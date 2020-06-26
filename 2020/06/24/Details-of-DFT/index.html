@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="傅里叶变换流程这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是  数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕； 书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程  1234I &#x3D; imread(&#39;imori.jpg&#39;); #导入图像I &#x3D; rgb2gray(I); #">
+    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点.这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达.待解决的问题包括:  [] 如何理解在采样点M的一半位置处出现的背对背 [] 如何理解直流分量出现在图片的四角 [] 如何理解交换就能够实现频率的平移 [] 如何理解二维卷积定理  理解在M&#x2F;2处的背对背">
 <meta property="og:type" content="article">
-<meta property="og:title" content="test">
-<meta property="og:url" content="http://yoursite.com/2020/06/24/test/index.html">
+<meta property="og:title" content="details of DFT">
+<meta property="og:url" content="http://yoursite.com/2020/06/24/Details-of-DFT/index.html">
 <meta property="og:site_name" content="SuperEafi">
-<meta property="og:description" content="傅里叶变换流程这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是  数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕； 书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程  1234I &#x3D; imread(&#39;imori.jpg&#39;); #导入图像I &#x3D; rgb2gray(I); #">
+<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点.这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达.待解决的问题包括:  [] 如何理解在采样点M的一半位置处出现的背对背 [] 如何理解直流分量出现在图片的四角 [] 如何理解交换就能够实现频率的平移 [] 如何理解二维卷积定理  理解在M&#x2F;2处的背对背">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-06-24T13:29:10.000Z">
-<meta property="article:modified_time" content="2020-06-24T13:32:17.790Z">
+<meta property="article:modified_time" content="2020-06-26T12:19:46.054Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="ImageProcessing">
@@ -38,7 +38,7 @@
         
     
     <!-- title -->
-    <title>test</title>
+    <title>details of DFT</title>
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -82,8 +82,8 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" href="/2020/06/24/Details-of-DFT/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
+        <li><a class="icon" href="/2020/06/24/test/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
         <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -96,22 +96,22 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/24/test/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/24/test/&text=test" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/24/test/&is_video=false&description=test" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=test&body=Check out this article: http://yoursite.com/2020/06/24/test/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/24/test/&name=test&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/24/test/&t=test" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/24/Details-of-DFT/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/24/Details-of-DFT/&text=details of DFT" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/24/Details-of-DFT/&is_video=false&description=details of DFT" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=details of DFT&body=Check out this article: http://yoursite.com/2020/06/24/Details-of-DFT/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/24/Details-of-DFT/&name=details of DFT&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/24/Details-of-DFT/&t=details of DFT" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#傅里叶变换流程"><span class="toc-number">1.</span> <span class="toc-text">傅里叶变换流程</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#理解在M-2处的背对背"><span class="toc-number">1.</span> <span class="toc-text">理解在M&#x2F;2处的背对背</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -123,7 +123,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        test
+        details of DFT
     </h1>
 
 
@@ -142,6 +142,11 @@
 
 
       
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
 
       
     <div class="article-tag">
@@ -155,13 +160,14 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h1 id="傅里叶变换流程"><a href="#傅里叶变换流程" class="headerlink" title="傅里叶变换流程"></a>傅里叶变换流程</h1><p>这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是</p>
-<ol>
-<li>数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕；</li>
-<li>书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程</li>
-</ol>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">I = imread('imori.jpg'); #导入图像</span><br><span class="line">I = rgb2gray(I); #转灰度</span><br><span class="line">I=im2double(I); #转浮点</span><br><span class="line">F=fft2(I); #fft</span><br></pre></td></tr></table></figure>
-
+    <p>本文用于总结<em>digital image processing</em>频域部分的一些细节知识点.<br>这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达.<br>待解决的问题包括:</p>
+<ul>
+<li>[] 如何理解在采样点M的一半位置处出现的背对背</li>
+<li>[] 如何理解直流分量出现在图片的四角</li>
+<li>[] 如何理解交换就能够实现频率的平移</li>
+<li>[] 如何理解二维卷积定理</li>
+</ul>
+<h1 id="理解在M-2处的背对背"><a href="#理解在M-2处的背对背" class="headerlink" title="理解在M/2处的背对背"></a>理解在M/2处的背对背</h1>
   </div>
 </article>
 
@@ -196,22 +202,22 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#傅里叶变换流程"><span class="toc-number">1.</span> <span class="toc-text">傅里叶变换流程</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#理解在M-2处的背对背"><span class="toc-number">1.</span> <span class="toc-text">理解在M&#x2F;2处的背对背</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/24/test/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/24/test/&text=test" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/24/test/&is_video=false&description=test" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=test&body=Check out this article: http://yoursite.com/2020/06/24/test/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/24/test/&title=test" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/24/test/&name=test&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/24/test/&t=test" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/24/Details-of-DFT/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/24/Details-of-DFT/&text=details of DFT" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/24/Details-of-DFT/&is_video=false&description=details of DFT" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=details of DFT&body=Check out this article: http://yoursite.com/2020/06/24/Details-of-DFT/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/24/Details-of-DFT/&title=details of DFT" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/24/Details-of-DFT/&name=details of DFT&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/24/Details-of-DFT/&t=details of DFT" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
