@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang=en>
 <head>
-    <!-- so meta -->
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点.这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达.待解决的问题包括:  [] 如何理解在采样点M的一半位置处出现的背对背 [] 如何理解直流分量出现在图片的四角 [] 如何理解交换就能够实现频率的平移 [] 如何理解二维卷积定理  理解在M&#x2F;2处的背对背">
+    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 待解决的问题包括: - [] 如何理解在采样点M的一半位置处出现的背对背 - [] 如何理解直流分量出现在图片的四角 - [] 如何理解交换就能够实现频率的平移 - [] 如何理解二维卷积定理 理解在M&#x2F;2处的背对背  什么叫M&#x2F;2处的背对背呢">
 <meta property="og:type" content="article">
 <meta property="og:title" content="details of DFT">
 <meta property="og:url" content="http://yoursite.com/2020/06/24/Details-of-DFT/index.html">
 <meta property="og:site_name" content="SuperEafi">
-<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点.这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达.待解决的问题包括:  [] 如何理解在采样点M的一半位置处出现的背对背 [] 如何理解直流分量出现在图片的四角 [] 如何理解交换就能够实现频率的平移 [] 如何理解二维卷积定理  理解在M&#x2F;2处的背对背">
+<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 待解决的问题包括: - [] 如何理解在采样点M的一半位置处出现的背对背 - [] 如何理解直流分量出现在图片的四角 - [] 如何理解交换就能够实现频率的平移 - [] 如何理解二维卷积定理 理解在M&#x2F;2处的背对背  什么叫M&#x2F;2处的背对背呢">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-06-24T13:29:10.000Z">
-<meta property="article:modified_time" content="2020-06-26T12:19:46.054Z">
+<meta property="article:modified_time" content="2020-06-27T03:46:41.771Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="ImageProcessing">
@@ -52,11 +52,11 @@
     <!-- rss -->
     
     
-<meta name="generator" content="Hexo 4.2.1"></head>
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
 
 <body class="max-width mx-auto px3 ltr">
     
-      <div id="header-post">
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
   <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
   <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
   <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
@@ -111,7 +111,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#理解在M-2处的背对背"><span class="toc-number">1.</span> <span class="toc-text">理解在M&#x2F;2处的背对背</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#理解在m2处的背对背"><span class="toc-number">1.</span> <span class="toc-text">理解在M&#x2F;2处的背对背</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -155,19 +155,68 @@
     </div>
 
 
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
     </div>
   </header>
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文用于总结<em>digital image processing</em>频域部分的一些细节知识点.<br>这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达.<br>待解决的问题包括:</p>
+    <p>本文用于总结<em>digital image processing</em>频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 待解决的问题包括: - [] 如何理解在采样点M的一半位置处出现的背对背 - [] 如何理解直流分量出现在图片的四角 - [] 如何理解交换就能够实现频率的平移 - [] 如何理解二维卷积定理</p>
+<h1 id="理解在m2处的背对背">理解在M/2处的背对背</h1>
 <ul>
-<li>[] 如何理解在采样点M的一半位置处出现的背对背</li>
-<li>[] 如何理解直流分量出现在图片的四角</li>
-<li>[] 如何理解交换就能够实现频率的平移</li>
-<li>[] 如何理解二维卷积定理</li>
+<li>什么叫M/2处的背对背呢？</li>
 </ul>
-<h1 id="理解在M-2处的背对背"><a href="#理解在M-2处的背对背" class="headerlink" title="理解在M/2处的背对背"></a>理解在M/2处的背对背</h1>
+<p>如图所示</p>
+
+<p>(图片取自<em>digital image processing 3rd</em>F4.23)</p>
+<p>这个图片是用来阐述，一个1D信号经过DFT变换后的图形形式。可以看到DFT呈现了周期性，并且周期为<span class="math inline">\(M\)</span>. 在M/2出现了对称性，这种在M/2的对称性被称作背对背(back-to-back).那么为什么会出现这种现象？</p>
+<p>回顾采样脉冲序列的时域表达<span class="math inline">\(s_{\Delta T}(t)\)</span></p>
+<p><span class="math display">\[s_{\Delta T}(t) = \sum_{n=-\infty}^{\infty}{\delta(t-n\Delta T)}\]</span></p>
+<p>与之相匹配的是它的图形化表达，如图所示.</p>
+
+<p>结合公式和图形，可以知道采样脉冲序列就是一系列的脉冲函数间隔<span class="math inline">\(\Delta T\)</span>得到的。其具备周期性、无界的特点，这些特点说明了它能够被傅立叶级数所表达。忽略推导过程，周期性采样脉冲序列的傅立叶变换如下:</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+S(\mu) &amp;= \Im{s_{\Delta T}(t)} \\
+       &amp;= \Im{\frac{1}{\Delta T} \sum_{n=-\infty}^{\infty}e^{j\frac{2\pi n}{\Delta T} t}}
+\end{aligned}
+\end{equation}
+\]</span></p>
+
   </div>
 </article>
 
@@ -202,7 +251,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#理解在M-2处的背对背"><span class="toc-number">1.</span> <span class="toc-text">理解在M&#x2F;2处的背对背</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#理解在m2处的背对背"><span class="toc-number">1.</span> <span class="toc-text">理解在M&#x2F;2处的背对背</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
@@ -324,7 +373,7 @@
             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
         }());
-    </script>
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 
 </body>

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang=en>
 <head>
-    <!-- so meta -->
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="傅里叶变换流程这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是  数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕； 书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程  1234I &#x3D; imread(&#39;imori.jpg&#39;); #导入图像I &#x3D; rgb2gray(I); #">
+    <meta name="description" content="傅里叶变换流程 这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是 1. 数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕； 2. 书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程 1234I &#x3D; imread(&#39;imori.jpg&#39;); #导入图像I &#x3D; rgb2gray(">
 <meta property="og:type" content="article">
 <meta property="og:title" content="test">
 <meta property="og:url" content="http://yoursite.com/2020/06/24/test/index.html">
 <meta property="og:site_name" content="SuperEafi">
-<meta property="og:description" content="傅里叶变换流程这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是  数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕； 书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程  1234I &#x3D; imread(&#39;imori.jpg&#39;); #导入图像I &#x3D; rgb2gray(I); #">
+<meta property="og:description" content="傅里叶变换流程 这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是 1. 数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕； 2. 书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程 1234I &#x3D; imread(&#39;imori.jpg&#39;); #导入图像I &#x3D; rgb2gray(">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-06-24T13:29:10.000Z">
 <meta property="article:modified_time" content="2020-06-24T13:32:17.790Z">
@@ -52,11 +52,11 @@
     <!-- rss -->
     
     
-<meta name="generator" content="Hexo 4.2.1"></head>
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
 
 <body class="max-width mx-auto px3 ltr">
     
-      <div id="header-post">
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
   <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
   <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
   <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
@@ -150,16 +150,16 @@
     </div>
 
 
+
+
+
     </div>
   </header>
   
 
   <div class="content" itemprop="articleBody">
-    <h1 id="傅里叶变换流程"><a href="#傅里叶变换流程" class="headerlink" title="傅里叶变换流程"></a>傅里叶变换流程</h1><p>这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是</p>
-<ol>
-<li>数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕；</li>
-<li>书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程</li>
-</ol>
+    <h1 id="傅里叶变换流程">傅里叶变换流程</h1>
+<p>这个流程其实和《数字图像处理》书上的流程相似但不相同，主要区别是 1. 数字图像处理中要求先对原图进行放大，以保证FFT性能，更符合从底层书写的代码，但Matlab已经封装完毕； 2. 书中对谱图的移动是通过每个像素乘以特定值实现的，Matlab使用封装函数fftshift实现 调用流程</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">I = imread('imori.jpg'); #导入图像</span><br><span class="line">I = rgb2gray(I); #转灰度</span><br><span class="line">I=im2double(I); #转浮点</span><br><span class="line">F=fft2(I); #fft</span><br></pre></td></tr></table></figure>
 
   </div>
@@ -318,7 +318,7 @@
             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
         }());
-    </script>
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 
 </body>
