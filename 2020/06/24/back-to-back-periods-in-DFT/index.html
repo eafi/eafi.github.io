@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 待解决的问题包括: -[x] 如何理解在采样点一半位置处出现的背对背 -[] 如何理解直流分量出现在图片的四角 -[] 如何理解交换就能够实现频率的平移 -[] 如何理解二维卷积定理 如何理解在采样点一半位置处的背对背? 如图所示  (图片取自">
+<meta property="og:type" content="article">
+<meta property="og:title" content="离散傅立叶变换中的背对背&#x2F;back-to-back periods in DFT">
+<meta property="og:url" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 待解决的问题包括: -[x] 如何理解在采样点一半位置处出现的背对背 -[] 如何理解直流分量出现在图片的四角 -[] 如何理解交换就能够实现频率的平移 -[] 如何理解二维卷积定理 如何理解在采样点一半位置处的背对背? 如图所示  (图片取自">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/back2back.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/implusetrain.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/periodicfft.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/back2back.png">
+<meta property="article:published_time" content="2020-06-24T13:29:10.000Z">
+<meta property="article:modified_time" content="2020-06-27T09:19:38.640Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="图像处理">
+<meta property="article:tag" content="ImageProcessing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/back2back.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>离散傅立叶变换中的背对背/back-to-back periods in DFT</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/06/24/test/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&text=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&is_video=false&description=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=离散傅立叶变换中的背对背/back-to-back periods in DFT&body=Check out this article: http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&name=离散傅立叶变换中的背对背/back-to-back periods in DFT&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&t=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#如何理解在采样点一半位置处的背对背"><span class="toc-number">1.</span> <span class="toc-text">如何理解在采样点一半位置处的背对背?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#背对背的产生"><span class="toc-number">1.1.</span> <span class="toc-text">背对背的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么说是采样点的一半位置m2"><span class="toc-number">1.2.</span> <span class="toc-text">为什么说是采样点的一半位置M&#x2F;2？</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        离散傅立叶变换中的背对背/back-to-back periods in DFT
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-06-24T13:29:10.000Z" itemprop="datePublished">2020-06-24</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/ImageProcessing/" rel="tag">ImageProcessing</a>, <a class="tag-link" href="/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">图像处理</a>
+    </div>
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文用于总结<em>digital image processing</em>频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 待解决的问题包括:</p>
+<p>-[x] 如何理解在采样点一半位置处出现的背对背</p>
+<p>-[] 如何理解直流分量出现在图片的四角</p>
+<p>-[] 如何理解交换就能够实现频率的平移</p>
+<p>-[] 如何理解二维卷积定理</p>
+<h1 id="如何理解在采样点一半位置处的背对背">如何理解在采样点一半位置处的背对背?</h1>
+<p>如图所示</p>
+<img src="/2020/06/24/back-to-back-periods-in-DFT/back2back.png" class="" title="back-to-back">
+<p>(图片取自<em>digital image processing 3rd</em>F4.23)</p>
+<p>这个图片是用来阐述，一个1D信号经过DFT变换后的图形形式。可以看到DFT呈现了周期性，并且周期为<span class="math inline">\(M\)</span>. 在M/2出现了对称性，这种在M/2的对称性被称作背对背(back-to-back).那么为什么会出现这种现象？</p>
+<ol type="1">
+<li>背对背是如何产生的，它代表了什么含义?</li>
+<li>为什么会在采样点一半位置M/2处出现背对背</li>
+</ol>
+<h2 id="背对背的产生">背对背的产生</h2>
+<p>回顾采样脉冲序列的时域表达<span class="math inline">\(s_{\Delta T}(t)\)</span></p>
+<p><span class="math display">\[s_{\Delta T}(t) = \sum_{n=-\infty}^{\infty}{\delta(t-n\Delta T)}\]</span></p>
+<p>与之相匹配的是它的图形化表达，如图所示.</p>
+<img src="/2020/06/24/back-to-back-periods-in-DFT/implusetrain.png" class="" title="impluse-train">
+<p>结合公式和图形，可以知道采样脉冲序列就是一系列的脉冲函数间隔<span class="math inline">\(\Delta T\)</span>得到的。其具备周期性、无界的特点，这些特点说明了它能够被傅立叶级数所表达。忽略推导过程，周期性采样脉冲序列的傅立叶变换如下:</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+S(\mu) &amp;= \Im{s_{\Delta T}(t)} \\
+       &amp;= \Im{\frac{1}{\Delta T} \sum_{n=-\infty}^{\infty}e^{j\frac{2\pi n}{\Delta T} t}} \\
+       &amp;= \frac{1}{\Delta T}\Im{\sum_{n=-\infty}^{\infty}e^{j\frac{2\pi n}{\Delta T} t}} \\
+       &amp;= \frac{1}{\Delta T}\Im{\sum_{n=-\infty}^{\infty} \delta(\mu - \frac{n}{\Delta T})} 
+\end{aligned} \tag{1}
+\end{equation}
+\]</span></p>
+<p>采样脉冲序列的频域表达的特点是<span class="math inline">\(S(\mu)\)</span>仍然是一个周期脉冲函数，只是周期变成了原来的倒数，即<span class="math inline">\(1/\Delta T\)</span>.这个间隔其实就是采样函数的频率间隔。</p>
+<p>假设现在有一个连续信号<span class="math inline">\(f(t)\)</span>，我们要将这个连续信号采样。那么在时域上，其实就是将这个连续信号乘以一个采样脉冲序列:</p>
+<p><span class="math display">\[\tilde{f}(t)=f(t)s_\Delta{T} (t)\]</span></p>
+<p><span class="math inline">\(\tilde{f}(t)\)</span>也就是我们最常接触到的离散信号了。比如一个采样得到的声音信号，又比如拓展到二维中的图形像素。也就是说我们所接触到的信号已经是被采样过了的，而我么能够做的就是分析这个采样过程，讨论这样的采样过程有什么特点。</p>
+<p>我们对这个离散信号进行傅立叶变换，又卷积定理可以得到:</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+\tilde{F}(\mu) &amp;= \Im({f(t)s_{\Delta T}(t)}) \\
+&amp;= F(\mu) \star S(\mu)
+\end{aligned}
+\end{equation}
+\]</span></p>
+<p>把上文已经已知的<span class="math inline">\(S(\mu)\)</span>带到这个离散信号傅立叶变换公式当中，进行推导可以得到重要结论:</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+\tilde{F}(\mu) &amp;= F(\mu) \star S(\mu) \\
+&amp;=\int_{-\infty}^{\infty}F(\tau)S(\mu - \tau)d \tau \\
+&amp;=\frac{1}{\Delta T} \int_{-\infty}^{\infty}F(\tau)  \sum_{n=-\infty}^{\infty} \delta(\mu - \tau - \frac{n}{\Delta T} )d \tau \\
+&amp;=\frac{1}{\Delta T} \sum_{n=-\infty}^{\infty} \int_{-\infty}^{\infty}F(\tau)  \delta(\mu - \tau - \frac{n}{\Delta T} )d \tau \\
+&amp;=\frac{1}{\Delta T} \sum_{n=-\infty}^{\infty} F(\mu - \frac{n}{\Delta T} )  
+\end{aligned} \tag{2}
+\end{equation}
+\]</span></p>
+<p>公式2一个重要结论是，尽管导入的信号是采样离散信号，但是它的傅立叶变换是无限、周期的。无限体现在傅立叶变换结果是一个无穷求和形式，周期体现在求和形式中蕴藏了周期是<span class="math inline">\(1/\Delta T\)</span>.这相当于每过<span class="math inline">\(1/ \Delta T\)</span>的频率范围，就会出现一个一摸一样的频谱图.这个过程的图形化解释如图:</p>
+<img src="/2020/06/24/back-to-back-periods-in-DFT/periodicfft.png" class="" title="perodicity-of-dft">
+<p>图的上方是原连续信号<span class="math inline">\(f(t)\)</span>的傅立叶变换，显然连续函数的傅立叶变换由于没有引入采样脉冲，因此在全频率域上没有重复谱图。当然，这在离散化、数字化的信号处理、图像处理中是不可能出现的。</p>
+<p>图的下方是采样信号<span class="math inline">\(\tilde{f}(t)\)</span>的傅立叶变换，这个图像和公式2所表达的关系是对应的。即采样信号傅立叶变换是无限的、周期的，并且其周期为采样频率<span class="math inline">\(1/ \Delta T\)</span>.</p>
+<p>这个图片至少能够得到如下结论:</p>
+<ol type="1">
+<li><p>采样信号的傅立叶变换是无穷、周期的，周期为采样频率<span class="math inline">\(1/ \Delta T\)</span>;</p></li>
+<li><p>引出采样定理，即为了避免频域信号发生混叠，采频应该尽可能的大。即采样频率至少大于两倍的信号最大频率;</p></li>
+<li><p>结合公式和图像，谱图上的原点位置为0频，即直流分量，然后频率随着<span class="math inline">\(\mu\)</span>轴逐渐升高,而由于在下一个周期处具有相同的频率分布特点，因此在周期的中间位置(<span class="math inline">\(\frac{1}{2\Delta T}\)</span>)为两个相同谱图交接的频率.这个频率被称做back-to-back，即背对背.</p></li>
+</ol>
+<p>回答完背对背是如何出现的，现在考虑什么叫采样点一半位置处.</p>
+<h2 id="为什么说是采样点的一半位置m2">为什么说是采样点的一半位置M/2？</h2>
+<p>回到刚才讨论的公式<span class="math inline">\((2)\)</span>，这个公式中忽略了具体的<span class="math inline">\(F(\mu)\)</span>求法。现在来推到具体<span class="math inline">\(F(\mu)\)</span>形式：</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+\tilde{F}(\mu) &amp;= \int_{-\infty}^{\infty} \tilde{f}(t) e^{-j 2\pi \mu t} dt \\
+&amp;= \int_{-\infty}^{\infty} \sum_{n=-\infty}^{\infty} f(t) \delta(t - n \Delta T) e^{-j 2\pi \mu t} dt \\
+&amp;=\sum_{n=-\infty}^{\infty} \int_{-\infty}^{\infty} f(t) \delta(t - n \Delta T) e^{-j 2\pi \mu t} dt \\
+&amp;=\sum_{n=-\infty}^{\infty} f_n e^{-j 2\pi \mu n \Delta T}
+\end{aligned} \tag{3}
+\end{equation}
+\]</span></p>
+<p>公式3推导的目的和公式2是不同的，公式2假设我们已知了<span class="math inline">\(F(\mu)\)</span>，讲求观察<span class="math inline">\(F(\mu)\)</span>的变换规律；而公式3是未知<span class="math inline">\(F(\mu)\)</span>,推导表达式. 注意公式3中的<span class="math inline">\(f_n\)</span>，它代表的是离散的信号。这里的n代表的是离散点的数量。但我们已经知道，尽管传入的是有限的离散信号，傅立叶变换结果却会被延展到整个频域。而且在频率中我们最关心的其实是一个不重复的周期内频率。</p>
+<p>所以，我们只需要考虑离散傅立叶变换结果中，频率为<span class="math inline">\(\mu=0\)</span>到<span class="math inline">\(\mu=1/\Delta T\)</span>之间的谱图。其他频率的图谱是周期性重复的。那么假设从<span class="math inline">\(\mu=0\)</span>到<span class="math inline">\(\mu=1/\Delta T\)</span>之间的频率，等间距的放置M个采样点，那么每一个采样点m对应的频率为：</p>
+<p><span class="math display">\[\mu = \frac{m}{M\Delta T} \qquad m=0,1,2,...,M-1\]</span></p>
+<p>将公式<span class="math inline">\((3)\)</span>中的<span class="math inline">\(\mu\)</span>替换为此处的m，得到作用于采样信号的离散傅立叶变换:</p>
+<p><span class="math display">\[F_m = \sum_{n=0}^{M-1}f_n e^{-j 2 \pi mn /M} \qquad m=0,1,2,...,M-1 \tag{4}\]</span></p>
+<p>这个公式<span class="math inline">\((4)\)</span>可以得出如下结论：</p>
+<ol type="1">
+<li><p>M个采样点均匀分布在从频率为<span class="math inline">\(\mu=0\)</span>到<span class="math inline">\(\mu=1/\Delta T\)</span>之间，如果满足采样频率，则这是一个完整的离散傅立叶变换的第一周期</p></li>
+<li><p>公式中的每一个离散傅立叶数值(比如F_2,第3个傅立叶计算结果)，都要重新从头到尾遍历一次<span class="math inline">\(f_n\)</span></p></li>
+</ol>
+<p>结合上面的总结，再来看一开始的图:</p>
+<img src="/2020/06/24/back-to-back-periods-in-DFT/back2back.png" class="" title="back-to-back">
+<p>采样点M就是M个等间距的采样点放置在频率为<span class="math inline">\(\mu=0\)</span>到<span class="math inline">\(\mu=1/\Delta T\)</span>之间.以一个周期为例，频域为0和频域为<span class="math inline">\(1/\Delta T\)</span>位置处是两个一样的频率图，二者在这个频率位置都是0频，即直流分量；并且随着<span class="math inline">\(\mu\)</span>轴向两边频率逐渐升高；最后在采样点中间处M/2位置交汇.这样造成了在采样点中间位置M/2处结果。</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#如何理解在采样点一半位置处的背对背"><span class="toc-number">1.</span> <span class="toc-text">如何理解在采样点一半位置处的背对背?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#背对背的产生"><span class="toc-number">1.1.</span> <span class="toc-text">背对背的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么说是采样点的一半位置m2"><span class="toc-number">1.2.</span> <span class="toc-text">为什么说是采样点的一半位置M&#x2F;2？</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&text=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&is_video=false&description=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=离散傅立叶变换中的背对背/back-to-back periods in DFT&body=Check out this article: http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&title=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&name=离散傅立叶变换中的背对背/back-to-back periods in DFT&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/&t=离散傅立叶变换中的背对背/back-to-back periods in DFT" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>
