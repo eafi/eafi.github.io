@@ -17,8 +17,9 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/implusetrain.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/periodicfft.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/back2back.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/24/back-to-back-periods-in-DFT/1d-dft-translation.png">
 <meta property="article:published_time" content="2020-06-24T13:29:10.000Z">
-<meta property="article:modified_time" content="2020-06-27T09:19:38.640Z">
+<meta property="article:modified_time" content="2020-06-27T10:28:18.304Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="ImageProcessing">
@@ -87,8 +88,8 @@
     <span id="actions">
       <ul>
         
+        <li><a class="icon" href="/2020/06/24/test/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
-        <li><a class="icon" href="/2020/06/24/test/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
         <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -211,7 +212,7 @@
 <p>这个图片是用来阐述，一个1D信号经过DFT变换后的图形形式。可以看到DFT呈现了周期性，并且周期为<span class="math inline">\(M\)</span>. 在M/2出现了对称性，这种在M/2的对称性被称作背对背(back-to-back).那么为什么会出现这种现象？</p>
 <ol type="1">
 <li>背对背是如何产生的，它代表了什么含义?</li>
-<li>为什么会在采样点一半位置M/2处出现背对背</li>
+<li>为什么是在采样点一半位置M/2处出现背对背?</li>
 </ol>
 <h2 id="背对背的产生">背对背的产生</h2>
 <p>回顾采样脉冲序列的时域表达<span class="math inline">\(s_{\Delta T}(t)\)</span></p>
@@ -287,9 +288,12 @@ S(\mu) &amp;= \Im{s_{\Delta T}(t)} \\
 <li><p>M个采样点均匀分布在从频率为<span class="math inline">\(\mu=0\)</span>到<span class="math inline">\(\mu=1/\Delta T\)</span>之间，如果满足采样频率，则这是一个完整的离散傅立叶变换的第一周期</p></li>
 <li><p>公式中的每一个离散傅立叶数值(比如F_2,第3个傅立叶计算结果)，都要重新从头到尾遍历一次<span class="math inline">\(f_n\)</span></p></li>
 </ol>
-<p>结合上面的总结，再来看一开始的图:</p>
+<p>综上，再来看一开始的图:</p>
 <img src="/2020/06/24/back-to-back-periods-in-DFT/back2back.png" class="" title="back-to-back">
 <p>采样点M就是M个等间距的采样点放置在频率为<span class="math inline">\(\mu=0\)</span>到<span class="math inline">\(\mu=1/\Delta T\)</span>之间.以一个周期为例，频域为0和频域为<span class="math inline">\(1/\Delta T\)</span>位置处是两个一样的频率图，二者在这个频率位置都是0频，即直流分量；并且随着<span class="math inline">\(\mu\)</span>轴向两边频率逐渐升高；最后在采样点中间处M/2位置交汇.这样造成了在采样点中间位置M/2处结果。</p>
+<p>采样点中间位置出现背对背这一现象是计算的公式和变换时采样脉冲的特性决定的。之所以讨论这一特殊点及其性质，是为了后面频率谱图平移做准备。可以在正式讨论二维频率谱图平移前，先简单分析上图的一维谱图。我们可以看到在一个采样周期<span class="math inline">\(0~M-1\)</span>点中，0频即直流分量出现在了两端，高频在中间位置处，但有时我们不想这么表达。为了图形化表达、展示更加容易理解，我们希望M个采样点的中间位置M/2处表达0频，而两端表达的是高频。就像下图所示那样。</p>
+<img src="/2020/06/24/back-to-back-periods-in-DFT/1d-dft-translation.png" class="" title="1d-dft-translation">
+<p>这样的图形可以利用周期性平移(频移)得到.当然在算法上，可以直接把M个点以M/2位置处分成两块，交换两块位置即可。</p>
 
   </div>
 </article>
