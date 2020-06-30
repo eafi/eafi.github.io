@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 在讨论完一维信号的背对背产生的原因和含义后，下面推广和总结二维的情况。 温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\(f(x,y)\)，它的离散傅立叶变换对: \[F(u,v)&#x3D;\sum_{x&#x3D;0}^{M-1} \sum">
+<meta property="og:type" content="article">
+<meta property="og:title" content="some-properties-of-the-2d-dft">
+<meta property="og:url" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 在讨论完一维信号的背对背产生的原因和含义后，下面推广和总结二维的情况。 温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\(f(x,y)\)，它的离散傅立叶变换对: \[F(u,v)&#x3D;\sum_{x&#x3D;0}^{M-1} \sum">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/back2back.png">
+<meta property="article:published_time" content="2020-06-30T02:38:32.000Z">
+<meta property="article:modified_time" content="2020-06-30T03:36:20.461Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="图像处理">
+<meta property="article:tag" content="ImageProcessing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>some-properties-of-the-2d-dft</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/06/24/back-to-back-periods-in-DFT/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&text=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&is_video=false&description=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=some-properties-of-the-2d-dft&body=Check out this article: http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&name=some-properties-of-the-2d-dft&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&t=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">4.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        some-properties-of-the-2d-dft
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-06-30T02:38:32.000Z" itemprop="datePublished">2020-06-30</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/ImageProcessing/" rel="tag">ImageProcessing</a>, <a class="tag-link" href="/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">图像处理</a>
+    </div>
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 在讨论完一维信号的背对背产生的原因和含义后，下面推广和总结二维的情况。</p>
+<h1 id="温故2d-dft">温故2D-DFT</h1>
+<p>对于一个尺寸为<span class="math inline">\(M \times N\)</span>的图像<span class="math inline">\(f(x,y)\)</span>，它的离散傅立叶变换对:</p>
+<p><span class="math display">\[F(u,v)=\sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y)e^{-j 2\pi (ux/M+vy/N)} \tag{1}\]</span></p>
+<p><span class="math display">\[f(x,y)=\frac{1}{MN} \sum_{u=0}^{M-1} \sum_{v=0}^{N-1} F(u,v)e^{j 2\pi (ux/M+vy/N)} \tag{2}\]</span></p>
+<h1 id="性质1图像的频率">性质1:图像的频率</h1>
+<p>由于傅立叶变换实质上是在找函数的周期性，其单位在<em>digital image processing</em>中被解释为<strong>频域单位取决于空间域的单位</strong>。比如如果空间域单位是时间秒，那么频域单位就是周期每秒(cycles/sec)，就是赫兹(Hz);又比如空间域单位为长度米，则频域单位为周期每米(cycles/sec);因此，类似的图片的空间域单位为像素，则频域单位为周期每像素.</p>
+<p>频域空间中水平或竖直采样点间的频率差为:</p>
+<p><span class="math display">\[\Delta u = \frac{1}{M \Delta T} \tag{3}\]</span></p>
+<p><span class="math display">\[\Delta v = \frac{1}{N \Delta Z} \tag{4}\]</span></p>
+<p>这里的<span class="math inline">\(\Delta T\)</span>和<span class="math inline">\(Delta Z\)</span>的含义一定要明确是将连续的图像离散化时的二维采样点的空间间隔。如下图所示。</p>
+<img src="/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png" class="" title="2D-sampling">
+<p>这样的采样点越密越多(即对应<span class="math inline">\(\Delta T\)</span>和<span class="math inline">\(Delta Z\)</span>越小)的覆盖在尺寸为<span class="math inline">\(M \times N\)</span>的图片上，产生的频域结果就越不会出现混叠。</p>
+<h1 id="性质2平移和旋转">性质2:平移和旋转</h1>
+<p><span class="math display">\[f(x,y)e^{j 2\pi (u_0 x/M + v_0 y/N)} \Leftrightarrow F(u-u_0,v-v_0) \tag{5}\]</span></p>
+<p><span class="math display">\[f(x-x_0,y-y_0)\Leftrightarrow F(u,v)e^{-j 2\pi (u x_0/M + v y_0/N) } \tag{6}\]</span></p>
+<p>对于旋转而言，频域和空间域是同步、等价的，即任意空间旋转<span class="math inline">\(\theta\)</span>，则另一个空间同样旋转<span class="math inline">\(\theta\)</span></p>
+<h1 id="性质3周期性">性质3:周期性</h1>
+<p>在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>的文章中已经解释了，经过了采样脉冲后的离散函数其傅立叶变换是周期性的。而且那种周期性在一个周期内(<span class="math inline">\(0~M-1\)</span>之间)呈现出低频到高频再到低频的过程。</p>
+<img src="/2020/06/30/some-properties-of-the-2d-dft/back2back.png" class="" title="back-to-back">
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">4.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&text=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&is_video=false&description=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=some-properties-of-the-2d-dft&body=Check out this article: http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&name=some-properties-of-the-2d-dft&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&t=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>
