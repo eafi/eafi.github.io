@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 在讨论完一维信号的背对背产生的原因和含义后，下面推广和总结二维的情况。 温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\(f(x,y)\)，它的离散傅立叶变换对: \[F(u,v)&#x3D;\sum_{x&#x3D;0}^{M-1} \sum">
+    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:  如何理解图像的频率单位 频域和空间域的平移和旋转 镜像性质(对称性) 周期性和频率域的交换技巧  温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\">
 <meta property="og:type" content="article">
 <meta property="og:title" content="some-properties-of-the-2d-dft">
 <meta property="og:url" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/index.html">
 <meta property="og:site_name" content="SuperEafi">
-<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 在讨论完一维信号的背对背产生的原因和含义后，下面推广和总结二维的情况。 温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\(f(x,y)\)，它的离散傅立叶变换对: \[F(u,v)&#x3D;\sum_{x&#x3D;0}^{M-1} \sum">
+<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:  如何理解图像的频率单位 频域和空间域的平移和旋转 镜像性质(对称性) 周期性和频率域的交换技巧  温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/back2back.png">
@@ -20,10 +20,10 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/imori-fft2.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2d-translation.png">
 <meta property="article:published_time" content="2020-06-30T02:38:32.000Z">
-<meta property="article:modified_time" content="2020-06-30T08:12:57.260Z">
+<meta property="article:modified_time" content="2020-06-30T14:01:05.304Z">
 <meta property="article:author" content="Eafi">
-<meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="ImageProcessing">
+<meta property="article:tag" content="图像处理">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png">
     
@@ -118,7 +118,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">4.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">4.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">5.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -201,7 +201,13 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 在讨论完一维信号的背对背产生的原因和含义后，下面推广和总结二维的情况。</p>
+    <p>本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:</p>
+<ol type="1">
+<li><p>如何理解图像的频率单位</p></li>
+<li><p>频域和空间域的平移和旋转</p></li>
+<li><p>镜像性质(对称性)</p></li>
+<li><p>周期性和频率域的交换技巧</p></li>
+</ol>
 <h1 id="温故2d-dft">温故2D-DFT</h1>
 <p>对于一个尺寸为<span class="math inline">\(M \times N\)</span>的图像<span class="math inline">\(f(x,y)\)</span>，它的离散傅立叶变换对:</p>
 <p><span class="math display">\[F(u,v)=\sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y)e^{-j 2\pi (ux/M+vy/N)} \tag{1}\]</span></p>
@@ -217,19 +223,17 @@
 <h1 id="性质2平移和旋转">性质2:平移和旋转</h1>
 <p><span class="math display">\[f(x,y)e^{j 2\pi (u_0 x/M + v_0 y/N)} \Leftrightarrow F(u-u_0,v-v_0) \tag{5}\]</span></p>
 <p><span class="math display">\[f(x-x_0,y-y_0)\Leftrightarrow F(u,v)e^{-j 2\pi (u x_0/M + v y_0/N) } \tag{6}\]</span></p>
-<p>对于旋转而言，频域和空间域是同步、等价的，即任意空间旋转<span class="math inline">\(\theta\)</span>，则另一个空间同样旋转<span class="math inline">\(\theta\)</span></p>
-<h1 id="性质3周期性">性质3:周期性</h1>
-<p>在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>的文章中已经解释了，经过了采样脉冲后的离散函数其傅立叶变换是周期性的。而且在一个周期内(0~M-1之间)呈现出低频到高频再到低频的过程，如下图所示。</p>
+<p>回顾一下在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>的一些细节。经过了采样脉冲后的离散函数其傅立叶变换是周期性的。而且在一个周期内(0~M-1之间)呈现出低频到高频再到低频的过程，如下图所示。</p>
 <img src="/2020/06/30/some-properties-of-the-2d-dft/back2back.png" class="" title="back-to-back">
 <center>
 图1
 </center>
-<p>在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>的最后也指出，为了表达简介和滤波方便，会把频谱图交换一下，以呈现出高-低-高的形貌，如下图所示。</p>
+<p>在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>的最后也指出，为了表达简介和滤波方便，会把频谱图变换一下，以呈现出高-低-高的形貌，如下图所示。</p>
 <img src="/2020/06/30/some-properties-of-the-2d-dft/1d-dft-translation.png" class="" title="1d-dft-translation">
 <center>
 图2
 </center>
-<p>这个图像可以认为是交换，也可以认为是利用了平移。如果当作是平移变换，那么可以认为一维信号<span class="math inline">\(f(x)\)</span>及其傅立叶变换<span class="math inline">\(F(\mu)\)</span>发生如下平移变换：</p>
+<p>结合前面的性质2中的平移和周期性，我么可以认为从图1到图2一维信号<span class="math inline">\(f(x)\)</span>及其傅立叶变换<span class="math inline">\(F(\mu)\)</span>发生如下平移变换：</p>
 <p><span class="math display">\[
 \begin{equation}
 \begin{aligned}
@@ -238,7 +242,52 @@ F(\mu - M/2) &amp;\Leftrightarrow f(x)(-1)^x \\
 \end{aligned}
 \end{equation} \tag{7}
 \]</span></p>
-<p>上述变换的第二个箭头利用了复平面的特点，即<span class="math inline">\(e^{j \pi} = -1\)</span>。换句话说，如果我们想让图1变化为图2，即频域上发生平移，那么我们可以在时域上对应元素乘以<span class="math inline">\((-1)^x\)</span>.当然，利用对称的特点，其实直接交换<span class="math inline">\(0 \thicksim M/2-1\)</span>和<span class="math inline">\(M/2 \thicksim M-1\)</span>也是一样的。</p>
+<p>上述变换的第二个箭头利用了复平面的特点，即<span class="math inline">\(e^{j \pi} = -1\)</span>。换句话说，如果我们想让图1变化为图2，即频域上发生平移，那么我们可以在时域上对应元素乘以<span class="math inline">\((-1)^x\)</span>.</p>
+<p>对于旋转而言，频域和空间域是同步、等价的，即任意空间旋转<span class="math inline">\(\theta\)</span>，则另一个空间同样旋转<span class="math inline">\(\theta\)</span></p>
+<h1 id="性质3镜像性">性质3:镜像性</h1>
+<p>我在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>最后也指出，图2可以看上去貌似是对称的，能否利用对称的特性直接交换<span class="math inline">\(0 \sim M/2-1\)</span>和<span class="math inline">\(M/2 \sim M-1\)</span>两块呢？答案是肯定的。下面对镜像性理清。</p>
+<p>假设有一个实函数序列<span class="math inline">\(f(x,y)\)</span>，即它是离散的又全是实数，这和我们采集的二维图像信号非常相似。那么我们对这个实函数序列求其离散傅立叶变换的共轭，即<span class="math inline">\(\Im^\ast {f(x)}\)</span>:</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+\Im^\ast{f(x)} = F^\ast (u,v) &amp;= [ \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y) e^{-j 2\pi (ux/M + vy/N)}]^\ast \\
+&amp;= \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f^\ast (x,y) e^{j 2\pi (ux/M + vy/N)} \\
+&amp;= \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f (x,y) e^{-j 2\pi ([-u]x/M + [-v]y/N)} \\
+&amp;= F(-u,-v)
+\end{aligned}
+\end{equation} \tag{8}
+\]</span></p>
+<p>公式8的推导利用了实数的共轭是它自己，虚数则是它的相反数。公式8说明，实函数序列的离散傅立叶变换是共轭镜像的。这是一个在离散傅立叶中非常重要的性质，因为我们通常接触到的数据都是实数信号。但只得出这个结论还不够具体，我们得继续往下讨论。我们知道，实函数序列<span class="math inline">\(f(x,y)\)</span>的离散傅立叶变换是一个复数，即<span class="math inline">\(F(u,v)\)</span>包含了两部分，一部分是实数<span class="math inline">\(R(u,v)\)</span>，另一部分是虚数<span class="math inline">\(I(u,v)\)</span>。因此有<span class="math inline">\(F(u,v) = R(u,v) + jI(u,v)\)</span>，它的共轭为<span class="math inline">\(F^\ast (u,v) = R(u,v) -j I(u,v)\)</span>。</p>
+<p>显然简单替换有<span class="math inline">\(F(-u,-v)=R(-u,-v) + jI(-u,-v)\)</span>，结合公式8的结论<span class="math inline">\(F^\ast (u,v) = F(-u,-v)\)</span>替换得到:</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+R(u,v)-jI(u,v) &amp;= R(-u,-v)+jI(u,v) \\
+R(u,v) &amp;= R(-u,-v) \\
+I(u,v) &amp;= -I(-u,-v)
+\end{aligned}
+\end{equation} \tag{9}
+\]</span></p>
+<p>公式9是公式8的更具体化展现，结合公式8和公式9有如下结论:</p>
+<ol type="1">
+<li><p>实函数序列的离散傅立叶变换时共轭镜像的;</p></li>
+<li><p>实函数序列的离散傅立叶变换可以分别展开表达为实部R和虚部I，并且实部是偶对称的，虚部奇对称的;</p></li>
+</ol>
+<p>这种对称性似乎快要达到我们的目的了：证明我们的图1是对称的。但是有一些细节仍然需要细究:</p>
+<ol type="1">
+<li><p>如何定义这里的负坐标，比如F(-u,-v)?</p></li>
+<li><p>实数部分和虚数部分分别呈现出偶对称和奇对称，怎么解读图1的对称性？</p></li>
+</ol>
+<p>为了回答第一个问题，不妨再看看图1。我们看到它其实是有负坐标的，所以这里的负频率找得到对应。当然，由于在计算过程中，我们只会留下0~M-1个计算值，而其他点只是理论存在的。这使得我们不得不重新考虑如何定义负坐标，由于在第M点处会出现一摸一样的频谱图像(周期性)，所以可以把这个负坐标转换成正坐标：<span class="math inline">\(F(-u,-v)=F(M-u,N-v)\)</span>。那么公式9第二三个等式可以写作:</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+R(u,v) &amp;= R(M-u,N-v) \\
+I(u,v) &amp;= -I(M-u,N-v)
+\end{aligned}
+\end{equation} 
+\]</span></p>
+<h1 id="性质3周期性">性质3:周期性</h1>
 <p>讨论完一维情况，现在再来讨论二维图像的情况。不过在讨论具体公式前，先看一个具体的二维图像傅立叶变换。</p>
 <img src="/2020/06/30/some-properties-of-the-2d-dft/imori.jpg" class="" title="imori">
 <center>
@@ -249,7 +298,7 @@ F(\mu - M/2) &amp;\Leftrightarrow f(x)(-1)^x \\
 图4 imori的离散傅立叶变换
 </center>
 <p>图4为图3的傅立叶变换，变换过程使用了matlab:</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">I = imread('imori.jpg'); #导入图像</span><br><span class="line">I = rgb2gray(I); #转灰度</span><br><span class="line">I=im2double(I); #转浮点</span><br><span class="line">F=fft2(I) #fft</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">I = imread('imori.jpg'); #导入图像</span><br><span class="line">I = rgb2gray(I); #转灰度</span><br><span class="line">I = im2double(I); #转浮点</span><br><span class="line">F = fft2(I) #fft</span><br></pre></td></tr></table></figure>
 <p>我们可以看到二维图像的傅立叶变换具备的特点是四角非常的亮，这主要是其四个角都是它的0频分量(可以分别带入边界坐标进行演算)。并且，非常类似一维变换，我们似乎从图像中看出了对称性。 为了将这个问题理清楚，我将以下图进行分析。</p>
 <img src="/2020/06/30/some-properties-of-the-2d-dft/2d-translation.png" class="" title="2d-translation">
 <center>
@@ -295,7 +344,7 @@ F(\mu - M/2) &amp;\Leftrightarrow f(x)(-1)^x \\
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">4.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">4.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">5.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
