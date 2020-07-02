@@ -6,21 +6,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:  如何理解图像的频率单位 频域和空间域的平移和旋转 镜像性质(对称性) 周期性和频率域的交换技巧  温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\">
+    <meta name="description" content="本文是[离散傅立叶中的背对背现象]之后的第二篇总结. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:  如何理解图像的频率单位 频域和空间域的平移和旋转 镜像性 利用周期性和镜像性的交换技巧  温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\(f(x,y)\)，它的离散傅立叶变换对: \[F(u,v)&#x3D;\sum_{x&#x3D;0}^{M-1} \sum_{y">
 <meta property="og:type" content="article">
-<meta property="og:title" content="some-properties-of-the-2d-dft">
+<meta property="og:title" content="二维离散傅立叶变换的一些性质讨论&#x2F;some-properties-of-the-2d-dft">
 <meta property="og:url" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/index.html">
 <meta property="og:site_name" content="SuperEafi">
-<meta property="og:description" content="本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:  如何理解图像的频率单位 频域和空间域的平移和旋转 镜像性质(对称性) 周期性和频率域的交换技巧  温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\">
+<meta property="og:description" content="本文是[离散傅立叶中的背对背现象]之后的第二篇总结. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:  如何理解图像的频率单位 频域和空间域的平移和旋转 镜像性 利用周期性和镜像性的交换技巧  温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\(f(x,y)\)，它的离散傅立叶变换对: \[F(u,v)&#x3D;\sum_{x&#x3D;0}^{M-1} \sum_{y">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/back2back.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/1d-dft-translation.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/back2back-symmetry.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/complexplane.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/imori.jpg">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/imori-fft2.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2d-translation.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/shiftedfft2.png">
 <meta property="article:published_time" content="2020-06-30T02:38:32.000Z">
-<meta property="article:modified_time" content="2020-06-30T14:01:05.304Z">
+<meta property="article:modified_time" content="2020-07-02T07:24:26.202Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta property="article:tag" content="图像处理">
@@ -45,7 +48,7 @@
         
     
     <!-- title -->
-    <title>some-properties-of-the-2d-dft</title>
+    <title>二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft</title>
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -104,21 +107,21 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&text=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&is_video=false&description=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=some-properties-of-the-2d-dft&body=Check out this article: http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&name=some-properties-of-the-2d-dft&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&t=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&text=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&is_video=false&description=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft&body=Check out this article: http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&name=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&t=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">4.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">5.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#预备离散序列的镜像性"><span class="toc-number">4.</span> <span class="toc-text">预备:离散序列的镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">5.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">6.</span> <span class="toc-text">性质3:周期性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#利用镜像性和周期性的交换技巧"><span class="toc-number">7.</span> <span class="toc-text">利用镜像性和周期性的交换技巧</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">9.</span> <span class="toc-text">参考文献</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -130,7 +133,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        some-properties-of-the-2d-dft
+        二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft
     </h1>
 
 
@@ -201,12 +204,12 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文用于总结digital image processing频域部分的一些细节知识点. 这些知识点可以被认为是非常重要的，能够帮助加深理解图像的频域表达. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:</p>
+    <p>本文是<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="[离散傅立叶中的背对背现象]">[离散傅立叶中的背对背现象]</a>之后的第二篇总结. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:</p>
 <ol type="1">
 <li><p>如何理解图像的频率单位</p></li>
 <li><p>频域和空间域的平移和旋转</p></li>
-<li><p>镜像性质(对称性)</p></li>
-<li><p>周期性和频率域的交换技巧</p></li>
+<li><p>镜像性</p></li>
+<li><p>利用周期性和镜像性的交换技巧</p></li>
 </ol>
 <h1 id="温故2d-dft">温故2D-DFT</h1>
 <p>对于一个尺寸为<span class="math inline">\(M \times N\)</span>的图像<span class="math inline">\(f(x,y)\)</span>，它的离散傅立叶变换对:</p>
@@ -223,7 +226,7 @@
 <h1 id="性质2平移和旋转">性质2:平移和旋转</h1>
 <p><span class="math display">\[f(x,y)e^{j 2\pi (u_0 x/M + v_0 y/N)} \Leftrightarrow F(u-u_0,v-v_0) \tag{5}\]</span></p>
 <p><span class="math display">\[f(x-x_0,y-y_0)\Leftrightarrow F(u,v)e^{-j 2\pi (u x_0/M + v y_0/N) } \tag{6}\]</span></p>
-<p>回顾一下在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>的一些细节。经过了采样脉冲后的离散函数其傅立叶变换是周期性的。而且在一个周期内(0~M-1之间)呈现出低频到高频再到低频的过程，如下图所示。</p>
+<p>回顾在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>的一些细节。经过了采样脉冲后的离散函数其傅立叶变换是周期性的。而且在一个周期内(0~M-1之间)呈现出低频到高频再到低频的过程，如下图所示。</p>
 <img src="/2020/06/30/some-properties-of-the-2d-dft/back2back.png" class="" title="back-to-back">
 <center>
 图1
@@ -233,7 +236,7 @@
 <center>
 图2
 </center>
-<p>结合前面的性质2中的平移和周期性，我么可以认为从图1到图2一维信号<span class="math inline">\(f(x)\)</span>及其傅立叶变换<span class="math inline">\(F(\mu)\)</span>发生如下平移变换：</p>
+<p>结合性质2的平移，我么可以认为从图1到图2一维信号<span class="math inline">\(f(x)\)</span>及其傅立叶变换<span class="math inline">\(F(\mu)\)</span>发生如下平移变换：</p>
 <p><span class="math display">\[
 \begin{equation}
 \begin{aligned}
@@ -244,51 +247,111 @@ F(\mu - M/2) &amp;\Leftrightarrow f(x)(-1)^x \\
 \]</span></p>
 <p>上述变换的第二个箭头利用了复平面的特点，即<span class="math inline">\(e^{j \pi} = -1\)</span>。换句话说，如果我们想让图1变化为图2，即频域上发生平移，那么我们可以在时域上对应元素乘以<span class="math inline">\((-1)^x\)</span>.</p>
 <p>对于旋转而言，频域和空间域是同步、等价的，即任意空间旋转<span class="math inline">\(\theta\)</span>，则另一个空间同样旋转<span class="math inline">\(\theta\)</span></p>
+<h1 id="预备离散序列的镜像性">预备:离散序列的镜像性</h1>
+<p>首先区分一个概念，这里讨论的镜像性，和对称性是有区别的。这种区别在一维中是不存在的，即我们说“一个一维信号傅立叶变换关于M/2对称或镜像“是没有区别的。我们说一维信号是偶对称的或偶镜像的，都是在说这个信号满足<span class="math inline">\(F(u)=F(-u)\)</span>.比如图1信号就是一个偶镜像或偶对称。</p>
+<p>但二维图像是不一样的，我们讨论的镜像关系是<strong>中心对称关系</strong>。</p>
+<p>我们定义偶镜像序列<span class="math inline">\(w_e (x,y)\)</span>:</p>
+<p><span class="math display">\[w_e (x,y) = w_e (-x,-y) \]</span></p>
+<p>和奇镜像序列<span class="math inline">\(w_o (x,y) = -w_o (x,y)\)</span>:</p>
+<p><span class="math display">\[w_o (x,y) = -w_o (-x,-y)\]</span></p>
+<p>可以看到<strong>二维镜像序列的坐标对应关系是关于原点中心对称的</strong>。牢记这一点。</p>
+<p>对于任何一个复数序列<span class="math inline">\(w(x,y)\)</span>，它总能被分解成偶镜像序列和奇镜像序列。</p>
+<p><span class="math display">\[w(x,y) = w_e (x,y) + w_o(x,y) \tag{9}\]</span></p>
+<p>其中，公式9中的奇偶序列可以这么计算得到:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{aligned}
+w_e(x,y) \triangleq \frac{w(x,y) + w(-x,-y)}{2} \\
+w_o(x,y) \triangleq \frac{w(x,y) - w(-x,-y)}{2} 
+\end{aligned}
+\end{equation}
+\]</span></p>
+<p>为这里的镜像性出现了负坐标，我们能够理解负坐标代表了原点另一侧的坐标，但在采样、计算过程中，我们只保存0~M-1值，而其他点只是理论存在的。这使得我们不得不重新考虑如何定义负坐标.</p>
+<p>我们不妨以图1为例，我们这里先假设我们已经证明了图1是偶镜像的，即关于原点偶对称(<span class="math inline">\(F(u)=F(-u)\)</span>)。结合前面的采样序列已知，第M点处会出现一摸一样的频谱图像(周期性)，所以可以把这个负坐标转换成正坐标：<span class="math inline">\(F(-u)=F(u)=F(M-u)\)</span>。推而广之，在二维坐标下有类似的结论:对于一个尺寸为<span class="math inline">\(M \times N\)</span>的图像而言，这种奇偶镜像序列可以改写为:</p>
+<img src="/2020/06/30/some-properties-of-the-2d-dft/back2back-symmetry.png" class="" title="back-to-back-symmetry">
+<p><span class="math display">\[w_e (x,y) = w_e (M-x,N-y)\]</span></p>
+<p><span class="math display">\[w_o (x,y) = -w_o (M-x,N-y)\]</span></p>
+<p>看一个偶序列的例子: <span class="math display">\[\begin{equation}
+\begin{aligned}
+f&amp;={f(0)\quad f(1)\quad f(2)\quad f(3)}  \\
+&amp;={2\qquad 1\qquad 1\qquad 1} 
+\end{aligned}
+\end{equation}
+\]</span></p>
+<p>偶序列的第一位可以为任何数，或者说在测试序列时第一位是否满足偶序列不重要，因为<span class="math inline">\(f(0) = f(4)\)</span>但<span class="math inline">\(f(4)\)</span>不存在。</p>
+<p>再看一个奇序列的例子: <span class="math display">\[\begin{equation}
+\begin{aligned}
+g&amp;={g(0)\quad g(1)\quad g(2)\quad g(3)}  \\
+&amp;={0\qquad -1\qquad 0\qquad 1} 
+\end{aligned}
+\end{equation}
+\]</span></p>
+<p>奇序列的第一位必是0。中间位置M/2是否是0取决于奇序列的长度，如果奇序列长度为偶数，那么可以推导M/2位置必为0。</p>
+<p>再看一个奇镜像的二维信号：</p>
+<p><span class="math display">\[
+\begin{matrix}
+0&amp;0&amp;0&amp;0&amp;0&amp;0 \\
+0&amp;0&amp;0&amp;0&amp;0&amp;0 \\
+0&amp;0&amp;-1&amp;0&amp;1&amp;0 \\
+0&amp;0&amp;-2&amp;0&amp;2&amp;0 \\
+0&amp;0&amp;-1&amp;0&amp;1&amp;0 \\
+0&amp;0&amp;0&amp;0&amp;0&amp;0
+\end{matrix}
+\]</span></p>
+<p>可以看出这是一个中心对称的奇镜像信号.在明确了二维图像的奇偶镜像定义后，便可以回到二维离散傅立叶变换的镜像性质的讨论了。</p>
 <h1 id="性质3镜像性">性质3:镜像性</h1>
-<p>我在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>最后也指出，图2可以看上去貌似是对称的，能否利用对称的特性直接交换<span class="math inline">\(0 \sim M/2-1\)</span>和<span class="math inline">\(M/2 \sim M-1\)</span>两块呢？答案是肯定的。下面对镜像性理清。</p>
-<p>假设有一个实函数序列<span class="math inline">\(f(x,y)\)</span>，即它是离散的又全是实数，这和我们采集的二维图像信号非常相似。那么我们对这个实函数序列求其离散傅立叶变换的共轭，即<span class="math inline">\(\Im^\ast {f(x)}\)</span>:</p>
+<p>在<a href="/2020/06/24/back-to-back-periods-in-DFT/" title="离散傅立叶中的背对背现象">离散傅立叶中的背对背现象</a>最后指出，图2可以看上去貌似是对称的，能否利用对称的特性直接交换<span class="math inline">\(0 \sim M/2-1\)</span>和<span class="math inline">\(M/2 \sim M-1\)</span>两块呢？答案是肯定的。下面对镜像性理清。</p>
+<p>假设有一个<strong>实函数序列<span class="math inline">\(f(x,y)\)</span></strong>，即它是离散的又全是实数，这和我们采集的二维图像信号非常相似。<strong>注意被变换的函数序列<span class="math inline">\(f(x,y)\)</span>全是实数是非常关键和核心的前提条件</strong>。那么我们对这个实函数序列求其离散傅立叶变换的共轭，即<span class="math inline">\(\Im^\ast {f(x)}\)</span>:</p>
 <p><span class="math display">\[
 \begin{equation}
 \begin{aligned}
-\Im^\ast{f(x)} = F^\ast (u,v) &amp;= [ \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y) e^{-j 2\pi (ux/M + vy/N)}]^\ast \\
+\Im^\ast{f(x,y)} = F^\ast (u,v) &amp;= [ \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y) e^{-j 2\pi (ux/M + vy/N)}]^\ast \\
 &amp;= \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f^\ast (x,y) e^{j 2\pi (ux/M + vy/N)} \\
 &amp;= \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f (x,y) e^{-j 2\pi ([-u]x/M + [-v]y/N)} \\
 &amp;= F(-u,-v)
 \end{aligned}
 \end{equation} \tag{8}
 \]</span></p>
-<p>公式8的推导利用了实数的共轭是它自己，虚数则是它的相反数。公式8说明，实函数序列的离散傅立叶变换是共轭镜像的。这是一个在离散傅立叶中非常重要的性质，因为我们通常接触到的数据都是实数信号。但只得出这个结论还不够具体，我们得继续往下讨论。我们知道，实函数序列<span class="math inline">\(f(x,y)\)</span>的离散傅立叶变换是一个复数，即<span class="math inline">\(F(u,v)\)</span>包含了两部分，一部分是实数<span class="math inline">\(R(u,v)\)</span>，另一部分是虚数<span class="math inline">\(I(u,v)\)</span>。因此有<span class="math inline">\(F(u,v) = R(u,v) + jI(u,v)\)</span>，它的共轭为<span class="math inline">\(F^\ast (u,v) = R(u,v) -j I(u,v)\)</span>。</p>
+<p>公式8的推导利用了实数的共轭是它自己，虚数则是它的相反数。公式8说明，<strong>实函数序列的离散傅立叶变换是共轭镜像的</strong>。这是一个在离散傅立叶中非常重要的性质，因为我们通常接触到的数据都是实数信号。但只得出这个结论还不够具体，我们得继续往下讨论。我们知道，实函数序列<span class="math inline">\(f(x,y)\)</span>的离散傅立叶变换是一个复数，即<span class="math inline">\(F(u,v)\)</span>包含了两部分，一部分是实数<span class="math inline">\(R(u,v)\)</span>，另一部分是虚数<span class="math inline">\(I(u,v)\)</span>。因此有<span class="math inline">\(F(u,v) = R(u,v) + jI(u,v)\)</span>，它的共轭为<span class="math inline">\(F^\ast (u,v) = R(u,v) -j I(u,v)\)</span>。</p>
 <p>显然简单替换有<span class="math inline">\(F(-u,-v)=R(-u,-v) + jI(-u,-v)\)</span>，结合公式8的结论<span class="math inline">\(F^\ast (u,v) = F(-u,-v)\)</span>替换得到:</p>
 <p><span class="math display">\[
 \begin{equation}
 \begin{aligned}
 R(u,v)-jI(u,v) &amp;= R(-u,-v)+jI(u,v) \\
 R(u,v) &amp;= R(-u,-v) \\
-I(u,v) &amp;= -I(-u,-v)
+R(u,v) &amp;= R(M-u,N-v) \\
+I(u,v) &amp;= -I(-u,-v) \\
+I(u,v) &amp;= -I(M-u,N-v)
 \end{aligned}
 \end{equation} \tag{9}
 \]</span></p>
 <p>公式9是公式8的更具体化展现，结合公式8和公式9有如下结论:</p>
 <ol type="1">
-<li><p>实函数序列的离散傅立叶变换时共轭镜像的;</p></li>
-<li><p>实函数序列的离散傅立叶变换可以分别展开表达为实部R和虚部I，并且实部是偶对称的，虚部奇对称的;</p></li>
+<li><p><strong>实函数序列</strong>的离散傅立叶变换是共轭镜像的;</p></li>
+<li><p><strong>实函数序列</strong>的离散傅立叶变换可以分别展开表达为实部R和虚部I，并且实部是偶镜像的，虚部奇镜像的;</p></li>
 </ol>
-<p>这种对称性似乎快要达到我们的目的了：证明我们的图1是对称的。但是有一些细节仍然需要细究:</p>
+<p>这种镜像性似乎快要达到我们的目的了：证明图1是镜像的。但是有一些细节仍然需要细究:</p>
 <ol type="1">
-<li><p>如何定义这里的负坐标，比如F(-u,-v)?</p></li>
-<li><p>实数部分和虚数部分分别呈现出偶对称和奇对称，怎么解读图1的对称性？</p></li>
+<li>傅立叶变换有实数部分和虚数部分，且分别呈现了不同的镜像特性，怎么解读图1的偶镜像性？</li>
 </ol>
-<p>为了回答第一个问题，不妨再看看图1。我们看到它其实是有负坐标的，所以这里的负频率找得到对应。当然，由于在计算过程中，我们只会留下0~M-1个计算值，而其他点只是理论存在的。这使得我们不得不重新考虑如何定义负坐标，由于在第M点处会出现一摸一样的频谱图像(周期性)，所以可以把这个负坐标转换成正坐标：<span class="math inline">\(F(-u,-v)=F(M-u,N-v)\)</span>。那么公式9第二三个等式可以写作:</p>
-<p><span class="math display">\[
-\begin{equation}
-\begin{aligned}
-R(u,v) &amp;= R(M-u,N-v) \\
-I(u,v) &amp;= -I(M-u,N-v)
-\end{aligned}
-\end{equation} 
-\]</span></p>
+<p>我们知道实数傅立叶变换是复数，复数可以表达在复平面中。即在复平面中，复数皆可表达为幅度和相位角度的组合。</p>
+<p><span class="math display">\[F(u,v)=|F(u,v)|e^{j \phi (u,v)}\]</span></p>
+<img src="/2020/06/30/some-properties-of-the-2d-dft/complexplane.png" class="" title="complex-plane">
+<p>幅度的计算公式为这个复数实部和虚部的平方和开根:<span class="math inline">\(|F(u,v)=[R^2(u,v)+I^2(u,v)]^{1/2}\)</span>.观察这个公式我们可以发现运算结果偶对称部分没变，奇对称部分由于平方变成了偶镜像，最后的结果是幅度变成了一个偶镜像。</p>
+<p>相位角度计算公式为:</p>
+<p><span class="math display">\[\phi (u,v) = arctan[\frac{I(u,v)}{R(u,v)}]\]</span></p>
+<p>这个相位角度公式有两点需要注意：</p>
+<ol type="1">
+<li><p>它是一个奇镜像的序列，即<span class="math inline">\(\phi (u,v) = - \phi( -u, -v)\)</span>;</p></li>
+<li><p>复平面中的相位角度为<span class="math inline">\(0 \sim 2\pi\)</span>，因此在计算这个反正切时需要注意它所落入的象限.</p></li>
+</ol>
+<p>综上，我们知道图1其实是傅立叶变换的幅度图像，根据上文的推导如果<span class="math inline">\(f(x,y)\)</span>是全实数的，那么它的幅度图像必定是一个偶镜像的。关于幅度和相位角的更多讨论，在后面的博客中会深入探索.</p>
 <h1 id="性质3周期性">性质3:周期性</h1>
-<p>讨论完一维情况，现在再来讨论二维图像的情况。不过在讨论具体公式前，先看一个具体的二维图像傅立叶变换。</p>
+<p>二维离散傅立叶变换的周期性与一维情况非常类似。二维傅立叶变换表达为:</p>
+<p><span class="math display">\[F(u,v) = F(u+k_1 M,v) = F(u,v+k_2 N) = F(u+k_1 M, v+ k_2 N) \]</span></p>
+<p>这种无限展开的频域空间图案对应的逆变换空间域也会变成周期函数:</p>
+<p><span class="math display">\[f(x,y) = f(x+k_1 M,y) = f(x,y+k_2 N) = f(x+k_1 M, y+ k_2 N) \]</span></p>
+<h1 id="利用镜像性和周期性的交换技巧">利用镜像性和周期性的交换技巧</h1>
+<p>先看一个具体的二维图像傅立叶变换。</p>
 <img src="/2020/06/30/some-properties-of-the-2d-dft/imori.jpg" class="" title="imori">
 <center>
 图3 <a href="https://github.com/gzr2017/ImageProcessing100Wen/" target="_blank" rel="noopener">图片取自imori</a>
@@ -297,18 +360,42 @@ I(u,v) &amp;= -I(M-u,N-v)
 <center>
 图4 imori的离散傅立叶变换
 </center>
-<p>图4为图3的傅立叶变换，变换过程使用了matlab:</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">I = imread('imori.jpg'); #导入图像</span><br><span class="line">I = rgb2gray(I); #转灰度</span><br><span class="line">I = im2double(I); #转浮点</span><br><span class="line">F = fft2(I) #fft</span><br></pre></td></tr></table></figure>
-<p>我们可以看到二维图像的傅立叶变换具备的特点是四角非常的亮，这主要是其四个角都是它的0频分量(可以分别带入边界坐标进行演算)。并且，非常类似一维变换，我们似乎从图像中看出了对称性。 为了将这个问题理清楚，我将以下图进行分析。</p>
+<p>图4为图3的傅立叶变换幅度图，变换过程使用了matlab:</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">I = imread('imori.jpg'); #导入图像</span><br><span class="line">I = rgb2gray(I); #转灰度</span><br><span class="line">I = im2double(I); #转浮点</span><br><span class="line">F = fft2(I); #fft</span><br><span class="line">imshow(<span class="built_in">log</span>(<span class="number">1</span>+<span class="built_in">abs</span>(F)),[]);</span><br></pre></td></tr></table></figure>
+<p>我们可以看到二维图像的傅立叶变换具备的特点是四角非常的亮，这主要是其四个角都是它的0频分量(可以分别带入边界坐标验算)。结合镜像性，我们知道这个幅度图是偶镜像的.</p>
+<p>结合镜像、周期性，画出下图进行分析:</p>
 <img src="/2020/06/30/some-properties-of-the-2d-dft/2d-translation.png" class="" title="2d-translation">
 <center>
 图5
 </center>
 <p>图5的左图红框ABCD为傅立叶变换的直出图像，也就是图4的抽象形式。将这个这些框的四角涂深蓝，用于指出这个角为0频分量存在的角。可以看到在红框ABCD外还有很多蓝色的ABCD，这些都是由周期性而得到的重复频域图。注意绿圈部分，这个地方对应了一维中的back-to-back相遇的位置。</p>
 <p>再以图5左图红A为例，显然它是在(0,0)位置处是0频分量，然后沿着<span class="math inline">\(u,v\)</span>轴频率逐渐升高，直到(<span class="math inline">\(M/2,N/2\)</span>)位置频率达到最高。而其余红色BCD具有同样的频率升高特点，只是他们升高的方向都是从外向(<span class="math inline">\(M/2,N/2\)</span>)。</p>
-<p>图5右图唯一的变化是红框移动到了中间。注意观察0频分量现在出现在了图像的中间，高频分量出现在了四角。这种结果是我们需求的：中间为0频，然后逐渐向两边频率升高。而从图5我们可以知道，这种变换可以利用周期性的特点平移得到。欲使频域平移，有：</p>
+<p>图5右图唯一的变化是红框移动了<span class="math inline">\((M/2,N/2)\)</span>。注意观察0频分量现在出现在了图像的中间，高频分量出现在了四角。这种结果是我们需求的：中间为0频，然后逐渐向两边频率升高。而从图5我们可以知道，这种变换可以利用周期性的特点平移得到。欲使频域平移，有：</p>
 <p><span class="math display">\[F(u-M/2,v-N/2) \Leftrightarrow f(x,y)(-1)^{x+y} \tag{8}\]</span></p>
-<p>除了使用公式8逐点进行变换外，通过我们对图5的讨论可以发现，直接对称地交换ABCD四块，也可以得到等效的结果。即<span class="math inline">\(A \rightleftarrows D,B \rightleftarrows C\)</span>.</p>
+<p>除了使用公式8逐点进行变换外，通过我们对实数二维离散傅立叶变换的讨论可知，其傅立叶变换结果的谱图是偶镜像的，直接镜像地交换ABCD四块，也可以得到等效的结果。即<span class="math inline">\(A \rightleftarrows D,B \rightleftarrows C\)</span>.</p>
+<p>matlab中内置的<code>fftshift</code>可以完成交换的动作:</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shiftedF = fftshift(F);</span><br><span class="line">imshow(<span class="built_in">log</span>(<span class="number">1</span>+<span class="built_in">abs</span>(shiftedF)),[])</span><br></pre></td></tr></table></figure>
+<p>亦或者使用OpenCV手写交换过程: <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cv::Mat <span class="title">fftshift</span><span class="params">(cv::Mat&amp; img)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> cx = img.cols/<span class="number">2</span>;</span><br><span class="line"><span class="keyword">int</span> cy = img.rows/<span class="number">2</span>;</span><br><span class="line"><span class="function">cv::Mat <span class="title">q0</span><span class="params">(img, cv::Rect(<span class="number">0</span>, <span class="number">0</span>, cx, cy))</span></span>;   <span class="comment">// Top-Left - Create a ROI per quadrant</span></span><br><span class="line"><span class="function">cv::Mat <span class="title">q1</span><span class="params">(img, cv::Rect(cx, <span class="number">0</span>, cx, cy))</span></span>;  <span class="comment">// Top-Right</span></span><br><span class="line"><span class="function">cv::Mat <span class="title">q2</span><span class="params">(img, cv::Rect(<span class="number">0</span>, cy, cx, cy))</span></span>;  <span class="comment">// Bottom-Left</span></span><br><span class="line"><span class="function">cv::Mat <span class="title">q3</span><span class="params">(img, cv::Rect(cx, cy, cx, cy))</span></span>; <span class="comment">// Bottom-Right</span></span><br><span class="line">cv::Mat tmp;</span><br><span class="line">q0.copyTo(tmp);</span><br><span class="line">q3.copyTo(q0);</span><br><span class="line">tmp.copyTo(q3);</span><br><span class="line">q1.copyTo(tmp);                    <span class="comment">// swap quadrant (Top-Right with Bottom-Left)</span></span><br><span class="line">q2.copyTo(q1);</span><br><span class="line">tmp.copyTo(q2);</span><br><span class="line"><span class="keyword">return</span> img;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+图4经过交换的效果如下： <img src="/2020/06/30/some-properties-of-the-2d-dft/shiftedfft2.png" class="" title="shift-fft">
+<center>
+图6
+</center>
+<p>从图6中可以得出以下结论：</p>
+<ol type="1">
+<li><p>实数图像的二维离散傅立叶变换谱图是偶镜像的</p></li>
+<li><p>中间<span class="math inline">\(F(M/2,N/2)\)</span>位置亮度最高，这里是占比最多的0频直流分量</p></li>
+</ol>
+<h1 id="总结">总结</h1>
+<ol type="1">
+<li><p>二维图像的频率单位可以解释为cycle/每像素</p></li>
+<li><p>利用平移和周期性的特点，可以平移谱图</p></li>
+<li><p>实数序列的傅立叶变换具有特殊的性质，他的傅立叶变换的幅度图是偶镜像的，而相位角图是奇镜像的</p></li>
+<li><p>利用镜像性质和周期性，在图5中我们解析了交换图块也可以实现类似平移的效果</p></li>
+</ol>
+<h1 id="参考文献">参考文献</h1>
+<blockquote>
+<p>digital image processing</p>
+</blockquote>
 
   </div>
 </article>
@@ -344,22 +431,22 @@ I(u,v) &amp;= -I(M-u,N-v)
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">4.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">5.</span> <span class="toc-text">性质3:周期性</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#预备离散序列的镜像性"><span class="toc-number">4.</span> <span class="toc-text">预备:离散序列的镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">5.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">6.</span> <span class="toc-text">性质3:周期性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#利用镜像性和周期性的交换技巧"><span class="toc-number">7.</span> <span class="toc-text">利用镜像性和周期性的交换技巧</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">9.</span> <span class="toc-text">参考文献</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&text=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&is_video=false&description=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=some-properties-of-the-2d-dft&body=Check out this article: http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&name=some-properties-of-the-2d-dft&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&t=some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&text=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&is_video=false&description=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft&body=Check out this article: http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&title=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&name=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/&t=二维离散傅立叶变换的一些性质讨论/some-properties-of-the-2d-dft" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
