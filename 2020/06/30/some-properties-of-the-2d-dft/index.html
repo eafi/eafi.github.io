@@ -13,6 +13,7 @@
 <meta property="og:site_name" content="SuperEafi">
 <meta property="og:description" content="本文是[离散傅立叶中的背对背现象]之后的第二篇总结. 本文的主要目的是推广和总结二维傅立叶变换的性质和关键细节，这些细节点包括:  如何理解图像的频率单位 频域和空间域的平移和旋转 镜像性 利用周期性和镜像性的交换技巧  温故2D-DFT 对于一个尺寸为\(M \times N\)的图像\(f(x,y)\)，它的离散傅立叶变换对: \[F(u,v)&#x3D;\sum_{x&#x3D;0}^{M-1} \sum_{y">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/wall.jpg">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/back2back.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/1d-dft-translation.png">
@@ -23,12 +24,12 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2d-translation.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/shiftedfft2.png">
 <meta property="article:published_time" content="2020-06-30T02:38:32.000Z">
-<meta property="article:modified_time" content="2020-07-02T07:31:20.997Z">
+<meta property="article:modified_time" content="2020-07-03T12:13:50.233Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta property="article:tag" content="图像处理">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2D-sampling.png">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/wall.jpg">
     
     
         
@@ -216,7 +217,9 @@
 <p><span class="math display">\[F(u,v)=\sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y)e^{-j 2\pi (ux/M+vy/N)} \tag{1}\]</span></p>
 <p><span class="math display">\[f(x,y)=\frac{1}{MN} \sum_{u=0}^{M-1} \sum_{v=0}^{N-1} F(u,v)e^{j 2\pi (ux/M+vy/N)} \tag{2}\]</span></p>
 <h1 id="性质1图像的频率">性质1:图像的频率</h1>
-<p>由于傅立叶变换实质上是在找函数的周期性，其单位在<em>digital image processing</em>中被解释为<strong>频域单位取决于空间域的单位</strong>。比如如果空间域单位是时间秒，那么频域单位就是周期每秒(cycles/sec)，就是赫兹(Hz);又比如空间域单位为长度米，则频域单位为周期每米(cycles/sec);因此，类似的图片的空间域单位为像素，则频域单位为周期每像素.</p>
+<p>由于傅立叶变换实质上是在找函数的周期性，其单位在<em>digital image processing</em>中被解释为<strong>频域单位取决于空间域的单位</strong>。比如如果空间域单位是时间秒，那么频域单位就是周期每秒(cycles/sec)，就是赫兹(Hz);又比如空间域单位为长度米，则频域单位为周期每米(cycles/sec);因此，类似的图片的空间域单位为像素，则频域单位为周期每像素，就是图像中亮度的变化剧烈程度.</p>
+<p>图像的频率描述了图像中亮度变化的速率。比如一个暖色的墙面，墙面部分的亮度变化是缓慢、平滑的，充满了低频信息；而高频则是这个墙面上亮度变化剧烈的地方，比如壁画和墙面的交界处，这些地方的亮度会出现剧烈的突变。</p>
+<img src="/2020/06/30/some-properties-of-the-2d-dft/wall.jpg" class="" title="wall">
 <p>频域空间中水平或竖直采样点间的频率差为:</p>
 <p><span class="math display">\[\Delta u = \frac{1}{M \Delta T} \tag{3}\]</span></p>
 <p><span class="math display">\[\Delta v = \frac{1}{N \Delta Z} \tag{4}\]</span></p>
@@ -240,8 +243,8 @@
 <p><span class="math display">\[
 \begin{equation}
 \begin{aligned}
-F(\u - M/2) &amp;\Leftrightarrow f(x)e^{j 2 \pi (M/2 x / M)} \\
-F(\u - M/2) &amp;\Leftrightarrow f(x)(-1)^x \\
+F(u - M/2) &amp;\Leftrightarrow f(x)e^{j 2 \pi (M/2 x / M)} \\
+F(u - M/2) &amp;\Leftrightarrow f(x)(-1)^x \\
 \end{aligned}
 \end{equation} \tag{7}
 \]</span></p>
