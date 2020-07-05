@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="在阅读digital image processing时，循环卷积(circular convolution)和卷积(convolution)仅仅靠文字很难琢磨透彻，因此记下关于二者的笔记和相关实验代码。这篇文章主要解决如下问题：  什么是卷积，什么是循环卷积？ 什么时候会出现循环卷积？  什么是卷积，什么是循环卷积? 这里讨论的卷积仅仅是图像处理当中广泛使用的离散卷积。 卷积 卷积操作是一种线性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实验:循环卷积和卷积&#x2F;Experiment:circular-convolution-and-convolution">
+<meta property="og:url" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="在阅读digital image processing时，循环卷积(circular convolution)和卷积(convolution)仅仅靠文字很难琢磨透彻，因此记下关于二者的笔记和相关实验代码。这篇文章主要解决如下问题：  什么是卷积，什么是循环卷积？ 什么时候会出现循环卷积？  什么是卷积，什么是循环卷积? 这里讨论的卷积仅仅是图像处理当中广泛使用的离散卷积。 卷积 卷积操作是一种线性">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/padding.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/convolution-center.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/convolution-conner.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/gauss-blur.png">
+<meta property="article:published_time" content="2020-07-04T07:16:09.000Z">
+<meta property="article:modified_time" content="2020-07-05T03:39:08.682Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="图像处理">
+<meta property="article:tag" content="ImageProcessing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/padding.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&text=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&is_video=false&description=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution&body=Check out this article: http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&name=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&t=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是卷积什么是循环卷积"><span class="toc-number">1.</span> <span class="toc-text">什么是卷积，什么是循环卷积?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#卷积"><span class="toc-number">1.1.</span> <span class="toc-text">卷积</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例子卷积"><span class="toc-number">1.2.</span> <span class="toc-text">例子:卷积</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#什么时候会出现循环卷积"><span class="toc-number">2.</span> <span class="toc-text">什么时候会出现循环卷积?</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-07-04T07:16:09.000Z" itemprop="datePublished">2020-07-04</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a> › <a class="category-link" href="/categories/Textbook/Code/">Code</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/ImageProcessing/" rel="tag">ImageProcessing</a>, <a class="tag-link" href="/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">图像处理</a>
+    </div>
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>在阅读<em>digital image processing</em>时，循环卷积(circular convolution)和卷积(convolution)仅仅靠文字很难琢磨透彻，因此记下关于二者的笔记和相关实验代码。这篇文章主要解决如下问题：</p>
+<ul>
+<li>什么是卷积，什么是循环卷积？</li>
+<li>什么时候会出现循环卷积？</li>
+</ul>
+<h1 id="什么是卷积什么是循环卷积">什么是卷积，什么是循环卷积?</h1>
+<p>这里讨论的卷积仅仅是图像处理当中广泛使用的<strong>离散卷积</strong>。</p>
+<h2 id="卷积">卷积</h2>
+<p>卷积操作是一种线性操作，它常常用在图像空间域滤波。比如对一个图像<span class="math inline">\(f(x,y)\)</span>进行高斯平滑处理，那么我们可以对这个图像<span class="math inline">\(f(x,y)\)</span>和高斯卷积核<span class="math inline">\(w(x,y)\)</span>进行卷积:</p>
+<p><span class="math display">\[w(x,y) \star f(x,y) = \sum_{s=-a}^a \sum_{t=-b}^b w(s,t)f(x-s,y-t) \tag{1}\]</span></p>
+<p>公式1这样的卷积行为可以认为是，将卷积核倒转后，将卷积核中心横扫图片每一个像素，计算每一个位置的乘积之和。其中卷积核尺寸为<span class="math inline">\(m \times n\)</span>，且满足关系:<span class="math inline">\(m = 2a+1,n=2b+1\)</span>.</p>
+<p>这个过程有如下细节需要注意：</p>
+<ol type="1">
+<li>在图像处理中不怎么强调区分卷积和关联(correlation),<a href="https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04" target="_blank" rel="noopener">比如OpenCV在实现<code>filter2D</code>时就说明了默认采用关联而非卷积，如果需要卷积操作需要先把核<code>flip</code>.</a>原因是常用的空间滤波操作所使用的滤波核都是中心对称的，从而不需要区分关联和卷积，比如下面的一种高斯滤波核就是中心对称的:</li>
+</ol>
+<p><span class="math display">\[
+\frac{1}{4.8976} \times \left[
+\begin{matrix}
+0.3679&amp;0.6065&amp;0.3679 \\
+0.6065&amp;1.0000&amp;0.6065 \\
+0.3679&amp;0.6065&amp;0.3679
+\end{matrix} \right]
+\]</span></p>
+<ol start="2" type="1">
+<li>公式1的卷积操作从卷积核中心锚点(anchor)对准图像待计算坐标<span class="math inline">\((x,y)\)</span>开始，即每对原图像的一个像素<span class="math inline">\((x,y)\)</span>进行卷积，就要把卷积核中心锚点放在这个像素上再进行卷积运算。计算前需要在图像边缘补0(或补其他值)，以保证卷积后尺寸不会改变，比如下图1所示.卷积核尺寸为mxn，则被卷积的图像<span class="math inline">\(f\)</span>应该在其四个边界增加<span class="math inline">\((m-1)/2\)</span>行和<span class="math inline">\((n-1)/2\)</span>列。</li>
+</ol>
+<img src="/2020/07/04/Experiment-circular-convolution-convolution/padding.png" class="" title="padding">
+<center>
+图1 卷积前的padding
+</center>
+<ol start="3" type="1">
+<li>公式1中以卷积核中心在图像上遍历，能够保证卷积核中心元素遍历了所有的图像元素，同时卷积核四周的元素不能遍历所有的图像元素。从图2就能看到有些卷积核元素并没有参与图像元素的计算。实际上有一种卷积操作保证了卷积核中所有的元素都能够遍历到图像元素，也就是说这种卷积过程是从卷积核的右下角元素与图像左上角第一个元素计算开始，到最后卷积核的左上角元素与图像右下角结束。如图3所示。显然这种卷积方式边界padding更多，如果卷积核尺寸为<span class="math inline">\(m \times n\)</span>，那么就需要在图像的上下各添加<span class="math inline">\(m-1\)</span>，左右各添加<span class="math inline">\(n-1\)</span>.</li>
+</ol>
+<img src="/2020/07/04/Experiment-circular-convolution-convolution/convolution-center.png" class="" width="400" title="convolution-center">
+<center>
+图2 核中心遍历卷积
+</center>
+<img src="/2020/07/04/Experiment-circular-convolution-convolution/convolution-conner.png" class="" width="400" title="convolution-conner">
+<center>
+图3 核的所有元素遍历卷积
+</center>
+<h2 id="例子卷积">例子:卷积</h2>
+<p>我们定义一个3X3的高斯卷积核:</p>
+<p><span class="math display">\[
+\frac{1}{16} \times \left[
+\begin{matrix}
+1&amp;2&amp;1 \\
+2&amp;4&amp;2 \\
+1&amp;2&amp;1
+\end{matrix} \right]
+\]</span></p>
+<p>在代码中它是这样表达的:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> value[] = &#123;<span class="number">1.</span>/<span class="number">16</span>,<span class="number">2.</span>/<span class="number">16</span>,<span class="number">1.</span>/<span class="number">16</span>,<span class="number">2.</span>/<span class="number">16</span>,<span class="number">4.</span>/<span class="number">16</span>,<span class="number">2.</span>/<span class="number">16</span>,<span class="number">1.</span>/<span class="number">16</span>,<span class="number">2.</span>/<span class="number">16</span>,<span class="number">1.</span>/<span class="number">16</span>&#125;;</span><br><span class="line"><span class="function">cv::Mat <span class="title">Kernel</span><span class="params">(<span class="number">3</span>,<span class="number">3</span>,CV_32FC1,value)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>然后对导入的图像使用<a href="https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04" target="_blank" rel="noopener"><code>cv::filter2D</code></a>即可:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cv::filter2D(imori, <span class="comment">//scr</span></span><br><span class="line">    imori, <span class="comment">//dst</span></span><br><span class="line">    <span class="number">-1</span>, <span class="comment">//ddepth</span></span><br><span class="line">    Kernel, <span class="comment">//kernel</span></span><br><span class="line">    cv::Point(<span class="number">-1</span>,<span class="number">-1</span>), <span class="comment">//anchor</span></span><br><span class="line">    <span class="number">0</span>, <span class="comment">//delta</span></span><br><span class="line">    cv::BORDER_CONSTANT); <span class="comment">//borderType</span></span><br></pre></td></tr></table></figure>
+<p>输出图像如下:</p>
+<img src="/2020/07/04/Experiment-circular-convolution-convolution/gauss-blur.png" class="" title="gauss-blur">
+<p>这个例子中有以下几点需要注意：</p>
+<ol type="1">
+<li><p>自设置的卷积核需要注意归一化，此处如果不对核内元素除以16便会得到错误的溢出结果</p></li>
+<li><p>参数<code>boderType</code>定义了padding时应该如何添加边界元素，我以一个示例表达各种边界类型造成的结果：</p></li>
+</ol>
+<h1 id="什么时候会出现循环卷积">什么时候会出现循环卷积?</h1>
+<p>在图像处理中，循环卷积出现在利用频域滤波时。我们假设图像离散傅立叶和滤波器傅立叶变换结果分别为<span class="math inline">\(F(u,v)\)</span>和<span class="math inline">\(H(u,v)\)</span>，那么而者滤波的过程就是对应像素相乘的过程。根据卷积定理，可知频域相乘等价于空间域卷积:</p>
+<p><span class="math display">\[F(u,v)H(u,v) \Leftrightarrow f(x,y)\star h(x,y)\]</span></p>
+<p>此时，发生了循环卷积过程:</p>
+<p><span class="math display">\[f(x,y) \star h(x,y) = \sum_{m=0}^{M-1} \sum_{n=0}^{N-1} f(m,n)h(x-m,y-n)\]</span></p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是卷积什么是循环卷积"><span class="toc-number">1.</span> <span class="toc-text">什么是卷积，什么是循环卷积?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#卷积"><span class="toc-number">1.1.</span> <span class="toc-text">卷积</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例子卷积"><span class="toc-number">1.2.</span> <span class="toc-text">例子:卷积</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#什么时候会出现循环卷积"><span class="toc-number">2.</span> <span class="toc-text">什么时候会出现循环卷积?</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&text=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&is_video=false&description=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution&body=Check out this article: http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&title=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&name=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/&t=实验:循环卷积和卷积/Experiment:circular-convolution-and-convolution" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>
