@@ -14,7 +14,7 @@
 <meta property="og:description" content="本文用于总结OpenCV中的cv::filter2D方法.在不产生歧义的情况下，这篇文章的出现的该函数&#x2F;这个函数&#x2F;本函数都是cv::filter2D 该函数为imgproc.hpp中声明的函数。函数实现了卷积操作，卷积操作经常被用来空间域滤波。尽管OpenCV提供大量免构造滤波核的方法，比如cv::blur，但如果需要客制化适合自己实际情况的滤波核，那么是有必要了解cv::filter2D运行细节">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-07-10T03:27:30.000Z">
-<meta property="article:modified_time" content="2020-07-10T13:33:05.166Z">
+<meta property="article:modified_time" content="2020-07-10T13:49:17.597Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="Imageprocessing">
@@ -276,8 +276,20 @@ w(x,y) = \left[
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cv::Mat g;</span><br><span class="line">cv::filter2D(f,g,<span class="number">-1</span>,w,cv::Point(<span class="number">-1</span>,<span class="number">-1</span>),<span class="number">0</span>,cv::BORDER_CONSTANT);</span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span>&lt;&lt;g&lt;&lt;<span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br></pre></td></tr></table></figure>
 <p>输出的结果为:</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">12</span>, <span class="number">21</span>, <span class="number">16</span>;</span><br><span class="line"> <span class="number">27</span>, <span class="number">45</span>, <span class="number">33</span>;</span><br><span class="line"> <span class="number">24</span>, <span class="number">39</span>, <span class="number">28</span>]</span><br></pre></td></tr></table></figure>
-<p>上述代码的锚点为默认的中间元素，<code>delta</code>为0，区别只在最后<code>borderType</code>的不同。当是<code>cv::BORDER_CONSTANT</code>时的情况，显然这个时候原来的<span class="math inline">\(f\)</span>矩阵外围被0(constant)填充:</p>
-<p>$$ </p>
+<p>上述代码的锚点为默认的中间元素，<code>delta</code>为0。当<code>cv::BORDER_CONSTANT</code>时，原来的<span class="math inline">\(f\)</span>矩阵外围被0(constant)填充:</p>
+$$
+<span class="math display">\[\begin{matrix}
+0&amp;0&amp;0&amp;0&amp;0 \\
+0&amp;1&amp;2&amp;3&amp;0 \\
+0&amp;4&amp;5&amp;6&amp;0 \\
+0&amp;7&amp;8&amp;9&amp;0 \\
+0&amp;0&amp;0&amp;0&amp;0 
+\end{matrix}\]</span>
+<span class="math display">\[\begin{matrix}
+1&amp;1&amp;1 \\
+1&amp;1&amp;1 \\
+1&amp;1&amp;1
+\end{matrix}\]</span>
 <p>$$</p>
 <p>以<code>g(0,1)=21</code>为例子，它的计算过程为:<span class="math inline">\(g(0,1) = 0+0+0+1+2+3+4+5+6=21\)</span></p>
 <h2 id="举例border_default和border_reflect_101">举例:<code>BORDER_DEFAULT</code>和<code>BORDER_REFLECT_101</code></h2>
