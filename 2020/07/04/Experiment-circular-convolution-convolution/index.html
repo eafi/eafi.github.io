@@ -6,19 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="在阅读digital image processing时，循环卷积(circular convolution)和卷积(convolution)仅仅靠文字很难琢磨透彻，因此记下关于二者的笔记和相关实验代码。这篇文章主要解决如下问题：  什么是卷积，什么是循环卷积？ 什么时候会出现循环卷积？  什么是卷积，什么是循环卷积? 这里讨论的卷积仅仅是图像处理当中广泛使用的离散卷积。 卷积 卷积操作是一种线性">
+    <meta name="description" content="在阅读digital image processing时，循环卷积(circular convolution)和卷积(convolution)仅仅靠文字很难琢磨透彻，因此记下关于二者的笔记和相关实验代码。这篇文章主要解决如下问题：  什么是卷积，什么是循环卷积？ 什么时候会出现循环卷积？  文章中所有的\(f(x,y)\)代表尺寸为\(M \times N\)的二维离散图像,\(h(x,y)\)代">
 <meta property="og:type" content="article">
 <meta property="og:title" content="实验:循环卷积和卷积&#x2F;Experiment:circular-convolution-and-convolution">
 <meta property="og:url" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/index.html">
 <meta property="og:site_name" content="SuperEafi">
-<meta property="og:description" content="在阅读digital image processing时，循环卷积(circular convolution)和卷积(convolution)仅仅靠文字很难琢磨透彻，因此记下关于二者的笔记和相关实验代码。这篇文章主要解决如下问题：  什么是卷积，什么是循环卷积？ 什么时候会出现循环卷积？  什么是卷积，什么是循环卷积? 这里讨论的卷积仅仅是图像处理当中广泛使用的离散卷积。 卷积 卷积操作是一种线性">
+<meta property="og:description" content="在阅读digital image processing时，循环卷积(circular convolution)和卷积(convolution)仅仅靠文字很难琢磨透彻，因此记下关于二者的笔记和相关实验代码。这篇文章主要解决如下问题：  什么是卷积，什么是循环卷积？ 什么时候会出现循环卷积？  文章中所有的\(f(x,y)\)代表尺寸为\(M \times N\)的二维离散图像,\(h(x,y)\)代">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/padding.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/convolution-center.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/convolution-conner.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/Experiment-circular-convolution-convolution/gauss-blur.png">
 <meta property="article:published_time" content="2020-07-04T07:16:09.000Z">
-<meta property="article:modified_time" content="2020-07-05T03:39:08.682Z">
+<meta property="article:modified_time" content="2020-07-10T03:28:46.916Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="ImageProcessing">
@@ -87,6 +87,8 @@
     <span id="actions">
       <ul>
         
+        <li><a class="icon" href="/2020/07/10/details-of-cv-filter2D/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
         
         <li><a class="icon" href="/2020/06/30/some-properties-of-the-2d-dft/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
@@ -149,7 +151,7 @@
       
     <div class="article-category">
         <i class="fas fa-archive"></i>
-        <a class="category-link" href="/categories/Textbook/">Textbook</a> › <a class="category-link" href="/categories/Textbook/Code/">Code</a>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
     </div>
 
 
@@ -204,12 +206,15 @@
 <li>什么是卷积，什么是循环卷积？</li>
 <li>什么时候会出现循环卷积？</li>
 </ul>
+<p><strong>文章中所有的<span class="math inline">\(f(x,y)\)</span>代表尺寸为<span class="math inline">\(M \times N\)</span>的二维离散图像,<span class="math inline">\(h(x,y)\)</span>代表尺寸为<span class="math inline">\(m \times n\)</span>的二维滤波器</strong></p>
 <h1 id="什么是卷积什么是循环卷积">什么是卷积，什么是循环卷积?</h1>
-<p>这里讨论的卷积仅仅是图像处理当中广泛使用的<strong>离散卷积</strong>。</p>
+<p><em>这里讨论的卷积仅仅是图像处理当中广泛使用的<strong>离散卷积</strong>。</em></p>
 <h2 id="卷积">卷积</h2>
-<p>卷积操作是一种线性操作，它常常用在图像空间域滤波。比如对一个图像<span class="math inline">\(f(x,y)\)</span>进行高斯平滑处理，那么我们可以对这个图像<span class="math inline">\(f(x,y)\)</span>和高斯卷积核<span class="math inline">\(w(x,y)\)</span>进行卷积:</p>
-<p><span class="math display">\[w(x,y) \star f(x,y) = \sum_{s=-a}^a \sum_{t=-b}^b w(s,t)f(x-s,y-t) \tag{1}\]</span></p>
+<p>卷积操作是一种线性操作，它常常用在图像空间域滤波。比如对一个图像<span class="math inline">\(f(x,y)\)</span>进行高斯平滑处理，那么我们可以对这个图像<span class="math inline">\(f(x,y)\)</span>和高斯卷积核<span class="math inline">\(h(x,y)\)</span>进行卷积:</p>
+<p><span class="math display">\[h(x,y) \star f(x,y) = \sum_{s=-a}^a \sum_{t=-b}^b h(s,t)f(x-s,y-t) \tag{1}\]</span></p>
 <p>公式1这样的卷积行为可以认为是，将卷积核倒转后，将卷积核中心横扫图片每一个像素，计算每一个位置的乘积之和。其中卷积核尺寸为<span class="math inline">\(m \times n\)</span>，且满足关系:<span class="math inline">\(m = 2a+1,n=2b+1\)</span>.</p>
+<p>下面的公式和公式1是等价的:</p>
+<p><span class="math display">\[f(x,y) \star h(x,y) = \sum_{m=0}^{M-1} \sum_{n=0}^{N-1} f(m,n)h(x-m,y-n)\]</span></p>
 <p>这个过程有如下细节需要注意：</p>
 <ol type="1">
 <li>在图像处理中不怎么强调区分卷积和关联(correlation),<a href="https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04" target="_blank" rel="noopener">比如OpenCV在实现<code>filter2D</code>时就说明了默认采用关联而非卷积，如果需要卷积操作需要先把核<code>flip</code>.</a>原因是常用的空间滤波操作所使用的滤波核都是中心对称的，从而不需要区分关联和卷积，比如下面的一种高斯滤波核就是中心对称的:</li>
@@ -256,16 +261,21 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cv::filter2D(imori, <span class="comment">//scr</span></span><br><span class="line">    imori, <span class="comment">//dst</span></span><br><span class="line">    <span class="number">-1</span>, <span class="comment">//ddepth</span></span><br><span class="line">    Kernel, <span class="comment">//kernel</span></span><br><span class="line">    cv::Point(<span class="number">-1</span>,<span class="number">-1</span>), <span class="comment">//anchor</span></span><br><span class="line">    <span class="number">0</span>, <span class="comment">//delta</span></span><br><span class="line">    cv::BORDER_CONSTANT); <span class="comment">//borderType</span></span><br></pre></td></tr></table></figure>
 <p>输出图像如下:</p>
 <img src="/2020/07/04/Experiment-circular-convolution-convolution/gauss-blur.png" class="" title="gauss-blur">
-<p>这个例子中有以下几点需要注意：</p>
-<ol type="1">
+<p>需要注意：</p>
+<ul>
 <li><p>自设置的卷积核需要注意归一化，此处如果不对核内元素除以16便会得到错误的溢出结果</p></li>
-<li><p>参数<code>boderType</code>定义了padding时应该如何添加边界元素，我以一个示例表达各种边界类型造成的结果：</p></li>
-</ol>
+<li><p>关于<code>filter2D</code>函数的具体行为，可以参照这篇文章</p></li>
+</ul>
 <h1 id="什么时候会出现循环卷积">什么时候会出现循环卷积?</h1>
+<p>回顾<a href="/2020/06/30/some-properties-of-the-2d-dft#周期性">离散二维傅立叶变换性质中的周期性</a>，周期性告诉我们，一个有限的图像经过DFT后在频域中是周期性重复的，而对这样周期性进行逆傅立叶变换也会得到周期性重复的原始图像。</p>
+<p>和一维信号类似，二维信号也具有卷积定理:</p>
+<p><span class="math display">\[f(x,y) \star h(x,y) \Leftrightarrow F(u,v)H(u,v) \tag{2}\]</span></p>
+<p>公式2是频域滤波的核心，它表达了如果我们对图像进行DFT并设计适合它的滤波器<span class="math inline">\(H\)</span>后，逐个频域元素相乘再逆傅立叶变换就可以得到滤波后的结果<span class="math inline">\(g(x,y)\)</span>:</p>
+<p><span class="math display">\[g(x,y) = Real \Im^{-1} \left[ H(u,v)F(u,v) \right]\]</span></p>
+<p>关于这个公式有更多细节，暂时不谈。回到公式2，了解了它的核心用处后就会发现：一旦我们就行频域滤波，那么相当于我们在时域进行了卷积，结合周期性可知这种卷积并不是简单两个函数乘积求和，而是两个<strong>周期</strong>函数乘积求和。可以预知的，如果周期很窄的话，卷积过程可能会出错。这种由于频域滤波造成的时域卷积过程，被称为循环卷积(circular-convolution)。</p>
+<p>关于</p>
 <p>在图像处理中，循环卷积出现在利用频域滤波时。我们假设图像离散傅立叶和滤波器傅立叶变换结果分别为<span class="math inline">\(F(u,v)\)</span>和<span class="math inline">\(H(u,v)\)</span>，那么而者滤波的过程就是对应像素相乘的过程。根据卷积定理，可知频域相乘等价于空间域卷积:</p>
 <p><span class="math display">\[F(u,v)H(u,v) \Leftrightarrow f(x,y)\star h(x,y)\]</span></p>
-<p>此时，发生了循环卷积过程:</p>
-<p><span class="math display">\[f(x,y) \star h(x,y) = \sum_{m=0}^{M-1} \sum_{n=0}^{N-1} f(m,n)h(x-m,y-n)\]</span></p>
 
   </div>
 </article>

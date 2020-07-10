@@ -24,7 +24,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/2d-translation.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/30/some-properties-of-the-2d-dft/shiftedfft2.png">
 <meta property="article:published_time" content="2020-06-30T02:38:32.000Z">
-<meta property="article:modified_time" content="2020-07-03T12:13:50.233Z">
+<meta property="article:modified_time" content="2020-07-05T07:46:53.457Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="ImageProcessing">
@@ -124,7 +124,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#预备离散序列的镜像性"><span class="toc-number">4.</span> <span class="toc-text">预备:离散序列的镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">5.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">6.</span> <span class="toc-text">性质3:周期性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#利用镜像性和周期性的交换技巧"><span class="toc-number">7.</span> <span class="toc-text">利用镜像性和周期性的交换技巧</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">9.</span> <span class="toc-text">参考文献</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#预备离散序列的镜像性"><span class="toc-number">4.</span> <span class="toc-text">预备:离散序列的镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">5.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质4周期性"><span class="toc-number">6.</span> <span class="toc-text">性质4:周期性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#利用镜像性和周期性的交换技巧"><span class="toc-number">7.</span> <span class="toc-text">利用镜像性和周期性的交换技巧</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">9.</span> <span class="toc-text">参考文献</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -350,7 +350,8 @@ I(u,v) &amp;= -I(M-u,N-v)
 <li><p>复平面中的相位角度为<span class="math inline">\(0 \sim 2\pi\)</span>，因此在计算这个反正切时需要注意它所落入的象限.</p></li>
 </ol>
 <p>综上，我们知道图1其实是傅立叶变换的幅度图像，根据上文的推导如果<span class="math inline">\(f(x,y)\)</span>是全实数的，那么它的幅度图像必定是一个偶镜像的。关于幅度和相位角的更多讨论，在后面的博客中会深入探索.</p>
-<h1 id="性质3周期性">性质3:周期性</h1>
+<p><a name="周期性" /></p>
+<h1 id="性质4周期性">性质4:周期性</h1>
 <p>二维离散傅立叶变换的周期性与一维情况非常类似。二维傅立叶变换表达为:</p>
 <p><span class="math display">\[F(u,v) = F(u+k_1 M,v) = F(u,v+k_2 N) = F(u+k_1 M, v+ k_2 N) \]</span></p>
 <p>这种无限展开的频域空间图案对应的逆变换空间域也会变成周期函数:</p>
@@ -436,7 +437,7 @@ I(u,v) &amp;= -I(M-u,N-v)
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#预备离散序列的镜像性"><span class="toc-number">4.</span> <span class="toc-text">预备:离散序列的镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">5.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3周期性"><span class="toc-number">6.</span> <span class="toc-text">性质3:周期性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#利用镜像性和周期性的交换技巧"><span class="toc-number">7.</span> <span class="toc-text">利用镜像性和周期性的交换技巧</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">9.</span> <span class="toc-text">参考文献</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#温故2d-dft"><span class="toc-number">1.</span> <span class="toc-text">温故2D-DFT</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质1图像的频率"><span class="toc-number">2.</span> <span class="toc-text">性质1:图像的频率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质2平移和旋转"><span class="toc-number">3.</span> <span class="toc-text">性质2:平移和旋转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#预备离散序列的镜像性"><span class="toc-number">4.</span> <span class="toc-text">预备:离散序列的镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质3镜像性"><span class="toc-number">5.</span> <span class="toc-text">性质3:镜像性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质4周期性"><span class="toc-number">6.</span> <span class="toc-text">性质4:周期性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#利用镜像性和周期性的交换技巧"><span class="toc-number">7.</span> <span class="toc-text">利用镜像性和周期性的交换技巧</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">9.</span> <span class="toc-text">参考文献</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
