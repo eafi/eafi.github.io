@@ -14,7 +14,7 @@
 <meta property="og:description" content="本文用于总结OpenCV中的cv::filter2D方法.在不产生歧义的情况下，这篇文章的出现的该函数&#x2F;这个函数&#x2F;本函数都是cv::filter2D 该函数为imgproc.hpp中声明的函数。函数实现了卷积操作，卷积操作经常被用来空间域滤波。尽管OpenCV提供大量免构造滤波核的方法，比如cv::blur，但如果需要客制化适合自己实际情况的滤波核，那么是有必要了解cv::filter2D运行细节">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-07-10T03:27:30.000Z">
-<meta property="article:modified_time" content="2020-07-10T13:24:22.311Z">
+<meta property="article:modified_time" content="2020-07-10T13:33:05.166Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="图像处理">
 <meta property="article:tag" content="Imageprocessing">
@@ -198,7 +198,8 @@
 <p>该函数为<code>imgproc.hpp</code>中声明的函数。函数实现了卷积操作，卷积操作经常被用来空间域滤波。尽管OpenCV提供大量免构造滤波核的方法，比如<code>cv::blur</code>，但如果需要客制化适合自己实际情况的滤波核，那么是有必要了解<code>cv::filter2D</code>运行细节的.</p>
 <p>本文以以下方式展开：</p>
 <ul>
-<li><a href="#official%20doc">描述该函数基本定义和功能的official doc</a></li>
+<li><p><a href="#official%20doc">描述该函数基本定义和功能的official doc</a></p></li>
+<li><p><a href="#borderType">参数:<code>borderType</code></a></p></li>
 </ul>
 <h1 id="official-doc">official doc</h1>
 <p><a href="https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga27c049795ce870216ddfb366086b5a04" target="_blank" rel="noopener">官方doc的链接在此</a></p>
@@ -244,29 +245,28 @@
 </tbody>
 </table>
 <h1 id="bordertype">borderType</h1>
-<ul>
-<li>为什么需要<code>borderType</code>?</li>
-</ul>
-<p>一个尺寸为<span class="math inline">\(M \times N\)</span>的图像<span class="math inline">\(f(x,y)\)</span>和一个尺寸为<span class="math inline">\(m \times n\)</span>的卷积核<span class="math inline">\(w(x,y)\)</span>进行卷积，输出的图像尺寸将会发生改变。比如，通常输出图像尺寸将会缩小到<span class="math inline">\(M-m+1 \times N-n+1\)</span>.为了保证输出图像的尺寸是不变的，也为了保证卷积过程遍历到了图像中的每一个像素，这就要求需要对原图像<span class="math inline">\(f(x,y)\)</span>进行边界填充。这种填充机制保证了输入输出图像尺寸是相同尺寸的，进而保证了该函数可以就地计算.</p>
-<p>在官方doc中有关于<code>borderType</code>的定义，<a href="https://docs.opencv.org/3.4/d2/de8/group__core__array.html#ga209f2f4869e304c82d07739337eae7c5" target="_blank" rel="noopener">参看这里</a>.</p>
-<p>需要进一步解释的是，表格第二列就是这个边界类型的具体表现。比如<code>cv::BORDER_REFLECT_101</code>所表现的gfedcb|abcdefgh|gfedcba，意思是中间元素就是原来的数据信息，两个竖线外则是添加的边界数据，而这个边界数据可以发现与内部的数据信息是对称的。(且这种对称性不包含内部数据的第一个元素a和最后一个元素h)。</p>
+<p>Q:为什么需要<code>borderType</code>?</p>
+<p>A: 一个尺寸为<span class="math inline">\(M \times N\)</span>的图像<span class="math inline">\(f(x,y)\)</span>和一个尺寸为<span class="math inline">\(m \times n\)</span>的卷积核<span class="math inline">\(w(x,y)\)</span>进行卷积，输出的图像尺寸将会发生改变。比如，通常输出图像尺寸将会缩小到<span class="math inline">\(M-m+1 \times N-n+1\)</span>.为了保证输出图像的尺寸是不变的，也为了保证卷积过程遍历到了图像中的每一个像素，这就要求需要对原图像<span class="math inline">\(f(x,y)\)</span>进行边界填充。这种填充机制保证了输入输出图像尺寸是相同尺寸的，进而保证了该函数可以就地计算.</p>
+<p><code>borderType</code>官方有非常多的种类可以选择，就是因为种类的繁多促使了需要对这个参数行为进行剖析。</p>
+<p>首先，引出官方doc中关于<code>borderType</code>的分类和定义，<a href="https://docs.opencv.org/3.4/d2/de8/group__core__array.html#ga209f2f4869e304c82d07739337eae7c5" target="_blank" rel="noopener">参看这里</a>.</p>
+<p>关于官方doc中的表格需要进一步解释，表格第二列就是这个边界类型的具体表现。比如<code>cv::BORDER_REFLECT_101</code>所表现的gfedcb|abcdefgh|gfedcba，意思是中间元素就是原来的数据信息，两个竖线外则是添加的边界数据，而这个边界数据可以发现与内部的数据信息是对称的。(且这种对称性不包含内部数据的第一个元素a和最后一个元素h)。</p>
 <p>下面，我通过具体的矩阵实例来分别阐述最常用的几种边界类型.我将使用如下的矩阵进行测试:</p>
 <p><span class="math display">\[
-f(x,y) = 
+f(x,y) = \left[
 \begin{matrix}
 1&amp;2&amp;3 \\
 4&amp;5&amp;6 \\
 7&amp;8&amp;9
-\end{matrix}
+\end{matrix} \right]
 \]</span></p>
 <p>对应的卷积核:</p>
 <p><span class="math display">\[
-w(x,y) =
+w(x,y) = \left[
 \begin{matrix}
 1&amp;1&amp;1 \\
 1&amp;1&amp;1 \\
 1&amp;1&amp;1
-\end{matrix}
+\end{matrix} \right]
 \]</span></p>
 <p>计算卷积:<span class="math inline">\(g = f \star w\)</span>，定义两个矩阵</p>
 <p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> value[] = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;;</span><br><span class="line"><span class="function">cv::Mat <span class="title">f</span><span class="params">(<span class="number">3</span>,<span class="number">3</span>,CV_32FC1,value)</span></span>;</span><br><span class="line"><span class="keyword">float</span> filter[] = &#123;<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>&#125;;</span><br><span class="line"><span class="function">cv::Mat <span class="title">w</span><span class="params">(<span class="number">3</span>,<span class="number">3</span>,CV_32FC1,filter)</span></span>;</span><br></pre></td></tr></table></figure></p>
@@ -277,19 +277,7 @@ w(x,y) =
 <p>输出的结果为:</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">12</span>, <span class="number">21</span>, <span class="number">16</span>;</span><br><span class="line"> <span class="number">27</span>, <span class="number">45</span>, <span class="number">33</span>;</span><br><span class="line"> <span class="number">24</span>, <span class="number">39</span>, <span class="number">28</span>]</span><br></pre></td></tr></table></figure>
 <p>上述代码的锚点为默认的中间元素，<code>delta</code>为0，区别只在最后<code>borderType</code>的不同。当是<code>cv::BORDER_CONSTANT</code>时的情况，显然这个时候原来的<span class="math inline">\(f\)</span>矩阵外围被0(constant)填充:</p>
-$$
-<span class="math display">\[\begin{matrix}
-0&amp;0&amp;0&amp;0&amp;0 \\
-0&amp;1&amp;2&amp;3&amp;0 \\
-0&amp;4&amp;5&amp;6&amp;0 \\
-0&amp;7&amp;8&amp;9&amp;0 \\
-0&amp;0&amp;0&amp;0&amp;0 
-\end{matrix} \star\]</span>
-<span class="math display">\[\begin{matrix}
-1&amp;1&amp;1 \\
-1&amp;1&amp;1 \\
-1&amp;1&amp;1
-\end{matrix}\]</span>
+<p>$$ </p>
 <p>$$</p>
 <p>以<code>g(0,1)=21</code>为例子，它的计算过程为:<span class="math inline">\(g(0,1) = 0+0+0+1+2+3+4+5+6=21\)</span></p>
 <h2 id="举例border_default和border_reflect_101">举例:<code>BORDER_DEFAULT</code>和<code>BORDER_REFLECT_101</code></h2>
@@ -298,19 +286,7 @@ $$
 <p>输出结果为:</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">33</span>, <span class="number">36</span>, <span class="number">39</span>;</span><br><span class="line"> <span class="number">42</span>, <span class="number">45</span>, <span class="number">48</span>;</span><br><span class="line"> <span class="number">51</span>, <span class="number">54</span>, <span class="number">57</span>]</span><br></pre></td></tr></table></figure>
 <p>查阅doc可知默认的边界类型和<code>BORDER_REFLECT_101</code>是等价的，显然这个时候的<span class="math inline">\(f\)</span>被镜像填充(根据前文这种镜像是不包含边界元素的):</p>
-$$
-<span class="math display">\[\begin{matrix}
-5&amp;4&amp;5&amp;6&amp;5 \\
-2&amp;1&amp;2&amp;3&amp;3 \\
-5&amp;4&amp;5&amp;6&amp;5 \\
-8&amp;7&amp;8&amp;9&amp;0 \\
-5&amp;4&amp;5&amp;6&amp;5 
-\end{matrix} \star\]</span>
-<span class="math display">\[\begin{matrix}
-1&amp;1&amp;1 \\
-1&amp;1&amp;1 \\
-1&amp;1&amp;1
-\end{matrix}\]</span>
+<p>$$ </p>
 <p>$$</p>
 <p>还是以<code>g(0,1)=36</code>为例子，它的计算过程为:<span class="math inline">\(g(0,1) = 4+5+6+1+2+3+4+5+6=36\)</span></p>
 
