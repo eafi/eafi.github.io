@@ -15,7 +15,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/LOG.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-11T12:19:37.612Z">
+<meta property="article:modified_time" content="2020-07-11T12:24:49.781Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -248,6 +248,8 @@
 <center>
 图1 LOG (<span class="math inline">\(\sigma = 1.4\)</span>)
 </center>
+<p>图1使用的matlab代码如下</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">lb = <span class="number">4</span>; <span class="comment">%left bound</span></span><br><span class="line">rb = <span class="number">4</span>; <span class="comment">%right bound</span></span><br><span class="line">n = <span class="number">50</span>; </span><br><span class="line">s = <span class="number">1.4</span>; <span class="comment">%sigma</span></span><br><span class="line">x = <span class="built_in">linspace</span>(-lb,rb,n);y=x;</span><br><span class="line">[X,Y] = <span class="built_in">meshgrid</span>(x,y);</span><br><span class="line">d = ((X.^<span class="number">2</span>+Y.^<span class="number">2</span><span class="number">-2</span>*s^<span class="number">2</span>)/(s^<span class="number">4</span>)).*<span class="built_in">exp</span>(-(X.^<span class="number">2</span>+Y.^<span class="number">2</span>)/(<span class="number">2</span>*s^<span class="number">2</span>)); <span class="comment">%Note '.*'</span></span><br><span class="line">m = mesh(d);</span><br></pre></td></tr></table></figure>
 <p>关于图1有以下几点需要说明：</p>
 <ol type="1">
 <li><p>一旦选定一个<span class="math inline">\(\sigma\)</span>，带回公式3便可得到对应的LoG表达式，该表达式指导了LoG核应该如何取值。由于同样使用了高斯核，所以在上文中提到的实践建议同样适用于此</p></li>
