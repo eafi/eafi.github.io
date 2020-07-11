@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文按照Computer Network:的顺序进行笔记的整理，主要是为了关键知识点的梳理和整理。 传输层中的数据包被称为segment,网络层中的数据包被称为datagram. 导引：传输层服务 传输层是在应用层(application layer)之下，网络层(network layer)之上的网络协议。这个位置决定了传输层协议使用了网络层所提供的服务，并向应用层提供服务。简单来说，传输层提供">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Network:Transport-Layer">
+<meta property="og:url" content="http://yoursite.com/2020/07/11/Network-Transport-Layer/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="本文按照Computer Network:的顺序进行笔记的整理，主要是为了关键知识点的梳理和整理。 传输层中的数据包被称为segment,网络层中的数据包被称为datagram. 导引：传输层服务 传输层是在应用层(application layer)之下，网络层(network layer)之上的网络协议。这个位置决定了传输层协议使用了网络层所提供的服务，并向应用层提供服务。简单来说，传输层提供">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
+<meta property="article:modified_time" content="2020-07-11T14:57:26.504Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="Network">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Network:Transport-Layer</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/07/11/comparison-between-LoG-and-Canny/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/07/10/details-of-cv-filter2D/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/11/Network-Transport-Layer/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&text=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&is_video=false&description=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Network:Transport-Layer&body=Check out this article: http://yoursite.com/2020/07/11/Network-Transport-Layer/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&name=Network:Transport-Layer&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/11/Network-Transport-Layer/&t=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Network:Transport-Layer
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-07-11T07:16:34.000Z" itemprop="datePublished">2020-07-11</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Network/" rel="tag">Network</a>
+    </div>
+
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文按照<em>Computer Network:</em>的顺序进行笔记的整理，主要是为了关键知识点的梳理和整理。</p>
+<p><em>传输层中的数据包被称为segment,网络层中的数据包被称为datagram.</em></p>
+<h1 id="导引传输层服务">导引：传输层服务</h1>
+<p>传输层是在应用层(application layer)之下，网络层(network layer)之上的网络协议。这个位置决定了传输层协议使用了网络层所提供的服务，并向应用层提供服务。简单来说，传输层提供了一种逻辑通讯服务，主机两端在应用层面上来看是逻辑互联的，底层复杂的物理链路对应用层来说不可见了。</p>
+<p>Internet有两个传输层协议，一个是TCP，提供了可靠的数据传输协议；另一个是UDP，提供了不可靠的数据传输协议。这两个协议由于设计的不同，为应用层提供了完全不同的服务。而本文的主要内容其实也是分别传输这两种协议的内在细节。</p>
+<p>本节只做传输层服务的导引，就两个内容:</p>
+<ol type="1">
+<li><p>由于传输层和网络层彼此紧邻，因此先简单讨论传输层与网络层的关系</p></li>
+<li><p>简单的了解网络层有助于理解传输层的一些设计思路，因此也会简单介绍网络层，以及在这种网络层下传输层应该如何设计</p></li>
+</ol>
+<h2 id="传输层与网络层的关系">传输层与网络层的关系</h2>
+<ol type="1">
+<li><p>网络层提供的是一种不同主机(hosts)间的逻辑互联（一般用IP来标示不同的主机地址）；而传输层提供的是一种不同主机间进程(processes)的逻辑互联</p></li>
+<li><p>传输层由于使用了网络层的服务，所以传输层的设计很大程度上受限于网络层的限制。比如网络层不保证延时和带宽，这导致了使用了该服务的传输层同样无法保证。</p></li>
+<li><p>而且网络层传输数据可能会丢包、篡改和重复发包，这种不可靠的服务似乎也会影响传输层。但答案是否定的，对于这类不可靠是可以通过传输层良好的设计解决的。</p></li>
+</ol>
+<h2 id="概括性的了解网路层和传输层">概括性的了解网路层和传输层</h2>
+<p>为了理解传输层的设计思路，有必要先简单了解传输层的下一层网络层。网络层协议，也叫IP，如前面所说的那样，提供了主机间的逻辑互联。我们非常关注网络层协议所提供服务的特点，因为其所提供的服务直接为传输层协议所用。</p>
+<p>IP提供的数据传输服务有以下特点:</p>
+<ol type="1">
+<li><p>是一种最大努力传输服务(best-effort delivery service)</p></li>
+<li><p>不保证一定能传输</p></li>
+<li><p>不保证一定能按顺序传输</p></li>
+<li><p>不保证数据的完整性</p></li>
+</ol>
+<p>网络层协议的这些特点很大程度上影响了传输层协议的设计，比如TCP这种可靠性传输协议需要设计更多复杂的机制才能弥补网络层的不可靠性。</p>
+<p>另外，还需要知道的是IP为每一个host分配了一个网络层地址，也被称为IP地址。一个host至少拥有一个IP地址。</p>
+<p>简单了解了网络层后，回到传输层上。TCP/IP网络提供了两种传输层协议，如前所述：TCP(Transmission Control Protocol)，一种提供了可靠、面向连接的传输层服务；UDP(User Datagram Protocol)，一种提供了不可靠、无连接的传输层服务。</p>
+<p>TCP和UDP尽管有诸多不同，但毕竟都是传输层协议，它们一定有共性的服务。这两个传输层协议提供的共性服务有：</p>
+<ol type="1">
+<li>将IP所提供的两个终端通讯服务扩展为两个终端上<strong>进程</strong>的通讯服务。这种将host-to-host的传输扩展为process-to-process的传输被称为<strong>transport-layer multiplexing</strong>和<strong>demultiplexing</strong>.</li>
+</ol>
+<p>向进程扩展这个功能非常基础和重要，想象一下运行了多个网络应用程序的电脑，它只有一个IP地址，如果没有复用功能那么将无法确定数据包到底是哪个应用程序的。</p>
+<ol start="2" type="1">
+<li>数据包的完整性检查。UDP和TCP都在自己的segment头中有相应的错误检查字段</li>
+</ol>
+<p>需要明确指出的是，UDP只有上述两个共性服务，不再提供任何其他服务。TCP除了上述两个服务外，还具备：</p>
+<ol type="1">
+<li><p>保证可靠的传输</p></li>
+<li><p>保证数据按顺序传输</p></li>
+<li><p>阻塞控制</p></li>
+</ol>
+<h1 id="复用与解复用">复用与解复用</h1>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/11/Network-Transport-Layer/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&text=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&is_video=false&description=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Network:Transport-Layer&body=Check out this article: http://yoursite.com/2020/07/11/Network-Transport-Layer/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&title=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/11/Network-Transport-Layer/&name=Network:Transport-Layer&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/11/Network-Transport-Layer/&t=Network:Transport-Layer" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>
