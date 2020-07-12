@@ -14,8 +14,10 @@
 <meta property="og:description" content="Laplacian of Gaussian和Canny是两个具有代表性的边缘检测算法。本文用以梳理两个算法的基本构成和注意事项，在梳理过程中也附加一些图像展示效果。 LoG LoG算子最早由Marr和Hildreth提出。在LoG之前的边缘检测算法多用如Sobel一类的算子。Sobel的核大小是固定的并且只对水平、垂直方向的边缘有较好的提取能力。这类算子如果需要对\(45^\circ\)有提取能力">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/LOG.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/lena_log.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/zero-crossing.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-11T13:52:24.925Z">
+<meta property="article:modified_time" content="2020-07-12T06:24:22.302Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -112,7 +114,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.2.</span> <span class="toc-text">Zero Crossing Detector</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log实验"><span class="toc-number">1.2.</span> <span class="toc-text">LoG实验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.3.</span> <span class="toc-text">Zero Crossing Detector</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -267,11 +269,21 @@
 \right]
 \]</span></p>
 <ol start="3" type="1">
-<li><p>注意到上述取值和图1是相反(但等价)的，实际使用中常常默认取图1的<strong>相反数</strong>。另外，观察可以发现上述LoG核求和为0，这是为了满足图像微分中<strong>亮度不变化部分起微分应该为0</strong>的观点。这也同时告诫我们在设计LoG核时也应该遵循此规则。</p></li>
-<li><p>除了直接使用公式3获得LoG核外，也可以分两步获得。首先确定一个<span class="math inline">\(\sigma\)</span>进而产生一个高斯核，再将此高斯核与Laplacian核卷积即可得到一样的LoG核</p></li>
+<li>注意到上述取值和图1是相反(但等价)的，实际使用中常常默认取图1的<strong>相反数</strong>。另外，观察可以发现上述LoG核求和为0，这是为了满足图像微分中<strong>亮度不变化部分起微分应该为0</strong>的观点。这也同时告诫我们在设计LoG核时也应该遵循此规则。</li>
+</ol>
+<h2 id="log实验">LoG实验</h2>
+<p>LoG核卷积得到的结果并不是LoG算法最终的结果。如下图所示，左边为原图，右边为采用上述取值的LoG核运算的结果。</p>
+<img src="/2020/07/11/comparison-between-LoG-and-Canny/lena_log.png" class="" title="lena_log">
+<p>从这个图中可以获得以下信息：</p>
+<ol type="1">
+<li><p>LoG确实检测出了边缘部分（高亮部分）</p></li>
+<li><p>右边的图是灰阶的，甚至可能出现负数</p></li>
 </ol>
 <h2 id="zero-crossing-detector">Zero Crossing Detector</h2>
-<p>LoG核卷积得到的结果并不是LoG算法最终的结果。如下图所示，左边为原图，右边为采用上述取值的LoG核运算的结果。可以看到右边的图是灰阶的，这不符合我们对边界的期望：我们希望输出的边界图是非0即1的，而且边界最好只有一个像素的厚度.</p>
+<p>在进行本节讨论前，首先需要明确一个边界图的概念。我们期望边界图是布尔图像(matlab中称为逻辑图像)，显然布尔图像是非0即1的；其次我们期望边界图中的边界以1表达（高亮），而且边界的厚度只能为一个像素。</p>
+<p>基于上述概念，我们回到LoG的实验结果。仅仅使用LoG核卷积得到的图是不完整的，根据定义可知这个时候的图像其实是二阶微分图，这种图像会在边缘处出现极大极小值（造成了上图的高亮部分），但这也同时说明了这种高亮部分其实不是我们想要的边缘。我们期望的边缘是极大极小值交接的zero crossing位置。</p>
+<img src="/2020/07/11/comparison-between-LoG-and-Canny/zero-crossing.png" class="" title="zero-crossing">
+<p>如图，这个图比较形象的表达了高亮位置其实并非边缘位置，而二阶导数的过零点才是。</p>
 <h1 id="canny">Canny</h1>
 
   </div>
@@ -308,7 +320,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.2.</span> <span class="toc-text">Zero Crossing Detector</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log实验"><span class="toc-number">1.2.</span> <span class="toc-text">LoG实验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.3.</span> <span class="toc-text">Zero Crossing Detector</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
