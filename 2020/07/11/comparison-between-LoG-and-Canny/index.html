@@ -25,9 +25,10 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/Sobel.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/example1.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/Lena_Sobel.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/Lena_angle.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/four-directions.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-29T03:12:37.482Z">
+<meta property="article:modified_time" content="2020-07-29T06:42:44.179Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -436,9 +437,20 @@ g_x \\ g_y
 <p>运用Sobel算子计算的强度图如下:</p>
 <img src="/2020/07/11/comparison-between-LoG-and-Canny/Lena_Sobel.png" class="" title="Lean_Sobel">
 <p>角度图如下：</p>
-
+<img src="/2020/07/11/comparison-between-LoG-and-Canny/Lena_angle.png" class="" title="Lean_angle">
 <p>前面已经提到梯度的强度和角度信息非常重要，强度提供了该位置亮度变化的幅度；角度提供了该位置改变的方向。而且角度的垂直方向就是边界方向，因此有时候也把这种角度称为边界法(Edge normal)。尽管边界的方向是全角度变化的，但在3x3核中只有四种有意义的角度：垂直、水平、<span class="math inline">\(45^\cir\)</span>和<span class="math inline">\(-45^\cir\)</span>。那么需要需要对全角度的变化向这四种变化映射的规律：</p>
 <img src="/2020/07/11/comparison-between-LoG-and-Canny/four-directions.png" class="" title="four-direction">
+<p>结合上图可以看到任意角度都能够被映射到四个方向中的一个，这个角度指向了梯度变化最剧烈的方向，而它的垂直方向就是边界方向，它对应的强度图就是方向指向的大小。Canny算法最为核心的的一步：nonmaxima suppression的目的是筛除掉方向上不是最大强度的值，具体为：</p>
+<p>我们假设遍历到了(x,y)点，根据前面的梯度计算有两个值与当前点对应，一个是角度<span class="math inline">\(\alpha(x,t)\)</span>，一个是强度<span class="math inline">\(|| \nabla f_s(x,y) ||\)</span>。并且这个角度<span class="math inline">\(\alpha\)</span>需要被映射到四个方向<span class="math inline">\(d_1,d_2,d_3,d_4\)</span></p>
+<ol type="1">
+<li><p>将<span class="math inline">\(\alpha (x,y)\)</span>映射到最近接近的四个方向中的一个<span class="math inline">\(d_k\)</span></p></li>
+<li><p>令<span class="math inline">\(K= || \nabla f_s(x,y) ||\)</span>，如果<span class="math inline">\(d_k\)</span>方向上两个相邻的任意元素大于了<span class="math inline">\(K\)</span>，那么输出图像<span class="math inline">\(g_N(x,y)=0\)</span>，否则<span class="math inline">\(g_N(x,y)=K\)</span></p></li>
+</ol>
+<p>关于nonmaxia suppression有以下点需要说明：</p>
+<ol type="1">
+<li><p>nonmaxia suppression输出图是一个灰度图，尺寸与原图尺寸一样</p></li>
+<li><p>覆盖的过程其实就是在寻找梯度方向上最大值的过程，有点类似于LoG中的假边界筛除过程，因此Canny的最大值覆盖天生就具备抑制假边界的能力</p></li>
+</ol>
 
   </div>
 </article>
