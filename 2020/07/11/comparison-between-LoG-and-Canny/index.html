@@ -27,7 +27,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/Lena_Sobel.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/four-directions.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-29T03:09:06.927Z">
+<meta property="article:modified_time" content="2020-07-29T03:12:37.482Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -126,7 +126,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log实验"><span class="toc-number">1.2.</span> <span class="toc-text">LoG实验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.3.</span> <span class="toc-text">Zero Crossing Detector</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log的深入讨论假边界"><span class="toc-number">1.4.</span> <span class="toc-text">LoG的深入讨论:假边界</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log小结"><span class="toc-number">1.5.</span> <span class="toc-text">LoG小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#图像梯度"><span class="toc-number">2.1.</span> <span class="toc-text">图像梯度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#梯度算子"><span class="toc-number">2.2.</span> <span class="toc-text">梯度算子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#canny-概览"><span class="toc-number">2.3.</span> <span class="toc-text">Canny 概览</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log实验"><span class="toc-number">1.2.</span> <span class="toc-text">LoG实验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.3.</span> <span class="toc-text">Zero Crossing Detector</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log的深入讨论假边界"><span class="toc-number">1.4.</span> <span class="toc-text">LoG的深入讨论:假边界</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#图像梯度"><span class="toc-number">2.1.</span> <span class="toc-text">图像梯度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#梯度算子"><span class="toc-number">2.2.</span> <span class="toc-text">梯度算子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#canny-概览"><span class="toc-number">2.3.</span> <span class="toc-text">Canny 概览</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -340,11 +340,10 @@
 <center>
 图5 假边界的检测和滤除
 </center>
-<p>图5a为原始图像， b为经过LOG核卷积后的图像， c为经过zero-crossing过零点检测后的输出图像。可以看到c中出现了大量的不存在的像“∞”一样的错误边界检测。出现这种问题的主要原因是当梯度想着双step进行检测时会出现不存在的边界，这种边界是假边界，不具有任何物理意义。图d为使用公式进行判断后分解出来的结果，其中红色的地方为检测出来的假边界，白色部分则是留下来的真边界。将红色与白色部分分离出来，依次得到e和f两幅图像。图像f为应该被删除的假边界，最后得到的e为留下来的真边界。从结果上来看， e最完美的表达了图a的边界信息。</p>
-<h2 id="log小结">LoG小结</h2>
+<p>图5a为原始图像， b为经过LOG核卷积后的图像， c为经过zero-crossing过零点检测后的输出图像。可以看到c中出现了大量的不存在的像“∞”一样的错误边界检测。出现这种问题的主要原因是梯度双step进行检测时会出现不存在的边界，这种边界是假边界，不具有任何物理意义。图d为使用公式进行判断后分解出来的结果，其中红色的地方为检测出来的假边界，白色部分则是留下来的真边界。将红色与白色部分分离出来，依次得到e和f两幅图像。图像f为应该被删除的假边界，最后得到的e为留下来的真边界。从结果上来看， e最完美的表达了图a的边界信息。</p>
 <hr />
 <h1 id="canny">Canny</h1>
-<p>Canny与LOG一个不同之处在Canny使用了图像梯度信息，也就是图像的一阶微分。显然一阶微分能够提供一些二阶微分无法提供的信息为Canny算法所用。因此有必要复习图像梯度及其性质.</p>
+<p>Canny使用了图像的梯度信息，而非LoG中使用的拉普拉斯。梯度的使用其实和LoG对假边界的检测过程类似，因此可以提前说明的是Canny对假边界有抑制能力。</p>
 <h2 id="图像梯度">图像梯度</h2>
 <p>图像梯度的表达式为<span class="math inline">\(\nabla f\)</span>:</p>
 <p><span class="math display">\[\nabla f(x,y) = grad[f(x,y)] =  \left[
@@ -438,7 +437,7 @@ g_x \\ g_y
 <img src="/2020/07/11/comparison-between-LoG-and-Canny/Lena_Sobel.png" class="" title="Lean_Sobel">
 <p>角度图如下：</p>
 
-<p>前面已经提到梯度的强度和角度信息非常重要，强度提供了该位置亮度变化的幅度；角度提供了该位置改变的方向。而且角度的垂直方向就是边界方向，因此有时候也把这种角度称为边界法(Edge normal)。尽管边界的方向是全角度变化的，但在3x3核中只有四种有意义的角度：垂直、水平、<span class="math inline">\(45^\cic\)</span>和<span class="math inline">\(-45^\cic\)</span>。那么需要需要对全角度的变化向这四种变化映射的规律：</p>
+<p>前面已经提到梯度的强度和角度信息非常重要，强度提供了该位置亮度变化的幅度；角度提供了该位置改变的方向。而且角度的垂直方向就是边界方向，因此有时候也把这种角度称为边界法(Edge normal)。尽管边界的方向是全角度变化的，但在3x3核中只有四种有意义的角度：垂直、水平、<span class="math inline">\(45^\cir\)</span>和<span class="math inline">\(-45^\cir\)</span>。那么需要需要对全角度的变化向这四种变化映射的规律：</p>
 <img src="/2020/07/11/comparison-between-LoG-and-Canny/four-directions.png" class="" title="four-direction">
 
   </div>
@@ -475,7 +474,7 @@ g_x \\ g_y
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log实验"><span class="toc-number">1.2.</span> <span class="toc-text">LoG实验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.3.</span> <span class="toc-text">Zero Crossing Detector</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log的深入讨论假边界"><span class="toc-number">1.4.</span> <span class="toc-text">LoG的深入讨论:假边界</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log小结"><span class="toc-number">1.5.</span> <span class="toc-text">LoG小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#图像梯度"><span class="toc-number">2.1.</span> <span class="toc-text">图像梯度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#梯度算子"><span class="toc-number">2.2.</span> <span class="toc-text">梯度算子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#canny-概览"><span class="toc-number">2.3.</span> <span class="toc-text">Canny 概览</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log"><span class="toc-number">1.</span> <span class="toc-text">LoG</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#log核的产生"><span class="toc-number">1.1.</span> <span class="toc-text">LoG核的产生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log实验"><span class="toc-number">1.2.</span> <span class="toc-text">LoG实验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zero-crossing-detector"><span class="toc-number">1.3.</span> <span class="toc-text">Zero Crossing Detector</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#log的深入讨论假边界"><span class="toc-number">1.4.</span> <span class="toc-text">LoG的深入讨论:假边界</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#canny"><span class="toc-number">2.</span> <span class="toc-text">Canny</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#图像梯度"><span class="toc-number">2.1.</span> <span class="toc-text">图像梯度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#梯度算子"><span class="toc-number">2.2.</span> <span class="toc-text">梯度算子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#canny-概览"><span class="toc-number">2.3.</span> <span class="toc-text">Canny 概览</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
