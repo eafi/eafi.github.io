@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="Laplacian of Gaussian和Canny是两个具有代表性的边缘检测算法。本文用以梳理两个算法的基本构成和注意事项，在梳理过程中也附加一些图像展示效果。 文章以一下顺序展开： 1. LoG的基本假设，即变尺度、一阶微分和二阶微分能够提供哪些边界信息 2. LoG核的产生，从高斯函数和拉普拉斯微分的角度推导 3. LoG的实验和LoG的过零点检测方法 4. LoG过零点检测引入的假边界检">
 <meta property="og:type" content="article">
-<meta property="og:title" content="comparison-between-LoG-and-Canny">
+<meta property="og:title" content="LoG和Canny的比较&#x2F;comparison-between-LoG-and-Canny">
 <meta property="og:url" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/index.html">
 <meta property="og:site_name" content="SuperEafi">
 <meta property="og:description" content="Laplacian of Gaussian和Canny是两个具有代表性的边缘检测算法。本文用以梳理两个算法的基本构成和注意事项，在梳理过程中也附加一些图像展示效果。 文章以一下顺序展开： 1. LoG的基本假设，即变尺度、一阶微分和二阶微分能够提供哪些边界信息 2. LoG核的产生，从高斯函数和拉普拉斯微分的角度推导 3. LoG的实验和LoG的过零点检测方法 4. LoG过零点检测引入的假边界检">
@@ -28,7 +28,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/lena-angle.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/four-directions.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-29T07:35:39.209Z">
+<meta property="article:modified_time" content="2020-07-29T07:36:55.569Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -52,7 +52,7 @@
         
     
     <!-- title -->
-    <title>comparison-between-LoG-and-Canny</title>
+    <title>LoG和Canny的比较/comparison-between-LoG-and-Canny</title>
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -113,16 +113,16 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&text=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&is_video=false&description=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=comparison-between-LoG-and-Canny&body=Check out this article: http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&name=comparison-between-LoG-and-Canny&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&t=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&text=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&is_video=false&description=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=LoG和Canny的比较/comparison-between-LoG-and-Canny&body=Check out this article: http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&name=LoG和Canny的比较/comparison-between-LoG-and-Canny&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&t=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -139,7 +139,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        comparison-between-LoG-and-Canny
+        LoG和Canny的比较/comparison-between-LoG-and-Canny
     </h1>
 
 
@@ -524,16 +524,16 @@ g_x \\ g_y
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&text=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&is_video=false&description=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=comparison-between-LoG-and-Canny&body=Check out this article: http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&name=comparison-between-LoG-and-Canny&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&t=comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&text=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&is_video=false&description=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=LoG和Canny的比较/comparison-between-LoG-and-Canny&body=Check out this article: http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&title=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&name=LoG和Canny的比较/comparison-between-LoG-and-Canny&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/&t=LoG和Canny的比较/comparison-between-LoG-and-Canny" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
