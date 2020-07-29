@@ -28,7 +28,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/lena-angle.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/comparison-between-LoG-and-Canny/four-directions.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-29T07:36:55.569Z">
+<meta property="article:modified_time" content="2020-07-29T07:41:15.164Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -465,7 +465,7 @@ g_x \\ g_y
 <li><p>覆盖的过程其实就是在寻找梯度方向上最大值的过程，有点类似于LoG中的假边界筛除过程，因此Canny的最大值覆盖天生就具备抑制假边界的能力</p></li>
 </ol>
 <p>经过nonmaxima suppression后得到的图像是灰度的，因此还需要进行最后的阈值化处理变成二值的。Canny使用了延迟阈值，延迟阈值有两个阈值参量:<span class="math inline">\(T_H,T_L\)</span>共同参与阈值化。</p>
-<p>先回顾传统的单值阈值操作，即大于<span class="math inline">\(T\)</span>为1，下于<span class="math inline">\(T\)</span>为0.单值的阈值速度快，但问题也很明显:<span class="math inline">\(T\)</span>太高会导致真边界被无意的抹除，而太低又回导致假边界出现。延迟阈值能够解决这种问题。</p>
+<p>先回顾传统的单值阈值操作，即大于<span class="math inline">\(T\)</span>为1，小于<span class="math inline">\(T\)</span>为0.单值的阈值速度快，但问题也很明显:<span class="math inline">\(T\)</span>太高会导致真边界被无意的抹除，而太低又回导致假边界出现。延迟阈值能够解决这种问题。</p>
 <p>根据阈值化操作，产生了两幅图<span class="math inline">\(g_{NH},g_{NL}\)</span>:</p>
 <p><span class="math display">\[g_{NH}(x,y)=g_N(x,y) \ge T_H\]</span></p>
 <p><span class="math display">\[g_{NL}(x,y)=g_N(x,y) \ge T_L\]</span></p>
