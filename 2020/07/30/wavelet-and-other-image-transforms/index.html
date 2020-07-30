@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文用以总结和消化digital image processing中的小波变换一章，众所周知小波变换和其他内积变换在信号处理中是重要的，因此本文在梳理过程中引入一些代码和图像辅助理解。 基本概念 首先需要明白离散傅立叶变换、Hartley变换、DCT、DST、Walsh-Hadamard变换、Haar小波、其他小波变换都是线性变换，他们的目的都是将原信号转换成线性展开因子。除此之外，这些线性变换还">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wavelet-and-other-image-transforms">
+<meta property="og:url" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="本文用以总结和消化digital image processing中的小波变换一章，众所周知小波变换和其他内积变换在信号处理中是重要的，因此本文在梳理过程中引入一些代码和图像辅助理解。 基本概念 首先需要明白离散傅立叶变换、Hartley变换、DCT、DST、Walsh-Hadamard变换、Haar小波、其他小波变换都是线性变换，他们的目的都是将原信号转换成线性展开因子。除此之外，这些线性变换还">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-07-30T01:56:15.000Z">
+<meta property="article:modified_time" content="2020-07-30T08:42:54.885Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="ImageProcessing">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>wavelet-and-other-image-transforms</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/07/11/Network-Transport-Layer/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&text=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&is_video=false&description=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=wavelet-and-other-image-transforms&body=Check out this article: http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&name=wavelet-and-other-image-transforms&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&t=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        wavelet-and-other-image-transforms
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-07-30T01:56:15.000Z" itemprop="datePublished">2020-07-30</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/ImageProcessing/" rel="tag">ImageProcessing</a>
+    </div>
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文用以总结和消化<em>digital image processing</em>中的小波变换一章，众所周知小波变换和其他内积变换在信号处理中是重要的，因此本文在梳理过程中引入一些代码和图像辅助理解。</p>
+<h1 id="基本概念">基本概念</h1>
+<p>首先需要明白离散傅立叶变换、Hartley变换、DCT、DST、Walsh-Hadamard变换、Haar小波、其他小波变换都是线性变换，他们的目的都是将原信号转换成线性展开因子。除此之外，这些线性变换还有如下共同特点：</p>
+<ol type="1">
+<li><p>能量和信息在变换前后是相同的<strong>此处可能有歧义</strong>，区别只在能量和信息分布的不同</p></li>
+<li><p>这些线性变换的计算基础都是内积，这说明内积有着非常重要的性质</p></li>
+</ol>
+<h2 id="向量空间和内积空间">向量空间和内积空间</h2>
+<ol type="1">
+<li><p>向量空间是一系列向量的集合，这些向量能够相加或乘以一个标量</p></li>
+<li><p>内积空间是一个具备<strong>内积函数</strong>的向量空间，在内积空间两个向量能够发生内积进而转换为一个标量，并且对于向量<span class="math inline">\(u,v\)</span>，标量<span class="math inline">\(\alpha\)</span>而言满足：</p></li>
+</ol>
+<ul>
+<li><span class="math inline">\(\left&lt; u,v\right&gt; = \left&lt; v,u \right&gt;^*\)</span></li>
+<li><span class="math inline">\(\left&lt; u+v,w\right&gt; = \left&lt; u, w \right&gt; + \left&lt; v, w \right&gt;\)</span></li>
+<li><span class="math inline">\(\left&lt; \alpha u,v\right&gt; = \alpha \left&lt; u,v \right&gt;\)</span></li>
+<li><span class="math inline">\(\left&lt; v,v\right&gt; \ge 0\ and\  \left&lt; v,v \right&gt; =0 \  \mbox{if and only if}\  v=0\)</span></li>
+</ul>
+<p>关于如上定义有以下几点需要说明：</p>
+<ol type="1">
+<li><p>向量空间一个例子就是常见的x，y轴所形成的空间，在这个空间中可以乘以一个标量进行向量的伸缩，也可以相加改变向量的首位</p></li>
+<li><p>内积空间一个例子就是实数空间<span class="math inline">\(\mathbb{R}\)</span>,在实数空间中的内积就是乘法，两个向量（在实数空间中就是实数）做乘得到一个标量，并且上述条件在实数空间均满足</p></li>
+</ol>
+<p>内积空间和向量空间的差别就在，内积空间有内积运算。内积运算的存在使得我们能够定义正交，而正交具有非常重要的性质。内积空间可以由不同的向量空间定义特定的内积函数产生，当然这些所定义的内积函数必须满足内积空间的条件。</p>
+<p>最常见的三种内积空间为笛卡尔空间、酉空间和连续函数内积空间。这三种内积空间最大的区别就在其内积操作的对象。</p>
+<p>对于笛卡尔空间<span class="math inline">\(\mathbb{R}^N\)</span>来说，其内积操作对象为实数：</p>
+<p><span class="math display">\[\left&lt; u,v \right&gt; = u^T v = \sum_{i=0}^{N-1} u_i v_i\]</span></p>
+<p>其中，<span class="math inline">\(u,v\)</span>都是<span class="math inline">\(N \times 1\)</span>的向量。</p>
+<p>对于酉空间<span class="math inline">\(\mathbb{C}^N\)</span>来说，其内积操作对象为复数:</p>
+<p><span class="math display">\[\left&lt; u,v \right&gt; = u^{*T} v \sum_{i=0}^{N-1} u_i^* v_i = \left&lt; v,u \right&gt; ^*\]</span></p>
+<p>其中，<span class="math inline">\(u,v\)</span>都是复数形式的<span class="math inline">\(N \times 1\)</span>向量，<span class="math inline">\(*\)</span>为共轭。</p>
+<p>对于连续函数内积空间<span class="math inline">\(\mathbb{C}\left[ a,b \right]\)</span>而言，它的内积对象是在区间<span class="math inline">\(a \le x \le b\)</span>的连续函数，它的内积函数是积分内积：</p>
+<p><span class="math display">\[\left&lt; f(x),g(x) \right&gt; = \int_a^b f^*(x)g(x)dx\]</span></p>
+<p>上述分别定义了在离散实数范围、离散复数范围和连续复述范围的内积空间.一旦定义好了恰当的内积空间，便可以深入研究内积空间的性质，下面讨论的性质显然适用于上述内积空间。比如我们说向量<span class="math inline">\(w\)</span>在笛卡尔空间或者酉空间，很显然我们其实是在说它是一个离散实数或离散复数向量，而如果我们说向量<span class="math inline">\(w\)</span>在连续函数内积空间，可以理解为<span class="math inline">\(w\)</span>也是一个向量，只是它是连续的，由无数个离散点组成的。因此在讨论内积空间的性质时常常提到的向量，可能是个<span class="math inline">\(N \times 1\)</span>矩阵，也可能是一个连续函数。但这不妨碍内积空间性质的讨论。</p>
+<p>内积空间最基础的，需要能够知道向量的长度，即范数<span class="math inline">\(||z||\)</span>:</p>
+<p><span class="math display">\[||z|| = \sqrt{\left&lt; z,z \right&gt;}\]</span></p>
+<p>和两个向量在内积空间中的角度：</p>
+<p><span class="math display">\[\theta = \cos^{-1} \frac{\left&lt; z,w \right&gt;}{||z|| \cdot ||w||}\]</span></p>
+<p>有了这两点性质，我们就能够定义内积空间一个非常重要的性质：<strong>正交</strong>。我们说，当两个向量的角度为<span class="math inline">\(90^\circ\)</span>即垂直/正交，显然当正交时，<span class="math inline">\(\left&lt; z,w \right&gt; =0\)</span>。推而广之，如果存在一系列的非零向量<span class="math inline">\(w_0,w_1,w_2,...\)</span>，这些向量两两相互正交,即：</p>
+<p><span class="math display">\[\left&lt; w_k,w_l \right&gt; =0 \ \mbox{for}\; k \ne l\]</span></p>
+<p>那么认为这些向量是这个内积空间的<strong>正交基(orthogonal basis)</strong>，这个向量空间可以由这些正交基生成/展开(span)。换句话说，这些正交基支撑了这个向量空间。</p>
+<p>如果这些向量被归一化了，那么这些正交基又被称为<strong>标准正交基</strong>：</p>
+<p><span class="math display">\[\left&lt; w_k,w_l \right&gt; = \delta_{kl} = \left\{ \begin{array}{rc1} 0 &amp; \mbox{for} &amp; k\ne l \\ 1 &amp; \mbox{for} &amp; k=l \end{array} \right. \]</span></p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&text=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&is_video=false&description=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=wavelet-and-other-image-transforms&body=Check out this article: http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&title=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&name=wavelet-and-other-image-transforms&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/&t=wavelet-and-other-image-transforms" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>
