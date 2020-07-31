@@ -14,7 +14,7 @@
 <meta property="og:description" content="本文用以总结和消化digital image processing中的小波变换一章，众所周知小波变换和其他内积变换在信号处理中是重要的，因此本文在梳理过程中引入一些代码和图像辅助理解。 基本概念 首先需要明白离散傅立叶变换、Hartley变换、DCT、DST、Walsh-Hadamard变换、Haar小波、其他小波变换都是线性变换，他们的目的都是将原信号转换成线性展开因子。除此之外，这些线性变换还">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-07-30T01:56:15.000Z">
-<meta property="article:modified_time" content="2020-07-30T08:42:54.885Z">
+<meta property="article:modified_time" content="2020-07-31T08:50:29.532Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -110,7 +110,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -222,20 +222,134 @@
 <p><span class="math display">\[\left&lt; u,v \right&gt; = u^T v = \sum_{i=0}^{N-1} u_i v_i\]</span></p>
 <p>其中，<span class="math inline">\(u,v\)</span>都是<span class="math inline">\(N \times 1\)</span>的向量。</p>
 <p>对于酉空间<span class="math inline">\(\mathbb{C}^N\)</span>来说，其内积操作对象为复数:</p>
-<p><span class="math display">\[\left&lt; u,v \right&gt; = u^{*T} v \sum_{i=0}^{N-1} u_i^* v_i = \left&lt; v,u \right&gt; ^*\]</span></p>
+<p><span class="math display">\[\left&lt; u,v \right&gt; = u^{*T} a= \sum_{i=0}^{N-1} u_i^* v_i = \left&lt; v,u \right&gt; ^*\]</span></p>
 <p>其中，<span class="math inline">\(u,v\)</span>都是复数形式的<span class="math inline">\(N \times 1\)</span>向量，<span class="math inline">\(*\)</span>为共轭。</p>
 <p>对于连续函数内积空间<span class="math inline">\(\mathbb{C}\left[ a,b \right]\)</span>而言，它的内积对象是在区间<span class="math inline">\(a \le x \le b\)</span>的连续函数，它的内积函数是积分内积：</p>
 <p><span class="math display">\[\left&lt; f(x),g(x) \right&gt; = \int_a^b f^*(x)g(x)dx\]</span></p>
-<p>上述分别定义了在离散实数范围、离散复数范围和连续复述范围的内积空间.一旦定义好了恰当的内积空间，便可以深入研究内积空间的性质，下面讨论的性质显然适用于上述内积空间。比如我们说向量<span class="math inline">\(w\)</span>在笛卡尔空间或者酉空间，很显然我们其实是在说它是一个离散实数或离散复数向量，而如果我们说向量<span class="math inline">\(w\)</span>在连续函数内积空间，可以理解为<span class="math inline">\(w\)</span>也是一个向量，只是它是连续的，由无数个离散点组成的。因此在讨论内积空间的性质时常常提到的向量，可能是个<span class="math inline">\(N \times 1\)</span>矩阵，也可能是一个连续函数。但这不妨碍内积空间性质的讨论。</p>
+<p>上述分别定义了在离散实数范围、离散复数范围和连续复数范围的内积空间.一旦定义好了恰当的内积空间，便可以深入研究内积空间的性质，下面讨论的性质显然适用于上述所有内积空间。再扩展向量的概念，我们说向量<span class="math inline">\(w\)</span>在笛卡尔空间或者酉空间，很显然我们其实是在说它是一个离散实数向量或离散复数向量，而如果我们说向量<span class="math inline">\(w\)</span>在连续函数内积空间，可以理解为<span class="math inline">\(w\)</span>也是一个向量，只是它是连续的，由无数个离散点组成的。因此在讨论内积空间的性质时常常提到的向量，可能是个<span class="math inline">\(N \times 1\)</span>矩阵，也可能是一个连续函数。但这不妨碍内积空间性质的讨论。</p>
 <p>内积空间最基础的，需要能够知道向量的长度，即范数<span class="math inline">\(||z||\)</span>:</p>
-<p><span class="math display">\[||z|| = \sqrt{\left&lt; z,z \right&gt;}\]</span></p>
+<p><span class="math display">\[||z|| = \sqrt{\left&lt; z,z \right&gt;} \tag{1}\]</span></p>
 <p>和两个向量在内积空间中的角度：</p>
-<p><span class="math display">\[\theta = \cos^{-1} \frac{\left&lt; z,w \right&gt;}{||z|| \cdot ||w||}\]</span></p>
-<p>有了这两点性质，我们就能够定义内积空间一个非常重要的性质：<strong>正交</strong>。我们说，当两个向量的角度为<span class="math inline">\(90^\circ\)</span>即垂直/正交，显然当正交时，<span class="math inline">\(\left&lt; z,w \right&gt; =0\)</span>。推而广之，如果存在一系列的非零向量<span class="math inline">\(w_0,w_1,w_2,...\)</span>，这些向量两两相互正交,即：</p>
-<p><span class="math display">\[\left&lt; w_k,w_l \right&gt; =0 \ \mbox{for}\; k \ne l\]</span></p>
+<p><span class="math display">\[\theta = \cos^{-1} \frac{\left&lt; z,w \right&gt;}{||z|| \cdot ||w||} \tag{2}\]</span></p>
+<p>有了这两点性质，我们就能够定义内积空间一个非常重要的性质：<strong>正交</strong>。我们说，当两个向量的角度为<span class="math inline">\(90^\circ\)</span>即垂直/正交.显然当正交时，<span class="math inline">\(\left&lt; z,w \right&gt; =0\)</span>。推而广之，如果存在一系列的非零向量<span class="math inline">\(w_0,w_1,w_2,...\)</span>，这些向量两两相互正交,即：</p>
+<p><span class="math display">\[\left&lt; w_k,w_l \right&gt; =0 \ \mbox{for}\; k \ne l \tag{3}\]</span></p>
 <p>那么认为这些向量是这个内积空间的<strong>正交基(orthogonal basis)</strong>，这个向量空间可以由这些正交基生成/展开(span)。换句话说，这些正交基支撑了这个向量空间。</p>
 <p>如果这些向量被归一化了，那么这些正交基又被称为<strong>标准正交基</strong>：</p>
-<p><span class="math display">\[\left&lt; w_k,w_l \right&gt; = \delta_{kl} = \left\{ \begin{array}{rc1} 0 &amp; \mbox{for} &amp; k\ne l \\ 1 &amp; \mbox{for} &amp; k=l \end{array} \right. \]</span></p>
+<p><span class="math display">\[\left&lt; w_k,w_l \right&gt; = \delta_{kl} = \left\{ \begin{array}{rc1} 0 &amp; \mbox{for} &amp; k\ne l \\ 1 &amp; \mbox{for} &amp; k=l \end{array} \right. \tag{4}\]</span></p>
+<p>内积空间的正交基一个非常重要的性质就是能够简明的表达在这个内积空间中的任何向量，比如如果在一个内积空间<span class="math inline">\(V\)</span>中，存在正交基<span class="math inline">\(W=\left\{ w_0,w_1,w_2,... \right\}\)</span>和一个向量<span class="math inline">\(z \in V\)</span>，那么我们可以使用正交基的<strong>线性组合</strong>简明地表达该向量：</p>
+<p><span class="math display">\[z=\alpha_0 w_0 + \alpha_1 w_1 + \alpha_2 w_2+... \tag{5}\]</span></p>
+<p>上述公式5可以看作是一个分解过程，即在内积空间<span class="math inline">\(V\)</span>中的向量<span class="math inline">\(z\)</span>向正交基与特定<span class="math inline">\(\alpha_i\)</span>线性组合分解。这种分解可以看作是一种变换.因此我们需要知道正交基<span class="math inline">\(W\)</span>是什么以及分解系数<span class="math inline">\(\alpha\)</span>该如何求得。</p>
+<p>接下来的推导将得出假设已知正交基时，我们应该如何求得<span class="math inline">\(\alpha\)</span>:</p>
+<p>将第i个正交基<span class="math inline">\(w_i\)</span>与<span class="math inline">\(z\)</span>做内积：</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+\left&lt; w_i,z \right&gt; &amp;= \left&lt;w_i, \alpha_0 w_0 + \alpha_1 w_1 + \alpha_2 w_2+... \right&gt; \\
+&amp;= \alpha_0 \left&lt;w_i,w_0 \right&gt; + \alpha_1 \left&lt;w_i,w_1 \right&gt;+...+\alpha_i \left&lt; w_i,w_i \right&gt;+... \\
+&amp;= \alpha_i \left&lt;w_i,w_i \right&gt;
+\end{aligned}
+\end{equation} \tag{6}
+\]</span></p>
+<p>公式6的第一个等号利用了公式5对<span class="math inline">\(z\)</span>的线性展开，第二个等号运用了内积空间条件和正交基相互正交的性质，第三个等号是最后唯一留下来的正交基自己的内积项。可以通过公式6得到第i个<span class="math inline">\(\alpha_i\)</span>:</p>
+<p><span class="math display">\[\alpha_i = \frac{\left&lt; w_i,z \right&gt;}{\left&lt;w_i,w_i \right&gt;} \tag{7}\]</span></p>
+<p>那么如果再满足公式4，即正交基都是标准正交基的话，分母就变成了1，公式7能够再被简化为<span class="math inline">\(\alpha_i =\left&lt; w_i,z \right&gt;\)</span>.</p>
+<p>关于公式7还有一点需要说明，这里的<span class="math inline">\(\alpha_i\)</span>只是一个标量（内积函数的输出），<span class="math inline">\(w_i\)</span>和<span class="math inline">\(z\)</span>都是向量。回到最开始的不同内积空间的定义，比如我们在酉空间中讨论，则这两个向量是复数，那么公式7可以进一步展开为：</p>
+<p><span class="math display">\[\alpha_i = \frac{\left&lt; w_i,z \right&gt;}{\left&lt;w_i,w_i \right&gt;} = \sum_{i=0}^{N-1} u_i^* v_i \]</span></p>
+<p>同理在不同的内积空间中的向量，需要应用不同的内积函数进行详细的计算。</p>
+<h2 id="小结">小结</h2>
+<p>在上面的讨论中主要说了如下几件事情：</p>
+<ol type="1">
+<li><p>内积空间一个非常重要的性质就是内积函数，由于内积函数的存在，我们可以定义空间中的垂直（正交）</p></li>
+<li><p>由于正交的特性，可以找到一系列的正交基用于生成空间。正交基相互正交支撑起了这个内积空间。</p></li>
+<li><p>在内积空间中的任何向量都可以由正交基的线性组合简明表达</p></li>
+</ol>
+<p>上述公式5可以看作是一种变换，它使得原向量<span class="math inline">\(z\)</span>向目标内积空间变换，他们二者能量和信息相同，只是换了一种观察的角度。而由于我们假设已知这个内积空间的正交基，因此只需要知道每一个基前面所乘系数<span class="math inline">\(\alpha_i\)</span>即可。求取<span class="math inline">\(\alpha_i\)</span>的过程可以使用公式7完成。但需要指出的是，公式7求的是第i个<span class="math inline">\(w_i\)</span>前面的系数，因此若一共有<span class="math inline">\(N\)</span>个<span class="math inline">\(w\)</span>，则应该分别求从i=0到i=N-1共N个<span class="math inline">\(\alpha_i\)</span>才算是完整的将<span class="math inline">\(z\)</span>分解到内积空间<span class="math inline">\(V\)</span>。</p>
+<h1 id="基于矩阵的变换">基于矩阵的变换</h1>
+<p>在本文最前面提到离散傅立叶变换也是一种内积操作，我们来观察如下两个公式：</p>
+<p><span class="math display">\[F(u) = \sum_{x=0}^{N-1} f(x) e^{-j 2\pi (u x /M)}\ u=0,1,2,...,N-1 \tag{8}\]</span></p>
+<p><span class="math display">\[T(u) = \sum_{x=0}^{N-1} f(x)r(x,u)\ u=0,1,2,...,N-1 \tag{9}\]</span></p>
+<p>公式8为一维离散傅立叶变换，公式9为公式7的进一步扩展表达.我们发现类似傅立叶变换的转换都可以用公式9来描述。或者说离散傅立叶变换其实是公式9内积变换的一种特例（特在公式8具体了正交基的表达）.</p>
+<p>再次注意公式9中写<span class="math inline">\(u=0,1,2,...,N-1\)</span>说明公式9需要计算N次才是一次完整的转换，而我们也能发现<strong>每一次计算<span class="math inline">\(T(u)\)</span>都遍历了一次原始数据<span class="math inline">\(f(x)\)</span></strong>。</p>
+<p>同理有傅立叶逆变换：</p>
+<p><span class="math display">\[f(x) = \frac{1}{M} \sum_{x=0}^{N-1} F(u) e^{j 2\pi (u x /M)}\ x=0,1,2,...,N-1 \tag{10}\]</span></p>
+<p><span class="math display">\[f(x) = \sum_{x=0}^{N-1} T(u)s(x,u)\ x=0,1,2,...,N-1 \tag{11}\]</span></p>
+<p>公式9和公式11共同组成了<strong>变换对(transform pair)</strong>。称<span class="math inline">\(r(x,u)\)</span>和<span class="math inline">\(s(x,u)\)</span>为变换核。</p>
+<p>观察公式11，这是<span class="math inline">\(f(x)\)</span>在内积空间中的线性展开(类似公式5)。为了和公式5做更详细的比较，我们展开公式11:</p>
+<p><span class="math display">\[f(x) = T(0)s(x,0) + T(1)s(x,1) + ... + T(N-1)s(x,N-1) \tag{12}\]</span></p>
+<p>关于式子12有更多的细节需要注意：</p>
+<ol type="1">
+<li><p>T(i)为分解出的系数，类似公式5中的<span class="math inline">\(\alpha_i\)</span></p></li>
+<li><p>s(x,i)为正交基中的一个向量，类似公式5中的<span class="math inline">\(w_i\)</span></p></li>
+<li><p>公式9，11，12都基于我们所分解的原始数据<span class="math inline">\(f(x)\)</span>是<strong>离散序列</strong>前提，这也符合对数字图像处理的期待</p></li>
+</ol>
+<p>现在我们想要求得分解后的<span class="math inline">\(T(u)\)</span>（类似之前求<span class="math inline">\(\alpha_i\)</span>），一种方法是利用公式9进行正变换。但通常我们更习惯已知逆变换核<span class="math inline">\(s(x,u)\)</span>，那么类似公式7有：</p>
+<p><span class="math display">\[T(u) = \left&lt; s(x,u),f(x) \right&gt; \tag{13}\]</span></p>
+<p>关于公式13有一点需要说明，不难发现公式13可以改写为：</p>
+<p><span class="math display">\[T(u) = \left&lt; s(x,u),f(x) \right&gt; = s(x,u)^{*T}f(x)=\sum_{x=0}^{N-1}s^* (x,u) f(x)\]</span></p>
+<p>结合公式9可知，<span class="math inline">\(r(x,u) = s^* (x,u)\)</span>。以傅立叶变换来说，它的逆变换核<span class="math inline">\(s^* (x,u)=\left\{e^{j 2\pi (ux/M)} \right\} ^* = r(x,u)\)</span>.如果变换核都是实数，那么它的共轭就是自身；如果变换核是复数，那么它对应的变换核对就是它的共轭。</p>
+<p>下面把矩阵引入计算，首先说明为什么要引入矩阵。我们在求变换的系数时用公式13，但是公式13一个非常显著的问题是它一次只计算一个值，需要从u=0计算到u=N-1为止。显然这种顺序性、重复性的计算适合使用矩阵来简化表达。</p>
+<p>定义原始信号函数<span class="math inline">\(f(x)\)</span>，变换后的序列<span class="math inline">\(T(u)\)</span>和逆变换核<span class="math inline">\(s(x,u)\)</span>为列向量：</p>
+<p><span class="math display">\[f = \left[ \begin{matrix} f(0) \\ f(1) \\ \vdots \\ f(N-1) \end{matrix} \right] = \left[ \begin{matrix} f_0 \\ f_1 \\ \vdots \\ f_{N-1}\end{matrix} \right] \tag{14}\]</span></p>
+<p><span class="math display">\[t = \left[ \begin{matrix} T(0) \\ T(1) \\ \vdots \\ T(N-1) \end{matrix} \right] = \left[ \begin{matrix} t_0 \\ t_1 \\ \vdots \\ t_{N-1}\end{matrix} \right] \tag{15}\]</span></p>
+<p>进行一次公式13的计算只能得到一个<span class="math inline">\(T(u)\)</span>，需要进行N次计算才能得到完整的<span class="math inline">\(t\)</span>向量。</p>
+<p><span class="math display">\[s_u = \left[ \begin{matrix} s(0,u) \\ s(1,u) \\ \vdots \\ s(N-1,u) \end{matrix} \right] = \left[ \begin{matrix} s_{u,0} \\ s_{u,1} \\ \vdots \\ s_{u,N-1}\end{matrix} \right]\  \mbox{for}\ u=0,1,...,N-1 \tag{16}\]</span></p>
+<p>注意公式16，<span class="math inline">\(s_u\)</span>是一个列向量，其中的分量对应的是<span class="math inline">\(x\)</span>从0到N-1。不难发现，<span class="math inline">\(s_u\)</span>就是公式13中的<span class="math inline">\(s(x,u),\mbox{for}\  x=0,1,...,N-1\)</span>的矩阵写法。因此，公式13可以改写为矩阵：</p>
+<p><span class="math display">\[T(u) = \left&lt;s_u,f\right&gt;\ \mbox{for}\ u=0,1,...,N-1 \tag{17}\]</span></p>
+<p>当然直到现在公式17仍然只是一次性只计算一个<span class="math inline">\(T(u)\)</span>，但好消息是它被转换成了矩阵表达，现在开始拓展。引入<span class="math inline">\(N \times N\)</span>变换矩阵<span class="math inline">\(A\)</span>:</p>
+<p><span class="math display">\[A = \left[ \begin{matrix} s_0^T \\ s_1^T \\ \vdots \\ s_{N-1}^T \end{matrix} \right] = \left[ \begin{matrix} s_0 &amp; s_1 &amp; \ldots &amp; s_{N-1}\end{matrix} \right]^T \tag{18}\]</span></p>
+<p>矩阵<span class="math inline">\(A\)</span>是N个不同的<span class="math inline">\(s_u\)</span>的结合，因此共同形成了一个<span class="math inline">\(N \times N\)</span>的变换矩阵。有了这个从u=0到u=N-1均有涵盖的变换矩阵，就可以通过一次变换得到所有的<span class="math inline">\(T(u)\)</span>，也就是<span class="math inline">\(t\)</span>向量:</p>
+<p><span class="math display">\[\begin{equation} \begin{aligned}t = \left[ \begin{matrix} \left&lt;s_0,f\right&gt; \\ \left&lt;s_0,f\right&gt;\\ \vdots \\ \left&lt;s_0,f\right&gt;\end{matrix} \right] &amp;= \left[ \begin{matrix} s_{0,0}f_0+s_{1,0}f_1+\ldots + s_{N-1,0}f_{N-1} \\ s_{0,1}f_0 + s_{1,1}f_1 + \ldots + s_{N-1,1} f_{N-1} \\ \vdots \\ s_{0,N-1} f_0 + s_{1,N-1} f_1 + \ldots + s_{N-1,N-1} f_{N-1} \end{matrix} \right] \\ &amp;= \left[ \begin{matrix} s_{0,0} &amp; s_{1,0} &amp; \ldots&amp; s_{N-1,0} \\ s_{0,1} &amp; s_{1,1} \\ \vdots&amp;\  &amp; \ddots &amp; s_{N-1,N-2} \\ s_{0,N-1}&amp;\  &amp;s_{N-2,N-1}&amp;s_{N-1,N-1} \end{matrix} \right] \left[ \begin{matrix} f_0 \\ f_1 \\ \vdots \\ f_{N-1} \end{matrix} \right] \end{aligned}\end{equation} \tag{19}\]</span></p>
+<p>公式19可以简写为:</p>
+<p><span class="math display">\[t = Af \tag{20}\]</span></p>
+<p>公式20就把所有的<span class="math inline">\(T(u)\)</span>一次性解完，下面我们看一种特殊情况，假设<span class="math inline">\(A\)</span>是一个是<strong>实数和正交的</strong>，那么有结论：</p>
+<p><span class="math display">\[AA^T = I \tag{21}\]</span></p>
+<p>有了公式21，我们在来看公式20，同时在公式20左乘<span class="math inline">\(A^T\)</span>:</p>
+<p><span class="math display">\[f = A^T t \tag{22}\]</span></p>
+<p>因此可以说，在假设矩阵<span class="math inline">\(A\)</span>是实数且正交时，我么不需要知道正变换核，正变换可由逆变换推导得到。而且在前面也提到如果变换核是实数，那么<span class="math inline">\(r(x,u) = s(x,u)\)</span>.</p>
+<p>关于<strong>当<span class="math inline">\(A\)</span>是实数和正交</strong>时，还有一些结论：</p>
+<ol type="1">
+<li>在原始空间中存在的两个向量<span class="math inline">\(f_1,f_2\)</span>它们在原始空间中的距离、角度在新的内积空间是一样的：</li>
+</ol>
+<p><span class="math display">\[\left&lt;f_1,f_2 \right&gt; = \left&lt;t_1,t_2 \right&gt;= \left&lt;A f_1,A f_2 \right&gt;\]</span></p>
+<p>这是因为：</p>
+<p><span class="math display">\[\begin{equation} \begin{aligned}\left&lt;f_1,f_2 \right&gt; &amp;= \left&lt;A^T t_1,A^T t_2 \right&gt; = (A^T t_1)^T \cdot A^T t_2 \\
+&amp;=t_1^T A \cdot A^T t_2 \\
+&amp;=t_1^T \cdot t_2 \\
+&amp;= \left&lt;t_1,t_2\right&gt;
+\end{aligned}
+\end{equation}\]</span></p>
+<ol start="2" type="1">
+<li>矩阵<span class="math inline">\(A\)</span>的行向量、列向量均是正交基</li>
+</ol>
+<h1 id="图像的矩阵变换">图像的矩阵变换</h1>
+<p>仿写公式9和公式11到二维，有：</p>
+<p><span class="math display">\[T(u,v) = \sum_{x=0}^{N-1} \sum_{y=0}^{N-1} f(x,y)r(x,y,u,v) \tag{23}\]</span></p>
+<p><span class="math display">\[f(x,y) = \sum_{u=0}^{N-1} \sum_{v=0}^{N-1} T(u,v)s(x,y,u,v) \tag{24}\]</span></p>
+<p>二维的变换更加复杂，但<em>digital image processing</em>书中进行了尽可能的前提假设以简化表达，书中假设了以下条件：</p>
+<ol type="1">
+<li>转换核<span class="math inline">\(r(x,y,u,v)\)</span>是可拆分的：</li>
+</ol>
+<p><span class="math display">\[r(x,y,u,v) = r_1(x,u)r_2(y,v)\]</span></p>
+<ol start="2" type="1">
+<li>转换核<span class="math inline">\(r(x,y,u,v)\)</span>是镜像的：</li>
+</ol>
+<p><span class="math display">\[r(x,y,u,v) = r_1(x,u)r_1(y,v)\]</span></p>
+<ol start="3" type="1">
+<li>转换核是实数、正交的，因此<span class="math inline">\(r=s\)</span></li>
+</ol>
+<p>基于上述三种假设，二维的矩阵变换已经被简化的非常简单，公式23,24也可以写为相应矩阵形式：</p>
+<p><span class="math display">\[T = AFA^T \tag{25}\]</span></p>
+<p><span class="math display">\[F = A^T FA \tag{26}\]</span></p>
+<p>其中<span class="math inline">\(F\)</span>为<span class="math inline">\(N \times N\)</span>的图像，<span class="math inline">\(T\)</span>为对应尺寸的变换，<span class="math inline">\(A^T\)</span>计算了<span class="math inline">\(F\)</span>的行变换，<span class="math inline">\(A\)</span>计算了<span class="math inline">\(F\)</span>的列变换。</p>
+<h1 id="相关性correlation">相关性(Correlation)</h1>
+<p>相关性的定义为，有两个连续函数<span class="math inline">\(f(x),g(x)\)</span>,它们的相关性为：</p>
+<p><span class="math display">\[\begin{equation}
+\begin{aligned}
+f \bigstarg (\Delta x) &amp;= \int_{- \infty}^{\infty}f^*(X)g(x+\Delta x)dx
+&amp;= \left&lt;f(x),g(x+\Delta x) \right&gt;
+\end{aligned}
+\end{equation}
+\]</span></p>
 
   </div>
 </article>
@@ -271,7 +385,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
