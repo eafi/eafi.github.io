@@ -13,11 +13,14 @@
 <meta property="og:site_name" content="SuperEafi">
 <meta property="og:description" content="本文按照Computer Network:的顺序进行笔记的整理，主要是为了关键知识点的梳理和整理。 传输层中的数据包被称为segment,网络层中的数据包被称为datagram. 导引：传输层服务 传输层是在应用层(application layer)之下，网络层(network layer)之上的网络协议。这个位置决定了传输层协议使用了网络层所提供的服务，并向应用层提供服务。简单来说，传输层提供">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/07/11/Network-Transport-Layer/source-and-destination-port-number.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/11/Network-Transport-Layer/TCP-multiplexing.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-11T14:57:26.504Z">
+<meta property="article:modified_time" content="2020-07-31T13:12:48.054Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="Network">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/07/11/Network-Transport-Layer/source-and-destination-port-number.png">
     
     
         
@@ -112,7 +115,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用multiplexing-and-demultiplexing"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用(Multiplexing and Demultiplexing)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#无连接协议实现复用与解复用"><span class="toc-number">2.1.</span> <span class="toc-text">无连接协议实现复用与解复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#面向连接协议实现复用与解复用"><span class="toc-number">2.2.</span> <span class="toc-text">面向连接协议实现复用与解复用</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -168,7 +171,7 @@
 <p><em>传输层中的数据包被称为segment,网络层中的数据包被称为datagram.</em></p>
 <h1 id="导引传输层服务">导引：传输层服务</h1>
 <p>传输层是在应用层(application layer)之下，网络层(network layer)之上的网络协议。这个位置决定了传输层协议使用了网络层所提供的服务，并向应用层提供服务。简单来说，传输层提供了一种逻辑通讯服务，主机两端在应用层面上来看是逻辑互联的，底层复杂的物理链路对应用层来说不可见了。</p>
-<p>Internet有两个传输层协议，一个是TCP，提供了可靠的数据传输协议；另一个是UDP，提供了不可靠的数据传输协议。这两个协议由于设计的不同，为应用层提供了完全不同的服务。而本文的主要内容其实也是分别传输这两种协议的内在细节。</p>
+<p>Internet有两个传输层协议，一个是TCP，提供了可靠的数据传输协议；另一个是UDP，提供了不可靠的数据传输协议。这两个协议由于设计的不同，为应用层提供了完全不同的服务。本文的主要内容是分别介绍这两种协议的内在细节。</p>
 <p>本节只做传输层服务的导引，就两个内容:</p>
 <ol type="1">
 <li><p>由于传输层和网络层彼此紧邻，因此先简单讨论传输层与网络层的关系</p></li>
@@ -178,7 +181,7 @@
 <ol type="1">
 <li><p>网络层提供的是一种不同主机(hosts)间的逻辑互联（一般用IP来标示不同的主机地址）；而传输层提供的是一种不同主机间进程(processes)的逻辑互联</p></li>
 <li><p>传输层由于使用了网络层的服务，所以传输层的设计很大程度上受限于网络层的限制。比如网络层不保证延时和带宽，这导致了使用了该服务的传输层同样无法保证。</p></li>
-<li><p>而且网络层传输数据可能会丢包、篡改和重复发包，这种不可靠的服务似乎也会影响传输层。但答案是否定的，对于这类不可靠是可以通过传输层良好的设计解决的。</p></li>
+<li><p>而且网络层传输数据可能会丢包、篡改和重复发包，这种不可靠的服务似乎也会影响传输层。但答案是否定的，对于这类不可靠是可以通过传输层良好的设计弥补的。</p></li>
 </ol>
 <h2 id="概括性的了解网路层和传输层">概括性的了解网路层和传输层</h2>
 <p>为了理解传输层的设计思路，有必要先简单了解传输层的下一层网络层。网络层协议，也叫IP，如前面所说的那样，提供了主机间的逻辑互联。我们非常关注网络层协议所提供服务的特点，因为其所提供的服务直接为传输层协议所用。</p>
@@ -206,7 +209,36 @@
 <li><p>保证数据按顺序传输</p></li>
 <li><p>阻塞控制</p></li>
 </ol>
-<h1 id="复用与解复用">复用与解复用</h1>
+<p>以上小节概述了网络层的特点和传输层的特点，并且概括性的比较了UDP和TCP两种传输层协议的异同。在相同的服务中，一个非常重要且基础的服务就是复用，下面将继续讨论这种复用服务。</p>
+<h1 id="复用与解复用multiplexing-and-demultiplexing">复用与解复用(Multiplexing and Demultiplexing)</h1>
+<p>复用的主要目的是<strong>将网络层的host-to-host连接服务扩展为应用程序的process-to-process连接服务</strong>。传输层提供的复用服务并不是直接连接在进程上的，而是进程的网络连接通过暴露出套接字(socket)实现。一个进程可以拥有若干个套接字，套接字具有唯一的标识符(identifier)，不同的传输层协议（TCP或UDP)的标识符格式是不同的.可以认为，进程的套接字是一道门，既是程序向网络发送数据的门，又是网络传输回进程的门。</p>
+<p>假设传输层有segment要发送给进程，那么传输层负责检查segment中的一段信息以确定是哪一个套接字的数据，然后传输层将数据发送给指定套接字，这个过程就完成了解复用(demultiplexing)；假设现在有多个不同的套接字，传输层负责把这些数据封装起来并添加传输层特有的信息头（显然，传输层的信息头是用来解复用的），然后将信息打包成segment传向网络层，这个过程完成了复用(multiplexing).</p>
+<p>复用和解复用的实现结合上文需要至少两个信息：</p>
+<ol type="1">
+<li><p>套接字需要唯一的标识符(identifier)，不同传输协议的标识符格式是不相同的；</p></li>
+<li><p>segment需要提供一段信息用以指明目标套接字</p></li>
+</ol>
+<p>关于标识符的格式，由于它是根据不同的传输层协议而发生一些变化，这里先不讨论。先看第二个条件，即segment需要提供目标套接字地址。在传输层的segment中用了端口号(port-number)来指明套接字地址，segment中提供了两个端口号，一个是源地址端口号(source port number field)，另一个是目标地址端口号(destination port number field)。这些端口都是16位的正整型。0~1023的端口号被保留，在设计进程端口号时应该避免与保留端口号冲突。</p>
+<p>源地址和目标地址端口号段在传输层segment中的位置如图所示：</p>
+<img src="/2020/07/11/Network-Transport-Layer/source-and-destination-port-number.png" class="" title="源地址和目标地址的端口号">
+<h2 id="无连接协议实现复用与解复用">无连接协议实现复用与解复用</h2>
+<p>无连接(connectionless)，指的就是UDP。UDP要实现复用与解复用同样需要满足上文中的两点。</p>
+<p>第一，UDP类型的套接字的标识符，是通过一个<strong>二元常量</strong>唯一指定的。这个二元常量指的是<strong>目标的IP地址</strong>和<strong>目标的端口号</strong>。UDP仅通过二元常量作为唯一的标识符所带来的影响是什么呢？假设现在有两个UDPsegments，它们具有不同的源IP地址和源地址端口号，但却拥有相同的目标IP地址和目标端口号。那么这两个segments会被传向<strong>同一个进程的同一个套接字</strong>。（与后面的TCP形成比较）</p>
+<p>第二，显然UDP也使用端口号作为指明目标套接字的方法。</p>
+<p>一个使用UDP传输协议的例子，假设A主机开启端口号为19157的UDP套接字，B主机开启端口号为46428的UDP套接字。A主机传输层获得应用层的数据，创建传输层segment，这个信息段中包含了数据、源端口号、目标端口号，A主机IP地址和B主机IP地址，然后将segment发送给网络层。B主机的传输层从网络层获得segment然后读取到这个segment的目标端口号，将里面的数据发送到目标端口号套接字。</p>
+<h2 id="面向连接协议实现复用与解复用">面向连接协议实现复用与解复用</h2>
+<p>面向连接(connection-oriented)，指的就是TCP。TCP与UDP在复用实现上有很大的不同。</p>
+<p>不同于UDP使用<strong>二元常量</strong>作为唯一标识符，TCP使用了<strong>四元</strong>，包括：<strong>源IP地址、源端口号、目标IP地址、目标端口号</strong>.带来什么影响呢？与在无连接协议实现复用与解复用相比较，如果有两个TCPsegments就算目标IP地址和目标端口号一样，一旦源IP地址<strong>或</strong>源端口号有所不同，segments也会被送到不同的TCP套接字中去。（与UDP相比较，UDP不会理会源IP和源端口，从而发送到同一个UDP套接字）</p>
+<p>要实现<strong>四元</strong>标识，这就说明TCP套接字的数量是变化的（对比UDP套接字是唯一的），这种数量变化的套接字是如何实现的？</p>
+<p>首先TCP服务器需要暴露一个欢迎套接字，这个套接字的目的不是为了通讯。比如一个TCP服务器的欢迎套接字绑定在了端口号为12000处。此时一个TCP客户请求连接TCP服务器：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">clientSocket = socket(AF_INET,SOCK_STREAM)</span><br><span class="line">clientSocket.connet((ServerName,<span class="number">12000</span>))</span><br></pre></td></tr></table></figure>
+<p>上述代码实现了一个TCP建立连接请求，建立连接请求也是一个TCPsegment。已经知道TCP需要四元标示，显然这个segment至少包含了四元信息。另外，需要特别指出的是，TCP客户端在建立连接请求时会选择一个合适的、未被占用的端口号作为源端口号。在TCP服务器一方，一旦检测到了建立连接请求，那么服务器端会<strong>根据四元标识符创建一个新的TCP套接字用以传输数据</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">connectionSocket,addr = serverSocket.accept()</span><br></pre></td></tr></table></figure>
+<p>一旦建立了一个基于四元标识符的TCP套接字，那么对于传入来的segment便可以按照其中的四元标识符进行推送到唯一指定的TCP套接字。</p>
+<p>如何理解UDP和TCP在标识符上的不同所带来的影响呢？见下图：</p>
+<img src="/2020/07/11/Network-Transport-Layer/TCP-multiplexing.png" class="" title="TCP-multiplexing">
+<p>ABC分别拥有不同的IP地址，并且C同时开启两个HTTP访问B，这两个HTTP访问的特点是IP地址相同，但端口号不同。A开启一个HTTP访问，其特点是A的IP地址与C不同，但端口号分配成了一样的。假如服务器B使用了TCP协议，那么在处理这三个连接请求时会分配不同的TCP套接字给每一个TCP连接。这是因为它们的四元标识符都不一样。而在之后的通讯过程也将流向不同的TCP套接字。</p>
+<p>作为对比，假如服务器B使用了UDP协议，那么这三个主机的segment都将传送到B中同一个UDP套接字当中，这是因为UDP协议采用二元标识符，而这三个请求的目标IP地址和目标端口号是相通的，即指向相同的UDP套接字。(注意，UDP没有创建连接的说法)</p>
 
   </div>
 </article>
@@ -242,7 +274,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用multiplexing-and-demultiplexing"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用(Multiplexing and Demultiplexing)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#无连接协议实现复用与解复用"><span class="toc-number">2.1.</span> <span class="toc-text">无连接协议实现复用与解复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#面向连接协议实现复用与解复用"><span class="toc-number">2.2.</span> <span class="toc-text">面向连接协议实现复用与解复用</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
