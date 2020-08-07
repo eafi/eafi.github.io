@@ -13,11 +13,17 @@
 <meta property="og:site_name" content="SuperEafi">
 <meta property="og:description" content="本文用以总结和消化digital image processing中的小波变换一章，众所周知小波变换和其他内积变换在信号处理中是重要的，因此本文在梳理过程中引入一些代码和图像辅助理解。 基本概念 首先需要明白离散傅立叶变换、Hartley变换、DCT、DST、Walsh-Hadamard变换、Haar小波、其他小波变换都是线性变换，他们的目的都是将原信号转换成线性展开因子。除此之外，这些线性变换还">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/Basis-vectors-of-some-commonly-transforms.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/localization.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/localization-examples.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/localization-examples2.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/wavelet.png">
 <meta property="article:published_time" content="2020-07-30T01:56:15.000Z">
-<meta property="article:modified_time" content="2020-08-02T03:01:18.501Z">
+<meta property="article:modified_time" content="2020-08-06T01:47:52.178Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/Basis-vectors-of-some-commonly-transforms.png">
     
     
         
@@ -112,7 +118,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#时频面中的基函数"><span class="toc-number">5.</span> <span class="toc-text">时频面中的基函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#初识小波"><span class="toc-number">6.</span> <span class="toc-text">初识小波</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基图像"><span class="toc-number">7.</span> <span class="toc-text">基图像</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-fourier-transform"><span class="toc-number">7.1.</span> <span class="toc-text">discrete Fourier transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-hartley-transform"><span class="toc-number">7.2.</span> <span class="toc-text">discrete Hartley transform</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -354,7 +360,80 @@ f \bigstar (\Delta x) &amp;= \int_{- \infty}^{\infty}f^*(X)g(x+\Delta x)dx \\
 \]</span></p>
 <p>相关性和内积在<span class="math inline">\(\Delta x=0\)</span>时等价：</p>
 <p><span class="math display">\[f \bigstar g(0) = \left&lt; f(x),g(x) \right&gt;\]</span></p>
-<p>由此可知，内积其实描述的是两个函数的相似程度，相似程度越高那么相关性/内积越大。</p>
+<p>仿照前面公式17，如果我们求原始向量<span class="math inline">\(f\)</span>与正交基向量中的一个<span class="math inline">\(s_u\)</span>的内积，得到一个展开项系数：</p>
+<p><span class="math display">\[\alpha_u = \left&lt; f,s_u \right&gt; = f \bigstar s_u (0) \tag{27}\]</span></p>
+<p>由此可知，内积的结果其实描述的是两个函数的相似程度，相似程度越高那么相关性/内积越大。</p>
+<h1 id="时频面中的基函数">时频面中的基函数</h1>
+<p>结合相关性的知识我们已经知道，两个函数越相似那么其相关性越大。观察公式17或公式27，描述了一个带分解原始函数<span class="math inline">\(f\)</span>与一个基函数<span class="math inline">\(s_u\)</span>的关联程度（相似程度）。函数<span class="math inline">\(f\)</span>与<span class="math inline">\(s_u\)</span>的相似性体现在<strong>时间历程上的相似</strong>和<strong>频率上的相似</strong>，换句话说原函数<span class="math inline">\(f\)</span>与<span class="math inline">\(s_u\)</span>越相似，他们在<strong>形状和带宽</strong>上也就越接近。</p>
+<p>这就不难理解傅立叶变换的工作了，傅立叶变换的基函数是频率不断递增的谐波函数，因此傅立叶变换求内积的过程其实就是原函数分别与不同频率的谐波求相关性的过程，在求取过程中原函数中越有接近基函数的频率(但却没时间)，那么在那个频率的基函数对应的系数越大（相关性越大），进而能够提取出原函数中的周期性成分。</p>
+<p><em>digital image processing</em>中对于几种常见的基函数列了一个表格如下：</p>
+<img src="/2020/07/30/wavelet-and-other-image-transforms/Basis-vectors-of-some-commonly-transforms.png" class="" title="Basis-vectors-of-some-commonly-transforms">
+<center>
+图1 常见的变换
+</center>
+<p>关于这个图有一下说明：</p>
+<ol type="1">
+<li><p>图中全部为离散时各种小波的u=0到u=15共16中基函数向量表达</p></li>
+<li><p>DFT有两列，这是因为DFT的基函数是一个复数，分别对应的是实部和虚部</p></li>
+<li><p>书中提供了一种思路，我们知道在求傅立叶变换时其实就是分别让u=0到u=15对应的基函数与原始函数发生内积，然后从得到的图像中提取出需要周期性；但假如我们现在只想研究图像中<em>亮度线性增加</em>的部分，那么其实我们可以考虑原始图像只与SLT（斜坡）的第二个基函数内积即可，而不需要再与其他SLT频率内积了。</p></li>
+</ol>
+<p>回到相似性的观点上来，<strong>时间历程上的相似</strong>和<strong>频率上的相似</strong>，其实从另一个角度来看就是定位的过程。包括了形状上的定位和带宽上的定位。基函数<span class="math inline">\(h\)</span>的定位能力可以在时频图上表达，分别描述了这个基函数在时间和频率上的定位能力：</p>
+<img src="/2020/07/30/wavelet-and-other-image-transforms/localization.png" class="" title="localization">
+<center>
+图2 定位能力
+</center>
+<p>从这个图中可以知道，在基函数与原始函数发生内积的过程，其实就是在将原始函数与基函数的时间、频率发生相关性计算的过程。比如在这个图中的，如果原始函数与这个基函数<span class="math inline">\(h\)</span>非常相似，那么在相交的地方值相关性结果会非常大。显然这个定位是宽泛的（因为它是一个拥有矩形面积的区域），我们希望能够非常准确的定位，也就是这个矩形越小越好，最理想能小成一个点。但是基函数的时频定位能力受限于Heisenberg不确定性原理，即<strong>不存在一个函数同时拥有有限的时间和频率支撑</strong>。这意味着，任何基函数在一个空间中是有限的，那么在另一个空间一定是无限延伸的。</p>
+<img src="/2020/07/30/wavelet-and-other-image-transforms/localization-examples.png" class="" title="localization-examples">
+<center>
+图3 定位的局限
+</center>
+<p>观察上面的图，上是在时域的脉冲函数，其频率域中是一条跨越全频率的横线。对于这种特性的基函数而言，显然相关性结果会显示出上图3的样子，即在时间上有精确的定位，而在频率上没有分辨率可言。这个过程其实类似于离散采样。</p>
+<p>相反我们知道傅立叶变换在时域上是两个谐波，在频域上是一个脉冲函数，这意味着相关性结果会显示下图3的样子，即在频率上有精确的定位，但时间上没有分辨率可言。</p>
+<p>上图和上面的文字描述只是基函数中某一个u的特例，如果我们遍历所有的u，会得到下面的图：</p>
+<img src="/2020/07/30/wavelet-and-other-image-transforms/localization-examples2.png" class="" title="localization-example">
+<center>
+图4 定位的局限2
+</center>
+<p>回到图1常见的变换中来，这幅图的上半部都是跨越整个时间轴的图像，自然类似于在图3中的讨论那样，他们不具备在时间上的定位能力，只具备频域定位能力。但图1下半部给出了一种全新的思路，即小波(wavelet)，它只存在于时间轴上的一小段，并且具备在时间轴上移动、缩放的能力。因此，小波同时具备<strong>时间历程和频率的定位能力</strong>。下面开始简单的讨论小波的构成。</p>
+<h1 id="初识小波">初识小波</h1>
+<p>我们之所以需要小波分析是因为脉冲采样所对应的时间域分析虽然对时间定位精确，即我们能够知道任意采样时刻有什么样的信号，但很难从中获取更多有意义的信息。比如各种杂波叠加在一起时，我们就已经束手无策了.这催生出傅立叶分析，傅立叶变换将时间域转换到了频率域，我们能够从频率的角度观察信号，或者对信号进行滤波，或者研究信号的频率组成成分.但傅立叶变换丢失了时间定位信息，这意味着我们不能像时间域分析那样直接从谱图中得到“这个频谱是哪里/何时发出的”。甚至有时候完全不同的输入信号谱图会得到完全一样的频域图。因此，我们需要同时获得时间、频率两个信息。小波分析的目标就是利用小波的变尺度、平移特性，能够以不同的尺度和时间来分解信号。</p>
+<p>以图4的时频分辨率相比较，小波的时频图如下：</p>
+<img src="/2020/07/30/wavelet-and-other-image-transforms/wavelet.png" class="" title="wavelet">
+<center>
+图5 小波时频图
+</center>
+<p>我们已经知道时间分辨率和频率分辨域不可能同时小，而且受限于Heisenberg不确定性原则。那么我们放宽我们的分析目标:首先，对于信号中的低频部分，由于这部分频率变化缓慢，因此为了检测出低频部分的频率信息，我们需要在低频部分拥有较高的频率分辨率，同时理所应当的，受限于Heisenberg不确定性原则，较高的频率分辨率使得低频部分的时间分辨率较低。这部分阐述其实对应了图5的下半部分图样。第二，对于高频部分信号，由于高频频率特点是短时间内剧烈变化，我们需要在时间上有较高的分辨率以便能够捕获这些短暂变化的高频信息，同样受限于Heisenberg不缺性原则，这使得高频频率分辨率降低。这部分阐述对应了图5上半部分图样。</p>
+<p>由此可见，小波分析具备变尺度分析信号的能力。</p>
+<p>为了构成小波需要定义一个母小波(mother wavelet)<span class="math inline">\(\psi\)</span>:</p>
+<p><span class="math display">\[\psi_{s,\tau} (t) = 2^{s/2} \psi(2^s t - \tau) \tag{28}\]</span></p>
+<p>关于公式28有如下说明：</p>
+<ol type="1">
+<li><p>母小波<span class="math inline">\(\psi(t)\)</span>是一个实数、平方可积的像带通一样的图像</p></li>
+<li><p>小波基函数是由可以缩放和平移的，缩放由<span class="math inline">\(s\)</span>实现，平移由<span class="math inline">\(\tau\)</span>实现</p></li>
+</ol>
+<h1 id="基图像">基图像</h1>
+<p>基图像的概念是将一维的正交基向二维拓展的产物。回顾公式24：</p>
+<p><span class="math display">\[f(x,y) = \sum_{u=0}^{N-1} \sum_{v=0}^{N-1} T(u,v)s(x,y,u,v) \tag{24}\]</span></p>
+<p>我们把公式24写成矩阵形式：</p>
+<p><span class="math display">\[F = \sum_{u=0}^{N-1} \sum_{v=0}^{N-1} T(u,v)S_{u,v} \tag{29}\]</span></p>
+<p>其中的<span class="math inline">\(F\)</span>就是一个<span class="math inline">\(N \times N\)</span>的原始图像，而<span class="math inline">\(S_{u,v}\)</span>是一个矩阵：</p>
+<p><span class="math display">\[
+S_{u,v} = \left[ \begin{matrix}
+s(0,0,u,v) &amp; s(0,1,u,v) &amp; \cdots &amp; s(0,N-1,u,v) \\
+s(1,0,u,v) &amp; \vdots &amp; \cdots &amp; \vdots \\
+\vdots &amp; \vdots &amp; \cdots &amp; \vdots \\
+\vdots &amp; \vdots &amp; \cdots &amp; \vdots \\
+\vdots \\
+s(N-1,0,u,v) &amp; s(N-1,1,u,v) &amp; \cdots &amp; s(N-1,N-1,u,v) 
+\end{matrix}
+\right]
+\]</span></p>
+<p>需要注意这个<span class="math inline">\(S_{u,v}\)</span>矩阵的<span class="math inline">\(u,v=0,1,...,N-1\)</span>，这意味着整个构成<span class="math inline">\(F\)</span>的<span class="math inline">\(S\)</span>矩阵应该是<span class="math inline">\(N^2\)</span>个<span class="math inline">\(N\times N\)</span>组成。同样，假设<span class="math inline">\(s(u,v,x,y)\)</span>是一个实数的、可拆分的、镜像的，那么有：</p>
+<p><span class="math display">\[S_{u,v} = s_u s_v^T \tag{30}\]</span></p>
+<p>下面介绍几种基函数的基图像的画法，包括DFT、DHT、DCT、DST。其中DHT、DCT、DST的特点是他们都是类傅立叶的变换，区别在于对于实数信号，FFT的结果是复数的，而这三个类傅立叶实数变换仍然是实数。</p>
+<h2 id="discrete-fourier-transform">discrete Fourier transform</h2>
+<p>:wq</p>
+<h2 id="discrete-hartley-transform">discrete Hartley transform</h2>
 
   </div>
 </article>
@@ -390,7 +469,7 @@ f \bigstar (\Delta x) &amp;= \int_{- \infty}^{\infty}f^*(X)g(x+\Delta x)dx \\
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#时频面中的基函数"><span class="toc-number">5.</span> <span class="toc-text">时频面中的基函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#初识小波"><span class="toc-number">6.</span> <span class="toc-text">初识小波</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基图像"><span class="toc-number">7.</span> <span class="toc-text">基图像</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-fourier-transform"><span class="toc-number">7.1.</span> <span class="toc-text">discrete Fourier transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-hartley-transform"><span class="toc-number">7.2.</span> <span class="toc-text">discrete Hartley transform</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">

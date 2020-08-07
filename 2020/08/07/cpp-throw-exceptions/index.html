@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="C++的异常处理机制是非常有用的工具，但是受限于之前不能深入理解其中的机理，在实际代码书写中还是会使用更佳简单的return error code的做法。为了比较深入浅出的方便自己在未来的代码工作中更合理和自信的使用异常处理机制，多方总结C++异常处理的经验并汇总为此文。 题外话:RAII RAII带来的好处 对于设计良好的，服从RAII的设计，带来的好处是非常明显的。比如如下两种文本处理方法：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="c++:throw-exceptions">
+<meta property="og:url" content="http://yoursite.com/2020/08/07/cpp-throw-exceptions/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="C++的异常处理机制是非常有用的工具，但是受限于之前不能深入理解其中的机理，在实际代码书写中还是会使用更佳简单的return error code的做法。为了比较深入浅出的方便自己在未来的代码工作中更合理和自信的使用异常处理机制，多方总结C++异常处理的经验并汇总为此文。 题外话:RAII RAII带来的好处 对于设计良好的，服从RAII的设计，带来的好处是非常明显的。比如如下两种文本处理方法：">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-08-07T02:50:55.000Z">
+<meta property="article:modified_time" content="2020-08-07T13:41:33.620Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>c++:throw-exceptions</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/08/04/leetcode-1-two-sum/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/07/cpp-throw-exceptions/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&text=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&is_video=false&description=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=c++:throw-exceptions&body=Check out this article: http://yoursite.com/2020/08/07/cpp-throw-exceptions/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&name=c++:throw-exceptions&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&t=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#题外话raii"><span class="toc-number">1.</span> <span class="toc-text">题外话:RAII</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#raii带来的好处"><span class="toc-number">1.1.</span> <span class="toc-text">RAII带来的好处</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#为何使用异常处理"><span class="toc-number">2.</span> <span class="toc-text">为何使用异常处理？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#异常处理的性能损耗"><span class="toc-number">3.</span> <span class="toc-text">异常处理的性能损耗</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#怎么抛throw异常"><span class="toc-number">4.</span> <span class="toc-text">怎么抛(throw)异常？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#怎么捕获catch异常"><span class="toc-number">5.</span> <span class="toc-text">怎么捕获(catch)异常？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传值catch可能导致错误的初始化"><span class="toc-number">5.1.</span> <span class="toc-text">传值catch可能导致错误的初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#throw的对象也可能导致错误的初始化"><span class="toc-number">5.2.</span> <span class="toc-text">throw的对象也可能导致错误的初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最好不要catch指针"><span class="toc-number">5.3.</span> <span class="toc-text">最好不要catch指针</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他注意事项"><span class="toc-number">6.</span> <span class="toc-text">其他注意事项</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#构造函数抛出异常"><span class="toc-number">6.1.</span> <span class="toc-text">构造函数抛出异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#析构函数抛出异常"><span class="toc-number">6.2.</span> <span class="toc-text">析构函数抛出异常</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">7.</span> <span class="toc-text">参考文献</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        c++:throw-exceptions
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-07T02:50:55.000Z" itemprop="datePublished">2020-08-07</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Report/">Report</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/C/" rel="tag">C++</a>
+    </div>
+
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>C++的异常处理机制是非常有用的工具，但是受限于之前不能深入理解其中的机理，在实际代码书写中还是会使用更佳简单的<code>return error code</code>的做法。为了比较深入浅出的方便自己在未来的代码工作中更合理和自信的使用异常处理机制，多方总结C++异常处理的经验并汇总为此文。</p>
+<h1 id="题外话raii">题外话:RAII</h1>
+<h2 id="raii带来的好处">RAII带来的好处</h2>
+<p>对于设计良好的，服从RAII的设计，带来的好处是非常明显的。比如如下两种文本处理方法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">fct</span><span class="params">(<span class="built_in">string</span> s)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">File_handle <span class="title">f</span><span class="params">(s,<span class="string">"r"</span>)</span></span>;   <span class="comment">// File_handle's constructor opens the file called "s"</span></span><br><span class="line">    <span class="comment">// use f</span></span><br><span class="line">&#125; <span class="comment">// here File_handle's destructor closes the file  </span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">old_fct</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* s)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    FILE* notgoodf = fopen(s,<span class="string">"r"</span>); <span class="comment">// open the file named "s"</span></span><br><span class="line">    <span class="comment">// use notgoodf </span></span><br><span class="line">    fclose(notgoodf);  <span class="comment">// close the file</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于良好的<code>File_handle</code>，按RAII设计，那么在程序正常执行离开<code>fct</code>函数时将自动调用析构函数进行释放，如果在使用<code>f</code>过程出现了异常抛出(命令流发生了意外的转变)，也会正常执行<code>File_handle</code>的析构函数，从而实现内部资源的安全释放。注意一个细节，在RAII下，<strong>构造函数</strong>中出现了异常抛出并不会调用其<strong>析构函数</strong>，这个道理容易想明白，因为可能有些资源还没有开始构造，试图释放这种资源是危险的。对于这种情况的讨论，在后文<strong>构造函数抛出异常</strong>中有讨论。</p>
+<p>我们说<code>File_handle</code>遵循了RAII的设计，基本设计思路就是在构造函数中获得对象，而在析构函数中释放对象：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">File_handle</span> &#123;</span></span><br><span class="line">    FILE* p;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    File_handle(<span class="keyword">const</span> <span class="keyword">char</span>* n, <span class="keyword">const</span> <span class="keyword">char</span>* a)</span><br><span class="line">        &#123; p = fopen(n,a); <span class="keyword">if</span> (p==<span class="number">0</span>) <span class="keyword">throw</span> Open_error(errno); &#125;</span><br><span class="line">    File_handle(FILE* pp)</span><br><span class="line">        &#123; p = pp; <span class="keyword">if</span> (p==<span class="number">0</span>) <span class="keyword">throw</span> Open_error(errno); &#125;</span><br><span class="line">    ~File_handle() &#123; fclose(p); &#125;</span><br><span class="line">    <span class="comment">///...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>作为RAII设计的对比，<code>old_fct</code>实现了一种经典的C文件处理方法。现在假使<code>notgoodf</code>中出现了异常抛出(我们尝试对它设计异常处理，说明我们希望能够掌握它的异常，并且安全的处理它).但使用了异常抛出还是会有问题:因为程序无法执行<code>fclose</code>了。换句话说，文件无法关闭！这对文件IO来说无疑是致命的错误。导致无法执行<code>fclose</code>的原因是：<code>throw</code>操作就像是<code>return</code>会发生命令流的改变。并且在异常处理完成后并不会回到原来<code>throw</code>下面的语句.</p>
+<p>还有一个RAII设计带来好处的对比例子：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">( <span class="keyword">int</span> x )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span>* pleak = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>]; <span class="comment">// might be lost =&gt; memory leak</span></span><br><span class="line">    <span class="function"><span class="built_in">std</span>::<span class="built_in">string</span> <span class="title">s</span><span class="params">( <span class="string">"hello world"</span> )</span></span>; <span class="comment">// will be properly destructed</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ( x ) <span class="keyword">throw</span> <span class="built_in">std</span>::runtime_error( <span class="string">"boom"</span> );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">delete</span> [] pleak; <span class="comment">// will only get here if x == 0. if x!=0, throw exception</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">        func( <span class="number">10</span> );</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> ( <span class="keyword">const</span> <span class="built_in">std</span>::exception&amp; e )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当在主函数中的<code>func(10)</code>调用，会导致内部<code>throw</code>，进而无法执行<code>delete [] pleak</code>导致内存泄漏。但对于<code>string</code>来说，会发生<code>stack unwinding</code>从而安全的释放掉。这个过程由编译器调用<code>string</code>对象的析构函数完成。显然没有遵循RAII设计的<code>pleak</code>无法利用这个特性。</p>
+<h1 id="为何使用异常处理">为何使用异常处理？</h1>
+<p>简而言之，异常处理可以简化代码。过去的设计中，一种常见的异常处理设计是使用<code>if</code>语句进行判断，然后对错误信息进行<code>return error code</code>。比如，一种<code>return error code</code>是这么设计的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">f1</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> resultCode = f2();  <span class="comment">//执行并返回结果代码</span></span><br><span class="line">    <span class="keyword">if</span>(resultCode == <span class="number">0</span>) &#123;&#125;  <span class="comment">//success</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(resulutCode == <span class="number">1</span>) &#123;...&#125; <span class="comment">//一种错误</span></span><br><span class="line">    <span class="keyword">else</span> &#123;...&#125;              <span class="comment">//其他错误</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这会导致至少以下问题：</p>
+<ol type="1">
+<li><p>如果<code>f1</code>不能够处理错误（即错误不能够在f1的<code>if</code>语句中进行解决），那么它必须在他的返回值中继续返向传播错误，这意味着如果函数调用非常深时，<code>if</code>和<code>return error code</code>将弄的代码非常难看</p></li>
+<li><p><code>return error code</code>的做法占用了返回值，使得想要返回修改值只能通过指针或引用传递，返回值只能作为异常处理使用。当然，可以在意义明确的情况下指明特殊的取值范围为异常，比如我们把返回值封装成一个对象，使其能够包含更多信息。但这明显增加了复杂度。</p></li>
+</ol>
+<p>还有一些情况压根无法使用<code>return error code</code>，比如在构造函数中出现了异常，由于构造函数没有返回值，使用异常处理是唯一安全的方法，比如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">VectorInSpecialMemory</span> &#123;</span></span><br><span class="line">     <span class="keyword">int</span> sz;</span><br><span class="line">     <span class="keyword">int</span>* elem;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">     VectorInSpecialMemory(<span class="keyword">int</span> s) </span><br><span class="line">         : sz(s) </span><br><span class="line">         , elem(AllocateInSpecialMemory(s))</span><br><span class="line">     &#123; </span><br><span class="line">         <span class="keyword">if</span> (elem == <span class="literal">nullptr</span>)</span><br><span class="line">             <span class="keyword">throw</span> <span class="built_in">std</span>::bad_alloc();     <span class="comment">//不抛出异常，那怎么处理这个分配失败呢？</span></span><br><span class="line">     &#125;</span><br><span class="line">     ...</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+<p>这种返回值很特殊的情况还出现在<code>operator</code>操作符重载函数上，假如我们创建了一个<code>Number</code>类，显然它需要实现符号运算：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Number</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">friend</span> Number <span class="keyword">operator</span>+ (<span class="keyword">const</span> Number&amp; x, <span class="keyword">const</span> Number&amp; y);</span><br><span class="line">  <span class="keyword">friend</span> Number <span class="keyword">operator</span>- (<span class="keyword">const</span> Number&amp; x, <span class="keyword">const</span> Number&amp; y);</span><br><span class="line">  <span class="keyword">friend</span> Number <span class="keyword">operator</span>* (<span class="keyword">const</span> Number&amp; x, <span class="keyword">const</span> Number&amp; y);</span><br><span class="line">  <span class="keyword">friend</span> Number <span class="keyword">operator</span>/ (<span class="keyword">const</span> Number&amp; x, <span class="keyword">const</span> Number&amp; y);</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>上述代码需要注意一点：这里的<code>operator</code>运算是声明定义在全局的，这是因为想要<code>Number</code>支持混合运算，参见<em>Effective C++ 条款24</em>.</p>
+<p>问题来了，我们知道<code>operator</code>返回了<code>Number</code>但我们想要控制异常，因为这些运算操作非常容易发生溢出，怎么办，返回值被占用了？一种办法就是妥协，放弃使用<code>operator</code>重载运算符，转而使用函数<code>Number add(const Number&amp; a,ReturnCode&amp; rc) const</code>，在异常处理中检查<code>rc</code>的值。</p>
+<p>更好地实现是，在<code>Number</code>类中预定义可能异常类型，在<code>operator</code>重载中检查是否<code>throw</code>，并在使用这些运算符的地方<code>catch</code>:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(Number x, Number y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    Number sum  = x + y;</span><br><span class="line">    Number diff = x - y;</span><br><span class="line">    Number prod = x * y;</span><br><span class="line">    Number quot = x / y;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (Number::Overflow&amp; exception) &#123;</span><br><span class="line">    <span class="comment">// ...code that handles overflow...</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (Number::Underflow&amp; exception) &#123;</span><br><span class="line">    <span class="comment">// ...code that handles underflow...</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (Number::DivideByZero&amp; exception) &#123;</span><br><span class="line">    <span class="comment">// ...code that handles divide-by-zero...</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="异常处理的性能损耗">异常处理的性能损耗</h1>
+<p>讨论异常处理的性能损耗，是因为常见的<code>error-return</code>看上去轻量简单。但事实真的如此吗？结论是，对于现代C++来说，异常处理的性能损耗是非常小的。对于完全没有异常的正常执行的代码，几乎无损耗可言，在这一点上就完胜于<code>error-return</code>以及与其匹配的测试代码了。异常处理的损耗出现在引发了异常。因此，合理的使用异常处理并不会引起严重的性能下降，相反避免繁重的<code>error-return</code>和安全测试代码能够提升性能。</p>
+<h1 id="怎么抛throw异常">怎么抛(throw)异常？</h1>
+<p><code>throw</code>可以抛出很多东西，这一点和<code>return</code>类似。因此，更重要的是合理的<code>throw</code>应该抛什么？一般认为，<code>throw</code>抛出的是对象，而且不应该是内建类型。比如下面的代码是成立的，而且确实可以被<code>catch</code>:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Window</span>&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Window() &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span> <span class="keyword">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span>&lt;&lt;<span class="string">"Window display"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">    <span class="keyword">throw</span> Window(); <span class="comment">//throw对象</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        f();</span><br><span class="line">    &#125;<span class="keyword">catch</span> (Window &amp;e)</span><br><span class="line">    &#123;</span><br><span class="line">        e.display();    <span class="comment">//catch到并调用方法</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但这种将抛出当作<code>return</code>的用法其实不好，算是对<code>throw</code>的错误使用。因为一般认为，<code>throw</code>只用作异常处理。因此，在这种情况下<code>throw</code>异常才是正确的编程思路。C++提供<code>std::exception</code>类，内建的C++异常类都继承于它。因此，自然对于自建的异常处理类，最恰当的做法是继承它或者其他它的子类。比如一种实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdexcept&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyException</span>:</span> <span class="keyword">public</span> <span class="built_in">std</span>::runtime_error &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    MyException() : <span class="built_in">std</span>::runtime_error(<span class="string">"MyException"</span>) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//. ...</span></span><br><span class="line">    <span class="keyword">throw</span> MyException();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="怎么捕获catch异常">怎么捕获(catch)异常？</h1>
+<p>有三种方式可以捕获(catch)<code>throw</code>抛出的对象，分别是<strong>传值</strong>、<strong>传引用</strong>和<strong>传指针</strong>来捕获异常对象。但这里有额外的说明。</p>
+<p>首先，通常来说<strong>捕获引用是最适合的</strong>，最不适合的是传指针。而对于传值拷贝而言，应该清楚拷贝可能导致的问题。使用拷贝来传异常就像函数调用时<code>by-value</code>一样，可能会导致切割(slicing)。比如，</p>
+<h2 id="传值catch可能导致错误的初始化">传值catch可能导致错误的初始化</h2>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Window</span>&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Window() &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span> <span class="keyword">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span>&lt;&lt;<span class="string">"Window display"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WindowWithScrollBars</span>:</span> <span class="keyword">public</span> Window&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    WindowWithScrollBars() &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span> <span class="keyword">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span>&lt;&lt;<span class="string">"WindowWithScrollBars display"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这个例子其实是<em>Effective C++</em>中用于解释传值<code>by-value</code>会导致切割时的例子，由于<code>catch</code>的动作非常类似传值过程，因此这个例子在这里同样适用:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">    <span class="keyword">throw</span> WindowWithScrollBars();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        f();</span><br><span class="line">    &#125;<span class="keyword">catch</span> (Window e)</span><br><span class="line">    &#123;</span><br><span class="line">        e.display();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意，此时输出的是<code>Window display</code>。这里发生了对象切割。要解决这个问题，可以修改<code>catch(Window &amp;e)</code>解决。</p>
+<h2 id="throw的对象也可能导致错误的初始化">throw的对象也可能导致错误的初始化</h2>
+<p>除了<code>catch</code>可能会发生对象切割外，其实<code>throw</code>也会。这意味着，就算我们用了引用捕获可能还是无法获得多态性(polymorphism).考虑如下代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyExceptionBase</span> &#123;</span> &#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyExceptionDerived</span> :</span> <span class="keyword">public</span> MyExceptionBase &#123; &#125;;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(MyExceptionBase&amp; e)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">throw</span> e;  <span class="comment">//注意抛出的是类型为MyExceptionBase</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">g</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  MyExceptionDerived e;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    f(e);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (MyExceptionDerived&amp; e) &#123;</span><br><span class="line">    <span class="comment">// ...code to handle MyExceptionDerived...</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (...) &#123;</span><br><span class="line">    <span class="comment">// ...code to handle other exceptions...</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用<code>g()</code>不会进入第一个<code>catch(MyExceptionDerived&amp; e)</code>，会反直觉的进入第二个<code>catch(...)</code>。这是因为<code>throw e</code>这个方式不具备多态性,相反它更像是<strong>对象的拷贝</strong>。C++中为实现多态性必须使用指针或引用，因此简单的抛出一个对象的拷贝，显然是无法实现多态性的。一种解决办法如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyExceptionBase</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">raise</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MyExceptionBase::raise</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123; <span class="keyword">throw</span> *<span class="keyword">this</span>; &#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyExceptionDerived</span> :</span> <span class="keyword">public</span> MyExceptionBase &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">raise</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MyExceptionDerived::raise</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123; <span class="keyword">throw</span> *<span class="keyword">this</span>; &#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(MyExceptionBase&amp; e)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  e.raise();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">g</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  MyExceptionDerived e;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    f(e);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (MyExceptionDerived&amp; e) &#123;</span><br><span class="line">    <span class="comment">// ...code to handle MyExceptionDerived...</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (...) &#123;</span><br><span class="line">    <span class="comment">// ...code to handle other exceptions...</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如此一来，<code>throw</code>被封装到了一个虚函数<code>raise()</code>，由于是虚函数且传引用，从而保证了多态性。当然<code>throw &amp;e</code>(抛e的指针)这种用法是可行的，满足了C++多态性指针的要求，但抛指针这个行为带来的问题远比靠它实现多态性带来的价值严重。</p>
+<h2 id="最好不要catch指针">最好不要catch指针</h2>
+<p>最好不要<code>catch</code>指针，因为无法得知是否需要在<code>catch</code>中做其他类似释放或新建这个指针的操作。增加的工作量是无意义的。比如，如果传入的指针是没有实际对象，需要<code>catch</code>自己创建，那么问题更严重了，如果程序异常的原因就是堆空间不足，那么在<code>catch</code>中<code>new</code>无疑是严重的问题。总之，使用<code>catch *e</code>一定要万般小心传入对象的状态、位置。</p>
+<p>另外，<code>catch</code>不接受rvalue-reference，即类似<code>catch(Window &amp;&amp;e)</code>无法通过编译。</p>
+<p>因此，可以总结的是，通常情况<code>catch</code>使用引用捕获异常适用于大部分情况。同时，我们要密切注意<code>throw</code>抛出的对象更像是拷贝从而没有多态性，如果要使用多态性要封装<code>throw</code>到虚函数，而不是使用抛出指针的危险行为。</p>
+<h1 id="其他注意事项">其他注意事项</h1>
+<h2 id="构造函数抛出异常">构造函数抛出异常</h2>
+<h2 id="析构函数抛出异常">析构函数抛出异常</h2>
+<h1 id="参考文献">参考文献</h1>
+<blockquote>
+<p><a href="https://isocpp.org/wiki/faq/exceptions" target="_blank" rel="noopener">这篇文章翔实解释了为什么和怎么使用C++异常处理机制</a></p>
+</blockquote>
+<blockquote>
+<p><a href="https://stackoverflow.com/questions/4403726/learning-c-polymorphism-and-slicing" target="_blank" rel="noopener">这篇问答解释了C++的对象切割的出现和如何实现多态性</a></p>
+</blockquote>
+<blockquote>
+<p><em>Effective C++</em></p>
+</blockquote>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#题外话raii"><span class="toc-number">1.</span> <span class="toc-text">题外话:RAII</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#raii带来的好处"><span class="toc-number">1.1.</span> <span class="toc-text">RAII带来的好处</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#为何使用异常处理"><span class="toc-number">2.</span> <span class="toc-text">为何使用异常处理？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#异常处理的性能损耗"><span class="toc-number">3.</span> <span class="toc-text">异常处理的性能损耗</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#怎么抛throw异常"><span class="toc-number">4.</span> <span class="toc-text">怎么抛(throw)异常？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#怎么捕获catch异常"><span class="toc-number">5.</span> <span class="toc-text">怎么捕获(catch)异常？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传值catch可能导致错误的初始化"><span class="toc-number">5.1.</span> <span class="toc-text">传值catch可能导致错误的初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#throw的对象也可能导致错误的初始化"><span class="toc-number">5.2.</span> <span class="toc-text">throw的对象也可能导致错误的初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最好不要catch指针"><span class="toc-number">5.3.</span> <span class="toc-text">最好不要catch指针</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他注意事项"><span class="toc-number">6.</span> <span class="toc-text">其他注意事项</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#构造函数抛出异常"><span class="toc-number">6.1.</span> <span class="toc-text">构造函数抛出异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#析构函数抛出异常"><span class="toc-number">6.2.</span> <span class="toc-text">析构函数抛出异常</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文献"><span class="toc-number">7.</span> <span class="toc-text">参考文献</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/07/cpp-throw-exceptions/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&text=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&is_video=false&description=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=c++:throw-exceptions&body=Check out this article: http://yoursite.com/2020/08/07/cpp-throw-exceptions/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&title=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&name=c++:throw-exceptions&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/07/cpp-throw-exceptions/&t=c++:throw-exceptions" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>
