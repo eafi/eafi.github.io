@@ -18,8 +18,11 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/localization-examples.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/localization-examples2.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/wavelet.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/DFT-aliasing.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/baseN8.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/baseN16.png">
 <meta property="article:published_time" content="2020-07-30T01:56:15.000Z">
-<meta property="article:modified_time" content="2020-08-06T01:47:52.178Z">
+<meta property="article:modified_time" content="2020-08-08T11:39:06.930Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -432,7 +435,47 @@ s(N-1,0,u,v) &amp; s(N-1,1,u,v) &amp; \cdots &amp; s(N-1,N-1,u,v)
 <p><span class="math display">\[S_{u,v} = s_u s_v^T \tag{30}\]</span></p>
 <p>下面介绍几种基函数的基图像的画法，包括DFT、DHT、DCT、DST。其中DHT、DCT、DST的特点是他们都是类傅立叶的变换，区别在于对于实数信号，FFT的结果是复数的，而这三个类傅立叶实数变换仍然是实数。</p>
 <h2 id="discrete-fourier-transform">discrete Fourier transform</h2>
-<p>:wq</p>
+<p>一维离散傅立叶变换的基函数为：</p>
+<p><span class="math display">\[s(x,u) = \frac{1}{\sqrt{N}} e^{j 2\pi u x /N}\ \mbox{for}\ u=0,1,...,N-1 \tag{31}\]</span></p>
+<p>关于这个基函数表达31有几点需要注意：</p>
+<ol type="1">
+<li><p>DFT的基函数是一个复数函数</p></li>
+<li><p>由于DFT是离散的，因此一定存在有限的采样长度，这会导致问题：</p></li>
+</ol>
+<img src="/2020/07/30/wavelet-and-other-image-transforms/DFT-aliasing.png" class="" title="DFT-aliasing">
+<center>
+图6 离散傅立叶基函数的混叠问题
+</center>
+<p>在这个支撑基函数为<span class="math inline">\(N=8\)</span>的采样序列矩阵中，我们分别计算对应位置(<span class="math inline">\(x=0,1,2,...,7\)</span>)处的<span class="math inline">\(s(x,u)\)</span>并放入表中。对于每一个<span class="math inline">\(u=0,1,...,7\)</span>，都有两个谐波图像，这是因为DFT基函数是一个复数函数。因此，蓝色代表了实数部分谐波，而黑色代表了虚数部分谐波。可以看到随着u的增大，基函数频率逐渐升高。</p>
+<p>问题出现在u=4之后的谐波图形，可以看到u=5,6,7三幅图像有蓝色和黑色的虚线和实线。实线说明的是当公式31的x是连续时，理想当中的基函数图像，而虚线说明的是当公式31的x为离散的时，实际上得到的基函数图像。</p>
+<p>根据上段的描述就已经知道了这出现了采样的问题.用离散点来描述谐波，能够描述的最大的频率出现在<em>u=N/2</em>个点描述一个周期,对应u=4时，可以看到采样点出现在实现的峰值位置。一旦超过这个频率，四个点就不足以描述，因此会出现混叠。这种混叠呈现出一种对称性:<span class="math inline">\(s_5 = s_3^*,s_6=s_2^*,s_7=s_1^*\)</span>.</p>
+<p>我们可以从图1的DFT中同样看出这种混叠现象的发生。混叠使得最终形成的傅立叶基函数呈现出对称性，换句话说有一半的内积变换是不需要计算的。下面拓展到二维的傅立叶变换基图像。回顾<em>digital image processing</em>第四章中2-D离散傅立叶变换的定义：</p>
+<p><span class="math display">\[F(u,v) = \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y) e^{-j 2\pi (ux/M + vy/N)} \tag{32}\]</span></p>
+<p>我们重新审视这个公式不难发现，公式32的变换核为$e^{-j 2(ux/M + vy/N)} $。这个核有以下特点：</p>
+<ol type="1">
+<li><p>它是复数的</p></li>
+<li><p>它是两个方向的一维DFT的乘积，即<span class="math inline">\(...=e^{-j 2\pi ux/M} \times e^{-j 2\pi vy/N)}\)</span></p></li>
+</ol>
+<p>那么我们如何画出二维傅立叶变换核呢？首先，我们要明确，基图像由若干个小的基图像组成。比如一个尺寸为<span class="math inline">\(N\times N\)</span>的原始图像，对应了<span class="math inline">\(N*N\)</span>个尺寸为<span class="math inline">\(N \times N\)</span>的基图像。这一群基图像共同组成了一个大的基图像。</p>
+<p>为画出二维离散傅里叶核对应的基图像，确定一个<span class="math inline">\(u,v\)</span>，即确定了一个<span class="math inline">\(S_{u,v}\)</span>矩阵.这两个参数对应了不同程度的基图像频率，越大对应的频率也就越大，但根据上文的叙述可以明白当达到<span class="math inline">\(u=M/2,v=N/2\)</span>时频率出现了混叠,再往后的图像将和前面的图像镜像。然后，<span class="math inline">\(x,y\)</span>分别从0到M和从0到N递增，填写这个矩阵内部的数值。最后依次改变<span class="math inline">\(u,v\)</span>进行下一个<span class="math inline">\(S_{u,v}\)</span>的绘制。</p>
+<p>下面的代码为指定原始图像的尺寸<span class="math inline">\(N\)</span>，假设这个图像是方形的时的基图像：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[]</span> = <span class="title">pltDFT</span><span class="params">(N)</span></span></span><br><span class="line">x = <span class="built_in">linspace</span>(<span class="number">0</span>,N<span class="number">-1</span>,N);</span><br><span class="line">y = x;</span><br><span class="line">base = <span class="built_in">ones</span>(N*N+<span class="number">5</span>*(N));</span><br><span class="line"><span class="keyword">for</span> u=<span class="number">0</span>:N<span class="number">-1</span></span><br><span class="line">    <span class="keyword">for</span> v=<span class="number">0</span>:N<span class="number">-1</span></span><br><span class="line">        s_x = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*<span class="built_in">exp</span>(<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*u*x/N);</span><br><span class="line">        s_y = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*<span class="built_in">exp</span>(<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*v*y/N);</span><br><span class="line">        s = transpose(s_x) * s_y;</span><br><span class="line">        s_real = <span class="built_in">real</span>(s);   <span class="comment">%实属部分，叙述部分可以imag(s)</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">max</span>(<span class="built_in">max</span>(s_real))) == <span class="built_in">min</span>(<span class="built_in">min</span>(s_real)) <span class="comment">%避免分母为零</span></span><br><span class="line">            s_real = <span class="built_in">ones</span>(N);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            s_real = (s_real - <span class="built_in">min</span>(<span class="built_in">min</span>(s_real)) ./ (<span class="built_in">max</span>(<span class="built_in">max</span>(s_real))-<span class="built_in">min</span>(<span class="built_in">min</span>(s_real)))); <span class="comment">%归一化</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        s_bordered = <span class="built_in">ones</span>(N+<span class="number">5</span>);</span><br><span class="line">        s_bordered(<span class="number">1</span>:N,<span class="number">1</span>:N)=s_real; <span class="comment">%添加5像素边界</span></span><br><span class="line">        base(u*(N+<span class="number">5</span>)+<span class="number">1</span>:u*(N+<span class="number">5</span>)+N+<span class="number">5</span>,v*(N+<span class="number">5</span>)+<span class="number">1</span>:v*(N+<span class="number">5</span>)+N+<span class="number">5</span>) = s_bordered;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">imshow(base);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>下图为执行<code>pltDFT(8)</code>时的输出图像:</p>
+<p><img src="baseN8.png" width=500 title="base N=8"></p>
+<center>
+图7 N=8,DFT基图像
+</center>
+<p>从图中可以得到以下结论：</p>
+<ol type="1">
+<li><p>可以看到图7相对u=4，v=4中心对称，这是因为DFT只能在一半位置处达到最高频率，其他更高的频率受限于采样点不足的原因而产生混叠</p></li>
+<li><p>我们在使用公式32进行二维图像傅立叶变换时，相当于是在对这个基图像中每一个图像发生相关性操作（内积）</p></li>
+<li><p>对于不同的原始图像尺寸，对应的基图像其实是有所不同的:</p></li>
+</ol>
+<p><img src="baseN16.png" width=600 title="base N=16"></p>
+<center>
+图7 N=16,DFT基图像
+</center>
+<p>另外，可以从图7看出，四角的基图像频率低，向着中心频率逐渐升高到中间位置达到最高。这一点的和傅立叶变换输出的结果，结合<em><a href="/2020/06/30/some-properties-of-the-2d-dft/" title="二维离散傅立叶变换的一些性质讨论">二维离散傅立叶变换的一些性质讨论</a></em>可以得到一样结论.</p>
 <h2 id="discrete-hartley-transform">discrete Hartley transform</h2>
 
   </div>
