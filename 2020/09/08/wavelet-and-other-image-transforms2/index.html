@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Wavelet Transforms 小波变换的核心是对信号进行多分辨率分析。回到过去的分析方法，只在时间域上分析，能够精确获得每一个采样点对应的信号，但多个频率的信号重合后信息很难被使用；只在频率上分析（通过傅立叶变换），能够精确获得每一个频率上的信号，但却完全丢失了时间信息，这导致傅立叶变换无法区分不同时间内的相同谱图。小波变换既能够在时间上有很好的分辨率，又能够在频率上有很好的定位效果。这种">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wavelet-and-other-image-transforms2">
+<meta property="og:url" content="http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="Wavelet Transforms 小波变换的核心是对信号进行多分辨率分析。回到过去的分析方法，只在时间域上分析，能够精确获得每一个采样点对应的信号，但多个频率的信号重合后信息很难被使用；只在频率上分析（通过傅立叶变换），能够精确获得每一个频率上的信号，但却完全丢失了时间信息，这导致傅立叶变换无法区分不同时间内的相同谱图。小波变换既能够在时间上有很好的分辨率，又能够在频率上有很好的定位效果。这种">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-09-08T08:27:01.000Z">
+<meta property="article:modified_time" content="2020-09-08T10:00:46.599Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="ImageProcessing">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>wavelet-and-other-image-transforms2</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/08/25/literature-Gradient-Response-Maps-for-Real-Time-Detection-of-Textureless-Objects/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&text=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&is_video=false&description=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=wavelet-and-other-image-transforms2&body=Check out this article: http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&name=wavelet-and-other-image-transforms2&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&t=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#wavelet-transforms"><span class="toc-number">1.</span> <span class="toc-text">Wavelet Transforms</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#尺度函数"><span class="toc-number">1.1.</span> <span class="toc-text">尺度函数</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        wavelet-and-other-image-transforms2
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-08T08:27:01.000Z" itemprop="datePublished">2020-09-08</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/ImageProcessing/" rel="tag">ImageProcessing</a>
+    </div>
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="wavelet-transforms">Wavelet Transforms</h1>
+<p>小波变换的核心是对信号进行多分辨率分析。回到过去的分析方法，只在时间域上分析，能够精确获得每一个采样点对应的信号，但多个频率的信号重合后信息很难被使用；只在频率上分析（通过傅立叶变换），能够精确获得每一个频率上的信号，但却完全丢失了时间信息，这导致傅立叶变换无法区分不同时间内的相同谱图。小波变换既能够在时间上有很好的分辨率，又能够在频率上有很好的定位效果。这种变尺度的分析能力使得小波变换能够对信号进行多分辨率分析。比如对于信号的高频部分而言，由于这部分信息变化剧烈，我们通常希望在时间上具备精准定位的能力，而在频率上由于波动幅度很大，可以降低频率分辨率；同样类似的，对于信号的低频部分，这部分信息变化是缓慢的，我们希望在频率上对这种低频部分进行精确的区分，但在时间上可以降低分辨率。这里时间与频率是相互制约的，不存在同时具备精确定位时间和频率的分析方法。</p>
+<p>小波变换中有两个函数，一个是尺度函数，用来近似(approximate)目标函数或图像；另一个是小波函数，用来描述近似与原函数的不同(differences)。下面分别讨论这两个函数。</p>
+<h2 id="尺度函数">尺度函数</h2>
+<p>考虑一个能够涵盖所有整数平移和二值缩放的实数，平方可积的父尺度函数(father scaling function)<span class="math inline">\(\phi(x)\)</span>.由此可以产生一系列的变尺度、平移的尺度函数<span class="math inline">\(\left{ \phi_{j,k} (x) | j,k \in Z \right}\)</span>:</p>
+<p><span class="math display">\[\phi_{j,k}(x) = 2^{j/2} \phi(2^j x - k) \tag{1}\]</span></p>
+<p>公式1中k决定了<span class="math inline">\(\phi_{j,k}\)</span>在x轴上的位置；j决定了这个尺度函数的形状，包括宽度和幅值两项。</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#wavelet-transforms"><span class="toc-number">1.</span> <span class="toc-text">Wavelet Transforms</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#尺度函数"><span class="toc-number">1.1.</span> <span class="toc-text">尺度函数</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&text=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&is_video=false&description=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=wavelet-and-other-image-transforms2&body=Check out this article: http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&title=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&name=wavelet-and-other-image-transforms2&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/&t=wavelet-and-other-image-transforms2" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>

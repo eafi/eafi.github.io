@@ -16,7 +16,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/11/Network-Transport-Layer/source-and-destination-port-number.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/11/Network-Transport-Layer/TCP-multiplexing.png">
 <meta property="article:published_time" content="2020-07-11T07:16:34.000Z">
-<meta property="article:modified_time" content="2020-07-31T13:12:48.054Z">
+<meta property="article:modified_time" content="2020-08-10T13:14:16.568Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="Network">
 <meta name="twitter:card" content="summary">
@@ -115,7 +115,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用multiplexing-and-demultiplexing"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用(Multiplexing and Demultiplexing)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#无连接协议实现复用与解复用"><span class="toc-number">2.1.</span> <span class="toc-text">无连接协议实现复用与解复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#面向连接协议实现复用与解复用"><span class="toc-number">2.2.</span> <span class="toc-text">面向连接协议实现复用与解复用</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用multiplexing-and-demultiplexing"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用(Multiplexing and Demultiplexing)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#无连接协议实现复用与解复用"><span class="toc-number">2.1.</span> <span class="toc-text">无连接协议实现复用与解复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#面向连接协议实现复用与解复用"><span class="toc-number">2.2.</span> <span class="toc-text">面向连接协议实现复用与解复用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#无连接传输协议udp"><span class="toc-number">3.</span> <span class="toc-text">无连接传输协议：UDP</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -171,7 +171,7 @@
 <p><em>传输层中的数据包被称为segment,网络层中的数据包被称为datagram.</em></p>
 <h1 id="导引传输层服务">导引：传输层服务</h1>
 <p>传输层是在应用层(application layer)之下，网络层(network layer)之上的网络协议。这个位置决定了传输层协议使用了网络层所提供的服务，并向应用层提供服务。简单来说，传输层提供了一种逻辑通讯服务，主机两端在应用层面上来看是逻辑互联的，底层复杂的物理链路对应用层来说不可见了。</p>
-<p>Internet有两个传输层协议，一个是TCP，提供了可靠的数据传输协议；另一个是UDP，提供了不可靠的数据传输协议。这两个协议由于设计的不同，为应用层提供了完全不同的服务。本文的主要内容是分别介绍这两种协议的内在细节。</p>
+<p>Internet有两个传输层协议，一个是TCP，提供了可靠的数据传输协议；另一个是UDP，提供了不可靠的数据传输协议。这两个协议由于设计的不同，为应用层提供了不完全相似的服务。本文的主要内容是分别介绍这两种协议的内在细节。</p>
 <p>本节只做传输层服务的导引，就两个内容:</p>
 <ol type="1">
 <li><p>由于传输层和网络层彼此紧邻，因此先简单讨论传输层与网络层的关系</p></li>
@@ -181,7 +181,7 @@
 <ol type="1">
 <li><p>网络层提供的是一种不同主机(hosts)间的逻辑互联（一般用IP来标示不同的主机地址）；而传输层提供的是一种不同主机间进程(processes)的逻辑互联</p></li>
 <li><p>传输层由于使用了网络层的服务，所以传输层的设计很大程度上受限于网络层的限制。比如网络层不保证延时和带宽，这导致了使用了该服务的传输层同样无法保证。</p></li>
-<li><p>而且网络层传输数据可能会丢包、篡改和重复发包，这种不可靠的服务似乎也会影响传输层。但答案是否定的，对于这类不可靠是可以通过传输层良好的设计弥补的。</p></li>
+<li><p>而且网络层传输数据可能会丢包、篡改和重复发包，这种不可靠的服务似乎也会影响传输层。但通过后面的学习会发现并不是这样的:对于这类网络层的不可靠是可以通过传输层良好的设计弥补的。</p></li>
 </ol>
 <h2 id="概括性的了解网路层和传输层">概括性的了解网路层和传输层</h2>
 <p>为了理解传输层的设计思路，有必要先简单了解传输层的下一层网络层。网络层协议，也叫IP，如前面所说的那样，提供了主机间的逻辑互联。我们非常关注网络层协议所提供服务的特点，因为其所提供的服务直接为传输层协议所用。</p>
@@ -203,20 +203,20 @@
 <ol start="2" type="1">
 <li>数据包的完整性检查。UDP和TCP都在自己的segment头中有相应的错误检查字段</li>
 </ol>
-<p>需要明确指出的是，UDP只有上述两个共性服务，不再提供任何其他服务。TCP除了上述两个服务外，还具备：</p>
+<p>需要明确指出的是，<strong>UDP只有上述两个共性服务，不再提供任何其他服务</strong>。TCP除了上述两个服务外，还具备：</p>
 <ol type="1">
-<li><p>保证可靠的传输</p></li>
-<li><p>保证数据按顺序传输</p></li>
-<li><p>阻塞控制</p></li>
+<li><p><strong>保证可靠的传输</strong></p></li>
+<li><p><strong>保证数据按顺序传输</strong></p></li>
+<li><p><strong>阻塞控制</strong></p></li>
 </ol>
-<p>以上小节概述了网络层的特点和传输层的特点，并且概括性的比较了UDP和TCP两种传输层协议的异同。在相同的服务中，一个非常重要且基础的服务就是复用，下面将继续讨论这种复用服务。</p>
+<p>以上小节概述了网络层的特点和传输层的特点，并且概括性的比较了UDP和TCP两种传输层协议的异同。在相同的服务中，一个非常重要且基础的服务就是复用，下面将继续讨论这种复用服务和解复用服务。</p>
 <h1 id="复用与解复用multiplexing-and-demultiplexing">复用与解复用(Multiplexing and Demultiplexing)</h1>
 <p>复用的主要目的是<strong>将网络层的host-to-host连接服务扩展为应用程序的process-to-process连接服务</strong>。传输层提供的复用服务并不是直接连接在进程上的，而是进程的网络连接通过暴露出套接字(socket)实现。一个进程可以拥有若干个套接字，套接字具有唯一的标识符(identifier)，不同的传输层协议（TCP或UDP)的标识符格式是不同的.可以认为，进程的套接字是一道门，既是程序向网络发送数据的门，又是网络传输回进程的门。</p>
 <p>假设传输层有segment要发送给进程，那么传输层负责检查segment中的一段信息以确定是哪一个套接字的数据，然后传输层将数据发送给指定套接字，这个过程就完成了解复用(demultiplexing)；假设现在有多个不同的套接字，传输层负责把这些数据封装起来并添加传输层特有的信息头（显然，传输层的信息头是用来解复用的），然后将信息打包成segment传向网络层，这个过程完成了复用(multiplexing).</p>
 <p>复用和解复用的实现结合上文需要至少两个信息：</p>
 <ol type="1">
 <li><p>套接字需要唯一的标识符(identifier)，不同传输协议的标识符格式是不相同的；</p></li>
-<li><p>segment需要提供一段信息用以指明目标套接字</p></li>
+<li><p>segment需要提供一段信息用以指明目标套接字(目标套接字地址)</p></li>
 </ol>
 <p>关于标识符的格式，由于它是根据不同的传输层协议而发生一些变化，这里先不讨论。先看第二个条件，即segment需要提供目标套接字地址。在传输层的segment中用了端口号(port-number)来指明套接字地址，segment中提供了两个端口号，一个是源地址端口号(source port number field)，另一个是目标地址端口号(destination port number field)。这些端口都是16位的正整型。0~1023的端口号被保留，在设计进程端口号时应该避免与保留端口号冲突。</p>
 <p>源地址和目标地址端口号段在传输层segment中的位置如图所示：</p>
@@ -225,20 +225,31 @@
 <p>无连接(connectionless)，指的就是UDP。UDP要实现复用与解复用同样需要满足上文中的两点。</p>
 <p>第一，UDP类型的套接字的标识符，是通过一个<strong>二元常量</strong>唯一指定的。这个二元常量指的是<strong>目标的IP地址</strong>和<strong>目标的端口号</strong>。UDP仅通过二元常量作为唯一的标识符所带来的影响是什么呢？假设现在有两个UDPsegments，它们具有不同的源IP地址和源地址端口号，但却拥有相同的目标IP地址和目标端口号。那么这两个segments会被传向<strong>同一个进程的同一个套接字</strong>。（与后面的TCP形成比较）</p>
 <p>第二，显然UDP也使用端口号作为指明目标套接字的方法。</p>
-<p>一个使用UDP传输协议的例子，假设A主机开启端口号为19157的UDP套接字，B主机开启端口号为46428的UDP套接字。A主机传输层获得应用层的数据，创建传输层segment，这个信息段中包含了数据、源端口号、目标端口号，A主机IP地址和B主机IP地址，然后将segment发送给网络层。B主机的传输层从网络层获得segment然后读取到这个segment的目标端口号，将里面的数据发送到目标端口号套接字。</p>
+<p>一个使用UDP传输协议的例子:假设A主机开启端口号为19157的UDP套接字，B主机开启端口号为46428的UDP套接字。A主机传输层获得应用层的数据，创建传输层segment，这个信息段中包含了数据、源端口号、目标端口号，A主机IP地址和B主机IP地址，然后将segment发送给网络层。B主机的传输层从网络层获得segment然后读取到这个segment的目标端口号，将里面的数据发送到目标端口号套接字。</p>
 <h2 id="面向连接协议实现复用与解复用">面向连接协议实现复用与解复用</h2>
 <p>面向连接(connection-oriented)，指的就是TCP。TCP与UDP在复用实现上有很大的不同。</p>
 <p>不同于UDP使用<strong>二元常量</strong>作为唯一标识符，TCP使用了<strong>四元</strong>，包括：<strong>源IP地址、源端口号、目标IP地址、目标端口号</strong>.带来什么影响呢？与在无连接协议实现复用与解复用相比较，如果有两个TCPsegments就算目标IP地址和目标端口号一样，一旦源IP地址<strong>或</strong>源端口号有所不同，segments也会被送到不同的TCP套接字中去。（与UDP相比较，UDP不会理会源IP和源端口，从而发送到同一个UDP套接字）</p>
 <p>要实现<strong>四元</strong>标识，这就说明TCP套接字的数量是变化的（对比UDP套接字是唯一的），这种数量变化的套接字是如何实现的？</p>
 <p>首先TCP服务器需要暴露一个欢迎套接字，这个套接字的目的不是为了通讯。比如一个TCP服务器的欢迎套接字绑定在了端口号为12000处。此时一个TCP客户请求连接TCP服务器：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">clientSocket = socket(AF_INET,SOCK_STREAM)</span><br><span class="line">clientSocket.connet((ServerName,<span class="number">12000</span>))</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">clientSocket = socket(AF_INET,SOCK_STREAM) <span class="comment">#客户端创建TCP类型的套接字</span></span><br><span class="line">clientSocket.connet((ServerName,<span class="number">12000</span>)) <span class="comment">#客户端连接请求地址为ServerName,暴露的TCP服务器端口号为12000</span></span><br></pre></td></tr></table></figure>
 <p>上述代码实现了一个TCP建立连接请求，建立连接请求也是一个TCPsegment。已经知道TCP需要四元标示，显然这个segment至少包含了四元信息。另外，需要特别指出的是，TCP客户端在建立连接请求时会选择一个合适的、未被占用的端口号作为源端口号。在TCP服务器一方，一旦检测到了建立连接请求，那么服务器端会<strong>根据四元标识符创建一个新的TCP套接字用以传输数据</strong>：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">connectionSocket,addr = serverSocket.accept()</span><br></pre></td></tr></table></figure>
 <p>一旦建立了一个基于四元标识符的TCP套接字，那么对于传入来的segment便可以按照其中的四元标识符进行推送到唯一指定的TCP套接字。</p>
 <p>如何理解UDP和TCP在标识符上的不同所带来的影响呢？见下图：</p>
 <img src="/2020/07/11/Network-Transport-Layer/TCP-multiplexing.png" class="" title="TCP-multiplexing">
 <p>ABC分别拥有不同的IP地址，并且C同时开启两个HTTP访问B，这两个HTTP访问的特点是IP地址相同，但端口号不同。A开启一个HTTP访问，其特点是A的IP地址与C不同，但端口号分配成了一样的。假如服务器B使用了TCP协议，那么在处理这三个连接请求时会分配不同的TCP套接字给每一个TCP连接。这是因为它们的四元标识符都不一样。而在之后的通讯过程也将流向不同的TCP套接字。</p>
-<p>作为对比，假如服务器B使用了UDP协议，那么这三个主机的segment都将传送到B中同一个UDP套接字当中，这是因为UDP协议采用二元标识符，而这三个请求的目标IP地址和目标端口号是相通的，即指向相同的UDP套接字。(注意，UDP没有创建连接的说法)</p>
+<p>作为对比，假如服务器B使用了UDP协议，那么这三个主机的segment都将传送到B中同一个UDP套接字当中，这是因为UDP协议采用二元标识符，而这三个请求的目标IP地址和目标端口号是相通的，即指向相同的UDP套接字。(注意，UDP没有创建连接的说法,因为它是一种无连接协议)</p>
+<p>关于图中的Web Server B有更多的细节，首先我们知道了TCP根据四元常量来分辨不同的套接字进而进行TCP通讯。传统意义上，TCP每一次建立的连接都应该是新的进程实现，但高性能和现代的做法肯定不是如此，取而代之的是<strong>在同一个服务器进程上开若干个线程</strong>来完成连接的建立和通讯。这将大大改善服务器性能。除此之外，HTTP信息分成了连接保持(persistent HTTP)和连接不保持(non-persistent HTTP)，这两种的最主要区别是：连接保持自从建立连接开始就一直保持TCP通讯，知道HTTP结束；连接不保持是每一次的HTTP请求和反馈都需要建立和关闭TCP连接。因此显而易见的，每一次请求和反馈都要重新建立TCP连接肯定是比较耗费资源的。</p>
+<p>复用和解复用是传输层所提供的一个共性服务，因此可以说非常重要和基础。复用和解复用将网络层的host-to-host服务延展成为可以process-to-process的服务，使得多个网络应用程序可以同时使用传输层所提供的服务。但由于传输层自身设计初衷的不同，复用和解复用的具体实现方式是有巨大差别的，这些差别也决定了应用层在使用这些传输层协议时能够获得的能力有所不同。</p>
+<h1 id="无连接传输协议udp">无连接传输协议：UDP</h1>
+<p>UDP是一个仅仅提供了复用/解复用服务和一些轻量化错误校验服务的传输层协议。使用UDP传输协议，很大程度上其实就有点类似直接使用IP进行通讯（相同点在于前面关于IP不可靠的特性UDP都有，不同又在UDP毕竟还是提供了两种特有的额外服务）。</p>
+<p>UDP为什么叫无连接传输协议？因为UDP发送数据segment根本不需要理会接收方会不会/能不能接收就发送，越就是说在发送方和接收方之间发送segment之前不会有一个握手程序以确认连接关系。因此，UDP被称为无连接传输。UDP的典型应用就是DNS服务。尽管UDP看上去如此不堪，但其应用确实非常广泛的，这包括一下原因：</p>
+<ol type="1">
+<li><p><strong>应用程序可以知道什么数据被发送了，什么时候发送的</strong>。这一点TCP就不好实现，原因很简单：TCP留给应用层可定制的空间已经不多了。TCP有阻塞控制机制，当发送端和目标段存在过多的数据流就会发生阻塞；再比如TCP会反复发送信息直到发送方回馈一个信息为止。网络应用程序，特别是当下的实时应用程序并不在乎一定程度的数据丢失，更在乎的是数据不阻塞尽量全速发送.因此，TCP在这点上就不如UDP来的自由、轻盈化。另外，UDP不提供很多功能，其实留给应用程序客制化功能的余地，不同应用程序针对各自的特点可以改进UDP，最大化适应自身的需求。反观，TCP能够客制化的地方已经不多。</p></li>
+<li><p><strong>无连接传输</strong>，TCP使用三次握手进行连接建立，在完成建立之后才能开始数据通讯。UDP则完全不需要建立连接这个步骤，一旦有数据直接发送即可。DNS这种服务为了保证相应的快速所以使用了UDP协议;但反观HTTP使用TCP，因为HTTP传输的是文本文件，需要严格保证数据不丢失，因此就算TCP连接建立延迟也可以。</p></li>
+<li><p><strong>没有连接状态(connection state)</strong>这个说法，因为TCP有连接状态，包括传输、接受缓冲、阻塞控制参数、队列、接收号。这些状态是TCP能够实现可靠的数据传输并提供阻塞控制的基础，反观UDP完全没有这些说法。换句话说，UDP所占用的资源也更少，同一个服务器开启UDP服务比TCP服务所能够接受的客户数量要多得多。</p></li>
+<li><p><strong>segment中信息头更小</strong>，作为对比，TCP的每一个segment头占20字节，而UDP只占8字节。</p></li>
+</ol>
 
   </div>
 </article>
@@ -274,7 +285,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用multiplexing-and-demultiplexing"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用(Multiplexing and Demultiplexing)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#无连接协议实现复用与解复用"><span class="toc-number">2.1.</span> <span class="toc-text">无连接协议实现复用与解复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#面向连接协议实现复用与解复用"><span class="toc-number">2.2.</span> <span class="toc-text">面向连接协议实现复用与解复用</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#导引传输层服务"><span class="toc-number">1.</span> <span class="toc-text">导引：传输层服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传输层与网络层的关系"><span class="toc-number">1.1.</span> <span class="toc-text">传输层与网络层的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#概括性的了解网路层和传输层"><span class="toc-number">1.2.</span> <span class="toc-text">概括性的了解网路层和传输层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复用与解复用multiplexing-and-demultiplexing"><span class="toc-number">2.</span> <span class="toc-text">复用与解复用(Multiplexing and Demultiplexing)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#无连接协议实现复用与解复用"><span class="toc-number">2.1.</span> <span class="toc-text">无连接协议实现复用与解复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#面向连接协议实现复用与解复用"><span class="toc-number">2.2.</span> <span class="toc-text">面向连接协议实现复用与解复用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#无连接传输协议udp"><span class="toc-number">3.</span> <span class="toc-text">无连接传输协议：UDP</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">

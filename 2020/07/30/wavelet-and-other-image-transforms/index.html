@@ -21,8 +21,11 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/DFT-aliasing.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/baseN8.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/baseN16.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/DHTvsDFT.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/DFT.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/30/wavelet-and-other-image-transforms/DCT.png">
 <meta property="article:published_time" content="2020-07-30T01:56:15.000Z">
-<meta property="article:modified_time" content="2020-08-08T11:41:10.686Z">
+<meta property="article:modified_time" content="2020-09-08T08:26:33.086Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -121,7 +124,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#时频面中的基函数"><span class="toc-number">5.</span> <span class="toc-text">时频面中的基函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#初识小波"><span class="toc-number">6.</span> <span class="toc-text">初识小波</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基图像"><span class="toc-number">7.</span> <span class="toc-text">基图像</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-fourier-transform"><span class="toc-number">7.1.</span> <span class="toc-text">discrete Fourier transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-hartley-transform"><span class="toc-number">7.2.</span> <span class="toc-text">discrete Hartley transform</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#时频面中的基函数"><span class="toc-number">5.</span> <span class="toc-text">时频面中的基函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#初识小波"><span class="toc-number">6.</span> <span class="toc-text">初识小波</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基图像"><span class="toc-number">7.</span> <span class="toc-text">基图像</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-fourier-transform"><span class="toc-number">7.1.</span> <span class="toc-text">discrete Fourier transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-hartley-transform"><span class="toc-number">7.2.</span> <span class="toc-text">discrete Hartley transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-cosine-transform"><span class="toc-number">7.3.</span> <span class="toc-text">discrete Cosine Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-sine-transform"><span class="toc-number">7.4.</span> <span class="toc-text">discrete Sine Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#walsh-hadamard-transform"><span class="toc-number">7.5.</span> <span class="toc-text">Walsh-Hadamard Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#slant-transform"><span class="toc-number">7.6.</span> <span class="toc-text">Slant Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#haar-transform"><span class="toc-number">7.7.</span> <span class="toc-text">Haar Transform</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -353,10 +356,11 @@
 <p><span class="math display">\[F = A^T FA \tag{26}\]</span></p>
 <p>其中<span class="math inline">\(F\)</span>为<span class="math inline">\(N \times N\)</span>的图像，<span class="math inline">\(T\)</span>为对应尺寸的变换，<span class="math inline">\(A^T\)</span>计算了<span class="math inline">\(F\)</span>的行变换，<span class="math inline">\(A\)</span>计算了<span class="math inline">\(F\)</span>的列变换。</p>
 <h1 id="相关性correlation">相关性(Correlation)</h1>
+<p>内积计算的结果是一个值，这个值表达了什么含义？相关性的概念对这个值有解释。先看相关性的定义：</p>
 <p>相关性的定义为，有两个连续函数<span class="math inline">\(f(x),g(x)\)</span>,它们的相关性为：</p>
 <p><span class="math display">\[\begin{equation}
 \begin{aligned}
-f \bigstar (\Delta x) &amp;= \int_{- \infty}^{\infty}f^*(X)g(x+\Delta x)dx \\
+f \bigstar (\Delta x) &amp;= \int_{- \infty}^{\infty}f^*(x)g(x+\Delta x)dx \\
 &amp;= \left&lt;f(x),g(x+\Delta x) \right&gt;
 \end{aligned}
 \end{equation}
@@ -448,18 +452,18 @@ s(N-1,0,u,v) &amp; s(N-1,1,u,v) &amp; \cdots &amp; s(N-1,N-1,u,v)
 </center>
 <p>在这个支撑基函数为<span class="math inline">\(N=8\)</span>的采样序列矩阵中，我们分别计算对应位置(<span class="math inline">\(x=0,1,2,...,7\)</span>)处的<span class="math inline">\(s(x,u)\)</span>并放入表中。对于每一个<span class="math inline">\(u=0,1,...,7\)</span>，都有两个谐波图像，这是因为DFT基函数是一个复数函数。因此，蓝色代表了实数部分谐波，而黑色代表了虚数部分谐波。可以看到随着u的增大，基函数频率逐渐升高。</p>
 <p>问题出现在u=4之后的谐波图形，可以看到u=5,6,7三幅图像有蓝色和黑色的虚线和实线。实线说明的是当公式31的x是连续时，理想当中的基函数图像，而虚线说明的是当公式31的x为离散的时，实际上得到的基函数图像。</p>
-<p>根据上段的描述就已经知道了这出现了采样的问题.用离散点来描述谐波，能够描述的最大的频率出现在<em>u=N/2</em>个点描述一个周期,对应u=4时，可以看到采样点出现在实现的峰值位置。一旦超过这个频率，四个点就不足以描述，因此会出现混叠。这种混叠呈现出一种对称性:<span class="math inline">\(s_5 = s_3^*,s_6=s_2^*,s_7=s_1^*\)</span>.</p>
+<p>根据上段的描述就已经知道了这出现了采样的问题.用离散点来描述谐波，能够描述的最大的频率出现在<em>u=N/2</em>个点描述一个周期,对应u=4时，可以看到采样点出现在实线的峰值位置。一旦超过这个频率，四个点就不足以描述，因此会出现混叠。这种混叠呈现出一种对称性:<span class="math inline">\(s_5 = s_3^*,s_6=s_2^*,s_7=s_1^*\)</span>.</p>
 <p>我们可以从图1的DFT中同样看出这种混叠现象的发生。混叠使得最终形成的傅立叶基函数呈现出对称性，换句话说有一半的内积变换是不需要计算的。下面拓展到二维的傅立叶变换基图像。回顾<em>digital image processing</em>第四章中2-D离散傅立叶变换的定义：</p>
 <p><span class="math display">\[F(u,v) = \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x,y) e^{-j 2\pi (ux/M + vy/N)} \tag{32}\]</span></p>
 <p>我们重新审视这个公式不难发现，公式32的变换核为$e^{-j 2(ux/M + vy/N)} $。这个核有以下特点：</p>
 <ol type="1">
 <li><p>它是复数的</p></li>
-<li><p>它是两个方向的一维DFT的乘积，即<span class="math inline">\(...=e^{-j 2\pi ux/M} \times e^{-j 2\pi vy/N)}\)</span></p></li>
+<li><p>它是两个方向的一维DFT的乘积，即<span class="math inline">\(...=e^{-j 2\pi ux/M} \times e^{-j 2\pi vy/N}\)</span></p></li>
 </ol>
 <p>那么我们如何画出二维傅立叶变换核呢？首先，我们要明确，基图像由若干个小的基图像组成。比如一个尺寸为<span class="math inline">\(N\times N\)</span>的原始图像，对应了<span class="math inline">\(N*N\)</span>个尺寸为<span class="math inline">\(N \times N\)</span>的基图像。这一群基图像共同组成了一个大的基图像。</p>
 <p>为画出二维离散傅里叶核对应的基图像，确定一个<span class="math inline">\(u,v\)</span>，即确定了一个<span class="math inline">\(S_{u,v}\)</span>矩阵.这两个参数对应了不同程度的基图像频率，越大对应的频率也就越大，但根据上文的叙述可以明白当达到<span class="math inline">\(u=M/2,v=N/2\)</span>时频率出现了混叠,再往后的图像将和前面的图像镜像。然后，<span class="math inline">\(x,y\)</span>分别从0到M和从0到N递增，填写这个矩阵内部的数值。最后依次改变<span class="math inline">\(u,v\)</span>进行下一个<span class="math inline">\(S_{u,v}\)</span>的绘制。</p>
-<p>下面的代码为指定原始图像的尺寸<span class="math inline">\(N\)</span>，假设这个图像是方形的时的基图像：</p>
-<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[]</span> = <span class="title">pltDFT</span><span class="params">(N)</span></span></span><br><span class="line">x = <span class="built_in">linspace</span>(<span class="number">0</span>,N<span class="number">-1</span>,N);</span><br><span class="line">y = x;</span><br><span class="line">base = <span class="built_in">ones</span>(N*N+<span class="number">5</span>*(N));</span><br><span class="line"><span class="keyword">for</span> u=<span class="number">0</span>:N<span class="number">-1</span></span><br><span class="line">    <span class="keyword">for</span> v=<span class="number">0</span>:N<span class="number">-1</span></span><br><span class="line">        s_x = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*<span class="built_in">exp</span>(<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*u*x/N);</span><br><span class="line">        s_y = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*<span class="built_in">exp</span>(<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*v*y/N);</span><br><span class="line">        s = transpose(s_x) * s_y;</span><br><span class="line">        s_real = <span class="built_in">real</span>(s);   <span class="comment">%实属部分，叙述部分可以imag(s)</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">max</span>(<span class="built_in">max</span>(s_real))) == <span class="built_in">min</span>(<span class="built_in">min</span>(s_real)) <span class="comment">%避免分母为零</span></span><br><span class="line">            s_real = <span class="built_in">ones</span>(N);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            s_real = (s_real - <span class="built_in">min</span>(<span class="built_in">min</span>(s_real)) ./ (<span class="built_in">max</span>(<span class="built_in">max</span>(s_real))-<span class="built_in">min</span>(<span class="built_in">min</span>(s_real)))); <span class="comment">%归一化</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        s_bordered = <span class="built_in">ones</span>(N+<span class="number">5</span>);</span><br><span class="line">        s_bordered(<span class="number">1</span>:N,<span class="number">1</span>:N)=s_real; <span class="comment">%添加5像素边界</span></span><br><span class="line">        base(u*(N+<span class="number">5</span>)+<span class="number">1</span>:u*(N+<span class="number">5</span>)+N+<span class="number">5</span>,v*(N+<span class="number">5</span>)+<span class="number">1</span>:v*(N+<span class="number">5</span>)+N+<span class="number">5</span>) = s_bordered;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">imshow(base);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>下面的代码为指定原始图像的尺寸<span class="math inline">\(N\)</span>，假设这个图像是方形时的基图像：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[]</span> = <span class="title">pltDFT</span><span class="params">(N)</span></span></span><br><span class="line">x = <span class="built_in">linspace</span>(<span class="number">0</span>,N<span class="number">-1</span>,N);</span><br><span class="line">y = x;</span><br><span class="line">base = <span class="built_in">ones</span>(N*N+<span class="number">5</span>*(N));</span><br><span class="line"><span class="keyword">for</span> u=<span class="number">0</span>:N<span class="number">-1</span></span><br><span class="line">    <span class="keyword">for</span> v=<span class="number">0</span>:N<span class="number">-1</span></span><br><span class="line">        s_x = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*<span class="built_in">exp</span>(<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*u*x/N);</span><br><span class="line">        s_y = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*<span class="built_in">exp</span>(<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*v*y/N);</span><br><span class="line">        s = transpose(s_x) * s_y;</span><br><span class="line">        s_real = <span class="built_in">real</span>(s);   <span class="comment">%实属部分，虚数部分可以imag(s)</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">max</span>(<span class="built_in">max</span>(s_real))) == <span class="built_in">min</span>(<span class="built_in">min</span>(s_real)) <span class="comment">%避免分母为零</span></span><br><span class="line">            s_real = <span class="built_in">ones</span>(N);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            s_real = (s_real - <span class="built_in">min</span>(<span class="built_in">min</span>(s_real)) ./ (<span class="built_in">max</span>(<span class="built_in">max</span>(s_real))-<span class="built_in">min</span>(<span class="built_in">min</span>(s_real)))); <span class="comment">%归一化</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        s_bordered = <span class="built_in">ones</span>(N+<span class="number">5</span>);</span><br><span class="line">        s_bordered(<span class="number">1</span>:N,<span class="number">1</span>:N)=s_real; <span class="comment">%添加5像素边界</span></span><br><span class="line">        base(u*(N+<span class="number">5</span>)+<span class="number">1</span>:u*(N+<span class="number">5</span>)+N+<span class="number">5</span>,v*(N+<span class="number">5</span>)+<span class="number">1</span>:v*(N+<span class="number">5</span>)+N+<span class="number">5</span>) = s_bordered;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">imshow(base);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
 <p>下图为执行<code>pltDFT(8)</code>时的输出图像:</p>
 <p><img src="baseN8.png" width=500 title="base N=8"></p>
 <center>
@@ -477,6 +481,312 @@ s(N-1,0,u,v) &amp; s(N-1,1,u,v) &amp; \cdots &amp; s(N-1,N-1,u,v)
 </center>
 <p>另外，可以从图7看出，四角的基图像频率低，向着中心频率逐渐升高到中间位置达到最高。这一点的和傅立叶变换输出的结果，结合<em><a href="/2020/06/30/some-properties-of-the-2d-dft/" title="二维离散傅立叶变换的一些性质讨论">二维离散傅立叶变换的一些性质讨论</a></em>可以得到一样结论:即傅立叶变换的结果，在四角为直流分量，向着中心频率逐渐升高。</p>
 <h2 id="discrete-hartley-transform">discrete Hartley transform</h2>
+<p>DHT是一种类似于DFT的线性变换，但又有所不同：</p>
+<ol type="1">
+<li><p>DHT计算的结果是实数，而DFT是复数；</p></li>
+<li><p>DHT的基图像因此也有所不同</p></li>
+</ol>
+<p>DHT的逆变换核如下:</p>
+<p><span class="math display">\[\begin{equation}
+\begin{aligned}
+s(x,u) &amp;= \frac{1}{\sqrt{N}} cas (\frac{2 \pi ux}{N}) \\
+&amp;=\frac{1}{\sqrt{N}} \left[ \cos (\frac{2 \pi ux}{N}) + \sin(\frac{2 \pi ux}{N}) \right]
+\end{aligned}
+\end{equation}
+\tag{33}
+\]</span></p>
+<p>对应的二维形式：</p>
+<p><span class="math display">\[s(x,y,u,v) = \left[ \frac{1}{\sqrt{N}} cas (\frac{2 \pi ux}{N})\right] \left[ \frac{1}{\sqrt{N}} cas (\frac{2 \pi uy}{N}) \right] \tag{34}\]</span></p>
+<p>关于公式33有以下说明:</p>
+<ol type="1">
+<li><p>DHT的基函数是实数的，正交的，镜像的，这意味着对于DHT的基图像矩阵<span class="math inline">\(A_{HY}\)</span>来说，有关系：<span class="math inline">\(A_{HY} = A_{HY}^T = A_{HY}^{-1}\)</span></p></li>
+<li><p>DHT由于满足上述关系，也同时意味着DHT变换的正变换、逆变换核是一样的</p></li>
+<li><p>观察公式33的第二个等号cas的展开，使用欧拉公式展开公式31:</p></li>
+</ol>
+<p><span class="math display">\[s(x,u)=\frac{1}{\sqrt{N}} \cos (\frac{2\pi ux}{N} - j \sin (\frac{2 \pi ux}{N}\]</span></p>
+<p>由此可知在基函数/基图像上DHT和DFT存在关系：</p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+A_{HY} &amp;= Real{A_F} - Image{A_F}\\
+&amp;= Real{(1+j)A_F}
+\end{aligned}
+\end{equation}
+\]</span></p>
+<p>这个关系说明DFT和DHT可以通过公式转化，但绝不是DFT简单的实数部分截取。那么DHT和DFT在图像上有什么区别呢？先看一维时候的图像：</p>
+<p><img src="DHTvsDFT.png"></p>
+<center>
+图8 DFT和DHT的对比
+</center>
+<p>图8的左边是DFT图像，这个图在上文中有出现。只需要注意的是，DFT的蓝色实线是DFT的实数部分，黑色实线是DFT的虚数部分。右边是DHT的图像，它只有实数部分。观察可以发现在实数部分上两个图像是相似的，只是相位上有差距。为了更加细致的研究二者在数值（幅度和相位）上的关系，我们取DFT的实部：</p>
+<p><span class="math display">\[\begin{equation}
+\begin{aligned}
+Re {s_F(x,u)} &amp;= Re \left{\frac{1}{\sqrt{N}} e^{j 2 \pi ux /N} \right} \\
+&amp;=\frac{1}{\sqrt{N}} \cos (\frac{2 \pi ux }{N})
+\end{aligned}
+\end{equation} \tag{35}\]</span></p>
+<p>由三角关系<span class="math inline">\(cas(\theta) = \sqrt{2} \cos (\theta - \pi/4)\)</span>,可以把公式33的第一个等式稍加修改：</p>
+<p><span class="math display">\[s_H(x,u) = \sqrt{\frac{2}{N}} \cos (\frac{2 \pi ux}{N} - \frac{\pi}{4} ) \tag{36}\]</span></p>
+<p>公式35和公式36说明，在实数部分DFT和DHT确实存在相似性，主要表现在都是余弦，并且频率相同。但也存在不同，首先余弦的幅度是差了<span class="math inline">\(\sqrt{2}\)</span>倍的，其次相位差了<span class="math inline">\(\pi / 4\)</span>a.</p>
+<p>使用公式34画出DHT的基图像，只需要改变DFT时的两个x，y公式即可:</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%...</span></span><br><span class="line">        s_x = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*(<span class="built_in">cos</span>(<span class="number">2</span>*<span class="built_in">pi</span>*u*x/N)+<span class="built_in">sin</span>(<span class="number">2</span>*<span class="built_in">pi</span>*u*x/N));</span><br><span class="line">        s_y = <span class="number">1</span>/(<span class="built_in">sqrt</span>(N))*(<span class="built_in">cos</span>(<span class="number">2</span>*<span class="built_in">pi</span>*v*y/N)+<span class="built_in">sin</span>(<span class="number">2</span>*<span class="built_in">pi</span>*v*y/N));</span><br><span class="line"><span class="comment">%...</span></span><br></pre></td></tr></table></figure>
+<p><img src="DFT.png" width=400></p>
+<center>
+图9 DHT基图像
+</center>
+<p>关于图9，有以下几点需要强调，主要是和DFT基图像的联系：</p>
+<ol type="1">
+<li><p>与DFT基图像一样，当u&gt;N/2时会出现混叠；也就是说DHT的能够达到的最大频率出现在N/2位置处</p></li>
+<li><p>由于上述原因，不难理解DFT和DHT具有一样的频率分辨率，都为<span class="math inline">\(\Delta u = 1 / (N \Delta T)\)</span></p></li>
+</ol>
+<p>综上，DHT可以看作是实数版本的DFT。除此之外相较于DFT没有其他优势。之所以要说“优势”，是因为相较DFT和DHT而言，马上介绍的另一种变换DCT拥有一些很棒的性质。</p>
+<h2 id="discrete-cosine-transform">discrete Cosine Transform</h2>
+<p>DCT和DHT一样具备计算结果是实数的特点，除此之外还有一些额外的性质。</p>
+<p>DCT的逆变换核为：</p>
+<p><span class="math display">\[s(x,u) = \alpha (u) \cos (\frac{2x+1)u \pi}{2 N})\]</span></p>
+<p>where</p>
+<p><span class="math display">\[\alpha (u) = \left\{ \begin{array}{rc1} \sqrt{\frac{1}{N}} &amp; \mbox{for} &amp; u=0 \\ \sqrt{\frac{2}{N}} &amp; \mbox{for} &amp; u=1,2,...,N-1  \end{array} \right. \]</span></p>
+<p>二维的DCT逆变换核为：</p>
+<p><span class="math display">\[s(x,y,u,v) = \alpha (u) \alpha(v) \cos (\frac{(2x+1)u \pi}{2N}) \cos(\frac{(2y+1) v \pi}{2N})\]</span></p>
+<p>DCT有如下特点：</p>
+<ol type="1">
+<li>两倍于DFT和DHT的频率分辨率，这主要体现在DFT和DHT的最大分辨率出现在N/2处，后面的频率为前面的镜像；而DCT的最大分辨率出现在N处。</li>
+</ol>
+<p>举个例子，如果N=4,<span class="math inline">\(\Delta T = 1\)</span>。那么DCT下系数为{0,0.5,1,1.5}而DFT为{0,1,2,1}.说明，在相同的N下，DCT能够分辨的最大辨率与DFT相似的同时，能够提供一倍的频率分辨率.</p>
+<p>通过二维DCT逆变换核，画出的图像如下：</p>
+<p><img src="DCT.png" width=400></p>
+<center>
+图10 DCT基图像
+</center>
+<p>从图像上来看，DCT确实没有重复的基图像。这也说明了DCT的频率分辨率更高。</p>
+<ol start="2" type="1">
+<li><p>DFT假设数据点是N点周期性的，而DCT假设数据点是2N点周期性的并且是偶镜像的。这个假设体现在公式中cos的周期。DFT的N点周期性假设导致在数据的两端边界位置会出现假的高频，而DCT通过翻倍数据量和偶对称来消除这种假的高频.</p></li>
+<li><p>DCT可以用过DFT计算然后变换得到。　</p></li>
+</ol>
+<h2 id="discrete-sine-transform">discrete Sine Transform</h2>
+<p>DST具备以下特点：</p>
+<ol type="1">
+<li><p>DST与DCT类似，具有两倍于DFT的频率分辨率</p></li>
+<li><p>DST与DCT不同在，DCT假设信号是偶镜像，而DST假设信号是奇镜像</p></li>
+<li><p>DST在u=0处不存在DC分量</p></li>
+</ol>
+<p>这些类似离散傅立叶变换的相关变换算法有以下几种方法可以算法实现：</p>
+<ol type="1">
+<li><p>直接使用每一种变换的A矩阵进行矩阵乘法（最复杂）</p></li>
+<li><p>使用快速傅立叶变换后再经过相应的变换回到具体的相关变换</p></li>
+<li><p>直接使用FFT-like算法（最快，但不具备通用性）</p></li>
+</ol>
+<h2 id="walsh-hadamard-transform">Walsh-Hadamard Transform</h2>
+<p>Walsh-Hadamard是一种非正弦的方波形状的线性变换。Walsh-Hadamard的逆变换核如下：</p>
+<p><span class="math display">\[s(x,u) = \frac{1}{\sqrt{N}} (-1)^{\sum_{i=0}^{n-1}b_i (x)b_i (u)a} \tag{37}\]</span></p>
+<p>where <span class="math inline">\(N=2^n\)</span></p>
+<p>公式37中的<span class="math inline">\(b_k(z)\)</span>运算是指，z的二进制表达的第k个位是什么。比如z=6时，<span class="math inline">\(z_b=110\)</span>，那么<span class="math inline">\(b_0(z)=0,b_1(z)=1,b_2(z)=1\)</span></p>
+<p>基于公式37，假如我们要创建一个N=2的变换A矩阵，那么矩阵中的数很大程度依赖于公式中的指数求和部分：</p>
+<table>
+<thead>
+<tr class="header">
+<th>u,x</th>
+<th>x=0</th>
+<th>x=1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>u=0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>u=1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>将上述指数求和部分带回公式37就能够形成变换矩阵：</p>
+<p><span class="math display">\[A_W = \frac{1}{\sqrt{2}} \left[ \begin{matrix} 1 &amp; 1 \\ 1 &amp; -1 \end{matrix} \right]\]</span></p>
+<p>可以发现Walsh-Hadamard在矩阵部分（也就是不含标量缩放因子的部分）都是1或-1的组合，那么这种组合的矩阵被称为<em>Hadamard matrix<span class="math inline">\(H_N\)</span></em>。<span class="math inline">\(H_N\)</span>与<span class="math inline">\(A_W\)</span>存在递归关系，即我们不需要从一开始计算很大的N，我们可以从很小的N值反复叠加成很大的N：</p>
+<p><span class="math display">\[A_W = \frac{1}{\sqrt{N}} H_N\]</span></p>
+<p>where <span class="math display">\[H_{2N} = \left[ \begin{matrix} H_N &amp; H_N \\ H_N &amp; -H_N \end{matrix} \right]\]</span></p>
+<p>and</p>
+<p><span class="math display">\[H_2 = \left[ \begin{matrix}1&amp;1 \\ 1&amp; -1 \end{matrix} \right]\]</span></p>
+<p>有了上述三个公式，就能够计算任意N下的<span class="math inline">\(H_N\)</span>,及其对应的<span class="math inline">\(A_W\)</span>了。比如，想要求得N=8时的<span class="math inline">\(H_8\)</span>矩阵：</p>
+<p><span class="math display">\[H_4 = \left[ \begin{matrix} H_2 &amp; H_2 \\ H_2 &amp; -H_2 \end{matrix}\right]\]</span></p>
+<p><span class="math display">\[
+\begin{equation}
+\begin{aligned}
+H_8 &amp;= \left[ \begin{matrix} H_4 &amp; H_4 \\ H_4 &amp; -H_4 \end{matrix}\right] \\
+&amp;= \left[ \begin{matrix} 
+1&amp;1&amp;1&amp;1&amp;1&amp;1&amp;1&amp;1 \\
+1&amp;-1&amp;1&amp;-1&amp;1&amp;-1&amp;1&amp;-1 \\
+1&amp;1&amp;-1&amp;-1&amp;1&amp;1&amp;-1&amp;-1 \\
+1&amp;-1&amp;-1&amp;1&amp;1&amp;-1&amp;-1&amp;1 \\
+1&amp;1&amp;1&amp;1&amp;-1&amp;-1&amp;-1&amp;-1 \\
+1&amp;-1&amp;1&amp;-1&amp;-1&amp;1&amp;-1&amp;1 \\
+1&amp;1&amp;-1&amp;-1&amp;-1&amp;-1&amp;1&amp;1 \\
+1&amp;-1&amp;-1&amp;1&amp;-1&amp;1&amp;1&amp;-1 \\
+\end{matrix}\right]
+\end{aligned}
+\end{equation}
+\]</span></p>
+<p>结合前面对图1的分析可以知道，基函数变换的频繁程度决定了这个基函数所能够检测的原函数的频率，比如变换越剧烈的基函数（高频）在与相近频率的原函数进行内积时能够获得更大的结果，进而表明原函数中存在这个高频基函数成分。这个道理同样适用于Walsh-Hadamard变换。Hadamard矩阵中1与-1的变换次数被称为序列(sequency)。比如<span class="math inline">\(H_8\)</span>的第二列一共发生了7次从1到-1或从-1到1的跳变，则称这一列的序列为7.那么很容易类似得到<span class="math inline">\(H_8\)</span>的基函数的跳变为0,7,3,4,1,6,2.序列越大说明频率越高，序列越低说明越接近DC频率。Hadamard矩阵保证矩阵中的每一行只存在<strong>唯一的序列</strong>。</p>
+<p>我们以图8中的DHT一个N=8的矩阵为例可以发现，随着u的增加，基函数变化越加剧烈。这符合我们的期待：频率随着u的增加<strong>逐渐</strong>增加。但是反观上面的矩阵<span class="math inline">\(H_8\)</span>，其序列（也就是变换的频率），没有呈现出<strong>递增</strong>的规律。这带来什么问题？在计算变换时不存在问题，但是想用变换后结果滤波时存在问题。如果是顺序递增的频率，那么在滤波时存在很大的便利，可以直接选定区域统一滤波；而如果没有明显顺序，那么滤波将带来很大的困难。</p>
+<p>为了将这种顺序重新组合成为序列递增的顺序，可以修改逆变换核的公式：</p>
+<p><span class="math display">\[s(x,u) = \frac{1}{\sqrt{N}} (-1)^{\sum_{i=0}^{n-1}b_i (x)p_i (u)a} \tag{38}\]</span></p>
+<p>where</p>
+<p><span class="math display">\[\begin{equation}
+\begin{aligned}
+p_0(u) &amp;= b_{n-1}(u) \\
+p_1(u) &amp;= b_{n-1}(u) + b_{n-1}(u) \\
+p_2(u) &amp;= b_{n-2}(u) + b_{n-3}(u) \\
+... \\
+p_{n-1}(u) &amp;= b_1(u) \\
+\end{aligned}
+\end{equation}
+\]</span></p>
+<p>基于此重新计算<span class="math inline">\(H_8\)</span>得到<span class="math inline">\(H&#39;_8\)</span>:</p>
+<p><span class="math display">\[
+H&#39;_8  
+= \left[ \begin{matrix} 
+1&amp;1&amp;1&amp;1&amp;1&amp;1&amp;1&amp;1 \\
+1&amp;1&amp;1&amp;1&amp;-1&amp;-1&amp;-1&amp;-1 \\
+1&amp;1&amp;-1&amp;-1&amp;-1&amp;-1&amp;1&amp;1 \\
+1&amp;1&amp;-1&amp;-1&amp;1&amp;1&amp;-1&amp;-1 \\
+1&amp;-1&amp;-1&amp;1&amp;1&amp;-1&amp;-1&amp;1 \\
+1&amp;-1&amp;-1&amp;1&amp;-1&amp;1&amp;1&amp;-1 \\
+1&amp;-1&amp;1&amp;-1&amp;-1&amp;1&amp;-1&amp;1 \\
+1&amp;-1&amp;1&amp;-1&amp;1&amp;-1&amp;1&amp;-1 \\
+\end{matrix}\right]
+\]</span></p>
+<p>除了直接计算得到<span class="math inline">\(H&#39;_N\)</span>外，还可以先计算得到<span class="math inline">\(H_N\)</span>，然后使用格雷码的反码来映射得到<span class="math inline">\(H&#39;_N\)</span>。</p>
+<p>顺序化的Hadamard矩阵才是我们常用的。</p>
+<h2 id="slant-transform">Slant Transform</h2>
+<p>前文描述的多种常用的变换都聚焦在了谐波变化和DC，Slant Transform的重点在均匀变化和线性变化。因此，Slant Transform非常适合用于检测灰度图像中均匀和线性变化.</p>
+<h2 id="haar-transform">Haar Transform</h2>
+<p>Haar Transform是一种最简单的小波分解，在还为正式进入小波分解前，我们先使用矩阵变换的观点来看Haar变换。Haar变换的基础是Haar函数:在连续、半开区间<span class="math inline">\(x \in \left[0,1 \right)\)</span>中，大于0的整数u可以被唯一地分解为：</p>
+<p><span class="math display">\[u=2^p + q\]</span></p>
+<p>其中，p能取到的最大的整数，q为余项。比如：N=4时</p>
+<table>
+<thead>
+<tr class="header">
+<th>u</th>
+<th>p</th>
+<th>q</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Haar基函数定义为：</p>
+<p><span class="math display">\[h_u(x) = \left\{ \begin{array}{rc1}
+1 &amp; u=0\  \mbox{and}\   0 \le x &lt; 1 \\
+2^{p/2} &amp; u&gt;0 \  \mbox{and}\  q/2^p \le x &lt; (q+0.5)/2^p \\
+-2^{p/2} &amp; u&gt;0\  \mbox{and} \ (q+0.5)/2^p \le x &lt; (q+1)/2^p \\
+0 &amp; \mbox{otherwise}
+\end{array} \right. \tag{39}\]</span></p>
+<p>关于公式39有以下说明：</p>
+<ol type="1">
+<li><p>当u=0时，<span class="math inline">\(h_u(x)\)</span>取值与pq无关，是独立的1</p></li>
+<li><p>第二行和第三行是Haar实现变尺度核心，可以看到p控制了尺度，而q控制了偏移量</p></li>
+</ol>
+<p>有了公式39的Haar基函数的定义，那么引出基于Haar基函数产生的离散Haar逆变换核：</p>
+<p><span class="math display">\[s(x,u) = \frac{1}{N} h_u (x/N) \ \mbox{for} \ x=0,1,...,N-1\]</span></p>
+<p>其中，<span class="math inline">\(u=0,1,...,N-1\)</span>,且<span class="math inline">\(N=2^n\)</span></p>
+<p>推广到二维上来看，NxN的Haar矩阵为：</p>
+<p><span class="math display">\[H_N = \left[\begin{matrix}
+h_0(0/N) &amp; h_0(1/N) &amp; \cdots &amp; h_0(N-1/N) \\
+h_1(0/N) &amp; h_1(1/N) &amp; \cdots &amp;  \vdots \\
+\vdots &amp;  &amp; \ddots &amp; \\
+h_{N-1}(0/N) &amp; \cdots &amp;  &amp; h_{N-1}(N-1/N) 
+\end{matrix}\right]\]</span></p>
+<p>进而得到变换A矩阵：</p>
+<p><span class="math display">\[A_H = \frac{1}{\sqrt{N}} H_N\]</span></p>
+<p>举一个产生Haar矩阵的例子，回到上面提到的N=4时的表格：</p>
+<table>
+<thead>
+<tr class="header">
+<th>u</th>
+<th>p</th>
+<th>q</th>
+<th><span class="math inline">\(2^{p/2}\)</span></th>
+<th><span class="math inline">\(-2^{p/2}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>n</td>
+<td>n</td>
+<td>n</td>
+<td>n</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>[0,0.5)</td>
+<td>(0.5,1])</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>[0,0.25)</td>
+<td>[0.25,0.5]</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>[0.5,0.75)</td>
+<td>[0.75,1]</td>
+</tr>
+</tbody>
+</table>
+<p>关于这个表格有以下几点需要说明：</p>
+<ol type="1">
+<li><p>表格新增加的两列，分别是计算<span class="math inline">\(h_u(x)\)</span>时所需要判断的区间范围。可以看到随着u的增加，这个区间越来越窄，而且有更多的q来控制移动这个区间以使得能够填满整个[0,1)区间</p></li>
+<li><p>有了这个表格就可以结合公式39得到每个区间对应的取值是1或-1或0:</p></li>
+</ol>
+<p><span class="math display">\[A_H = \frac{1}{2} \left[ \begin{matrix} 
+1&amp;1&amp;1&amp;1\\
+1&amp;1&amp;-1&amp;-1 \\
+\sqrt{2} &amp; -\sqrt{2} &amp;0 &amp;0\\
+0&amp;0&amp;\sqrt{2}&amp;-\sqrt{2}
+\end{matrix} \right]\]</span></p>
+<ol start="3" type="1">
+<li>u=0时的取值无qp无关</li>
+</ol>
+<p>Haar变换还有一些其他特性：</p>
+<ol type="1">
+<li><p>Haar变换矩阵<span class="math inline">\(A_H\)</span>是实数、正交且序列是有序的，可以分解为数个小的非零矩阵的乘积</p></li>
+<li><p>Haar变换矩阵<span class="math inline">\(A_H\)</span>中存在大量的0，这使得FFT-like算法甚至能够达到O(N)</p></li>
+</ol>
+<h1 id="总结">总结</h1>
+<p>下节将开始正式进入小波分解的讲解。在本文中一共讲述了一下几件事情:</p>
+<ol type="1">
+<li><p>内积的基本概念讲解，主要体现在向量空间和内积空间的定义，内积操作的定义。有了内积操作，我们就能够定义正交，而正交具备无冗余的分解函数的性质。为了介绍这种分解特性，列举了将一个向量z分解到由正交基组成的内积空间当中，分解的结果就是一系列的系数乘以正交基再求和。</p></li>
+<li><p>为了支撑一个内积空间，正交基的选择是非常重要的。本文从离散傅立叶变换的基函数出发，研究一些典型的正交基函数的形式和特点。变换核就是一系列正交基函数组成的矩阵。</p></li>
+<li><p>扩展到图像矩阵变换，引出了变换矩阵A，这个矩阵是非常庞大的，是由若干个变换核组成的。</p></li>
+<li><p>引入相关性的概念。前面只是探讨了向量能够在正交基中被分解成若干系数，那么这些系数代表了什么含义？这些系数的求解过程其实就是一种特殊的相关性计算，而相关性越大说明向量与这个对应的正交基越相似；反之，则越不相似。因此内积操作，从相关性的角度来解读，变成了描述待分解向量与一个正交基的相似性程度的度量。</p></li>
+<li><p>同样扩展到了图像矩阵变换，本文列出了多个常用的变换矩阵A，并把这些矩阵画成了基图像的形式。基图像可以直接用于与原图内积得到分解结果，但也存在很多优化FFT-like的优化算法。</p></li>
+<li><p>最后提到了Haar变换，需要提前预知的是，Haar变换与Haar小波还有点不同。Haar变换可以看作是矩阵变换，而Haar小波是小波变换。但他们的表达具有相似性.</p></li>
+</ol>
 
   </div>
 </article>
@@ -512,7 +822,7 @@ s(N-1,0,u,v) &amp; s(N-1,1,u,v) &amp; \cdots &amp; s(N-1,N-1,u,v)
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#时频面中的基函数"><span class="toc-number">5.</span> <span class="toc-text">时频面中的基函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#初识小波"><span class="toc-number">6.</span> <span class="toc-text">初识小波</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基图像"><span class="toc-number">7.</span> <span class="toc-text">基图像</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-fourier-transform"><span class="toc-number">7.1.</span> <span class="toc-text">discrete Fourier transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-hartley-transform"><span class="toc-number">7.2.</span> <span class="toc-text">discrete Hartley transform</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本概念"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#向量空间和内积空间"><span class="toc-number">1.1.</span> <span class="toc-text">向量空间和内积空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于矩阵的变换"><span class="toc-number">2.</span> <span class="toc-text">基于矩阵的变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#图像的矩阵变换"><span class="toc-number">3.</span> <span class="toc-text">图像的矩阵变换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#相关性correlation"><span class="toc-number">4.</span> <span class="toc-text">相关性(Correlation)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#时频面中的基函数"><span class="toc-number">5.</span> <span class="toc-text">时频面中的基函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#初识小波"><span class="toc-number">6.</span> <span class="toc-text">初识小波</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基图像"><span class="toc-number">7.</span> <span class="toc-text">基图像</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-fourier-transform"><span class="toc-number">7.1.</span> <span class="toc-text">discrete Fourier transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-hartley-transform"><span class="toc-number">7.2.</span> <span class="toc-text">discrete Hartley transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-cosine-transform"><span class="toc-number">7.3.</span> <span class="toc-text">discrete Cosine Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#discrete-sine-transform"><span class="toc-number">7.4.</span> <span class="toc-text">discrete Sine Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#walsh-hadamard-transform"><span class="toc-number">7.5.</span> <span class="toc-text">Walsh-Hadamard Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#slant-transform"><span class="toc-number">7.6.</span> <span class="toc-text">Slant Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#haar-transform"><span class="toc-number">7.7.</span> <span class="toc-text">Haar Transform</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
