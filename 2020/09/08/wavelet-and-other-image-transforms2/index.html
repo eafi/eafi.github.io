@@ -13,11 +13,13 @@
 <meta property="og:site_name" content="SuperEafi">
 <meta property="og:description" content="Wavelet Transforms 小波变换的核心是对信号进行多分辨率分析。回到过去的分析方法，只在时间域上分析，能够精确获得每一个采样点对应的信号，但多个频率的信号重合后信息很难被使用；只在频率上分析（通过傅立叶变换），能够精确获得每一个频率上的信号，但却完全丢失了时间信息，这导致傅立叶变换无法区分不同时间内的相同谱图。小波变换既能够在时间上有很好的分辨率，又能够在频率上有很好的定位效果。这种">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/Haar-scaling-function.png">
 <meta property="article:published_time" content="2020-09-08T08:27:01.000Z">
-<meta property="article:modified_time" content="2020-09-08T10:00:46.599Z">
+<meta property="article:modified_time" content="2020-09-08T11:22:36.088Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/08/wavelet-and-other-image-transforms2/Haar-scaling-function.png">
     
     
         
@@ -110,7 +112,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#wavelet-transforms"><span class="toc-number">1.</span> <span class="toc-text">Wavelet Transforms</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#尺度函数"><span class="toc-number">1.1.</span> <span class="toc-text">尺度函数</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#wavelet-transforms"><span class="toc-number">1.</span> <span class="toc-text">Wavelet Transforms</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#尺度函数"><span class="toc-number">1.1.</span> <span class="toc-text">尺度函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#举例haar尺度函数"><span class="toc-number">1.1.1.</span> <span class="toc-text">举例：Haar尺度函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#requirements-of-multiresolution-analysisrma"><span class="toc-number">1.2.</span> <span class="toc-text">Requirements of Multiresolution analysis(RMA)</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -197,9 +199,52 @@
 <p>小波变换的核心是对信号进行多分辨率分析。回到过去的分析方法，只在时间域上分析，能够精确获得每一个采样点对应的信号，但多个频率的信号重合后信息很难被使用；只在频率上分析（通过傅立叶变换），能够精确获得每一个频率上的信号，但却完全丢失了时间信息，这导致傅立叶变换无法区分不同时间内的相同谱图。小波变换既能够在时间上有很好的分辨率，又能够在频率上有很好的定位效果。这种变尺度的分析能力使得小波变换能够对信号进行多分辨率分析。比如对于信号的高频部分而言，由于这部分信息变化剧烈，我们通常希望在时间上具备精准定位的能力，而在频率上由于波动幅度很大，可以降低频率分辨率；同样类似的，对于信号的低频部分，这部分信息变化是缓慢的，我们希望在频率上对这种低频部分进行精确的区分，但在时间上可以降低分辨率。这里时间与频率是相互制约的，不存在同时具备精确定位时间和频率的分析方法。</p>
 <p>小波变换中有两个函数，一个是尺度函数，用来近似(approximate)目标函数或图像；另一个是小波函数，用来描述近似与原函数的不同(differences)。下面分别讨论这两个函数。</p>
 <h2 id="尺度函数">尺度函数</h2>
-<p>考虑一个能够涵盖所有整数平移和二值缩放的实数，平方可积的父尺度函数(father scaling function)<span class="math inline">\(\phi(x)\)</span>.由此可以产生一系列的变尺度、平移的尺度函数<span class="math inline">\(\left{ \phi_{j,k} (x) | j,k \in Z \right}\)</span>:</p>
+<p>考虑一个能够涵盖所有整数平移和二值缩放的实数，平方可积的父尺度函数(father scaling function)<span class="math inline">\(\phi(x)\)</span>.由此可以产生一系列的变尺度、平移的尺度函数<span class="math inline">\(\left\{ \phi_{j,k} (x) | j,k \in Z \right\}\)</span>:</p>
 <p><span class="math display">\[\phi_{j,k}(x) = 2^{j/2} \phi(2^j x - k) \tag{1}\]</span></p>
-<p>公式1中k决定了<span class="math inline">\(\phi_{j,k}\)</span>在x轴上的位置；j决定了这个尺度函数的形状，包括宽度和幅值两项。</p>
+<p>公式1中k决定了<span class="math inline">\(\phi_{j,k}\)</span>在x轴上的位置；j决定了这个尺度函数的形状，包括宽度和幅值两项。对于一个特定的<span class="math inline">\(j=j_0\)</span>，尺度函数<span class="math inline">\(\left\{ \phi_{j_0,k} | k \in Z \right\}\)</span>在若干个<span class="math inline">\(k=...,-1,0,1,2,...\)</span>下展开的一系列尺度函数被称为<span class="math inline">\(V_{j_0}\)</span>。随着<span class="math inline">\(j_0\)</span>的增加，<span class="math inline">\(V_{j_0}\)</span>所能近似的函数细节越丰富.</p>
+<h3 id="举例haar尺度函数">举例：Haar尺度函数</h3>
+<p>Haar的父尺度函数表达式如下：</p>
+<p><span class="math display">\[\phi(x) = \left\{ \begin{array}{rc1} 
+1 &amp; 0 \le x &lt;1 \\
+0 &amp; \mbox{otherwise}
+\end{array} \right.\]</span></p>
+<p>根据这个描述可以知道Haar尺度函数是一个单位长度的方形波。当j=1,k=0时：</p>
+<p><span class="math display">\[\phi_{j,k}(x) = 2^{1/2} \phi(2x)\]</span></p>
+<p>这个表达式说明，j=1,k=0时，Haar尺度函数和父尺度函数相比，幅值增加<span class="math inline">\(\sqrt{2}\)</span>，宽度缩小一倍。基于此就能够产生无数更加细的尺度函数。如下图所示。</p>
+<p><img src="Haar-scaling-function.png"></p>
+<center>
+图1 Haar小波的尺度函数变换
+</center>
+<p>关于图1还有一点需要说明：</p>
+<ol type="1">
+<li><p><span class="math inline">\(V_1\)</span>拥有比<span class="math inline">\(V_0\)</span>更窄的波形，而且在<span class="math inline">\(V_0\)</span>中[0,1]范围内只有一个<span class="math inline">\(\phi_{0,0}(x)\)</span>波形，而在相同范围内<span class="math inline">\(V_1\)</span>可以放下<span class="math inline">\(\phi_{1,0}(x),\phi_{1,1}(x)\)</span>两个波形</p></li>
+<li><p>结合波形宽度和幅度之间的关系，可以发现<span class="math inline">\(V_1\)</span>的两个尺度函数可以通过适当的线性组合（乘以一个因子相加）得到<span class="math inline">\(V_0\)</span>的尺度函数<span class="math inline">\(\phi_{0,0}(x)=\phi(x)\)</span>:</p></li>
+</ol>
+<p><span class="math display">\[\phi_{0,k}(x) = \frac{1}{\sqrt{2}} \phi_{1,2k}(x) + \frac{1}{\sqrt{2}} \phi_{1,2k+1}(x)\]</span></p>
+<p>这说明分辨率更高的尺度函数可以通过线性组合得到分辨率较低的尺度函数。</p>
+<h2 id="requirements-of-multiresolution-analysisrma">Requirements of Multiresolution analysis(RMA)</h2>
+<p>Mallat在提出多分辨率分析时，对尺度函数有四个基本要求：</p>
+<ol type="1">
+<li><p>尺度函数在整数平移上是相互正交的</p></li>
+<li><p>低尺度的尺度函数(低分辩尺度函数)被包含在高尺度尺度函数中（高分辨率尺度函数)，而且这种包含呈现出如下性质：</p></li>
+</ol>
+<p><span class="math display">\[V_{-\infty} \subset ... \subset V_-1 \subset V_0 \subset V_1 \subset V_2 \subset ... \subset V_{\infty}\]</span></p>
+<p>比如对于一个尺度函数<span class="math inline">\(f(x) \in V_j\)</span>，那么必然存在<span class="math inline">\(f(2x) \in V_{j+1}\)</span></p>
+<ol start="3" type="1">
+<li><p>只有<span class="math inline">\(f(x) = 0\)</span>可以在任何尺度下都能够被表达</p></li>
+<li><p>任何可测、平方可积的函数都能够被表达为尺度函数在<span class="math inline">\(j \rightarrow \infty\)</span>时的线性组合</p></li>
+</ol>
+<p>基于上述，有如下公式：</p>
+<p><span class="math display">\[\phi(x) = \sum_{k \in Z} h_{\phi} (k) \sqrt(2) \phi(2x-k) \tag{2}\]</span></p>
+<p>公式2有如下说明：</p>
+<ol type="1">
+<li><p>这个公式说明，尺度函数<span class="math inline">\(\phi(x)\)</span>都可由两倍分辨率于它的<span class="math inline">\(\phi(2x)\)</span>通过平移k、变因子<span class="math inline">\(h_{\phi}(k)\)</span>组合得到。这个公式就是上述Haar举例的公理化表达。</p></li>
+<li><p>公式中的展开因子<span class="math inline">\(\left\{ h_{\phi}(x) | k=0,1,2,... \right\}\)</span>被称为尺度函数因子(scaling function coefficients)变换公式2，可以使用内积来计算这个因子：</p></li>
+</ol>
+<p><span class="math display">\[h_{\phi}(k) = \left&lt; \phi(x) , \sqrt(2) \phi(2x-k) \right&gt;\]</span></p>
+<ol start="3" type="1">
+<li>公式2被称为细化方程，可以理解为当前尺度函数于下一级（分辨率翻倍）的尺度函数之间的联系（低分辩率尺度函数被高分辨率尺度函数线性组合进行表达）</li>
+</ol>
 
   </div>
 </article>
@@ -235,7 +280,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#wavelet-transforms"><span class="toc-number">1.</span> <span class="toc-text">Wavelet Transforms</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#尺度函数"><span class="toc-number">1.1.</span> <span class="toc-text">尺度函数</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#wavelet-transforms"><span class="toc-number">1.</span> <span class="toc-text">Wavelet Transforms</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#尺度函数"><span class="toc-number">1.1.</span> <span class="toc-text">尺度函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#举例haar尺度函数"><span class="toc-number">1.1.1.</span> <span class="toc-text">举例：Haar尺度函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#requirements-of-multiresolution-analysisrma"><span class="toc-number">1.2.</span> <span class="toc-text">Requirements of Multiresolution analysis(RMA)</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
