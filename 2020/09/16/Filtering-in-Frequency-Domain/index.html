@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="频域滤波中基本函数 matlab中计算图像的傅立叶变换使用： 12F &#x3D; fft2(f);F &#x3D; fft2(f,P,Q); 接受三个参数的fft2在频率滤波更为常用，函数先将图像f进行zero-padding到指定P,Q尺寸后再进行傅立叶变换。zero-padding可以加快fft计算并且能够避免循环卷积。关于循环卷积的更多内容，在文章中有描述. 对于一个实数图像f，执行fft2输出一定是复数(在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Filtering-in-Frequency-Domain-Using-MATLAB">
+<meta property="og:url" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="频域滤波中基本函数 matlab中计算图像的傅立叶变换使用： 12F &#x3D; fft2(f);F &#x3D; fft2(f,P,Q); 接受三个参数的fft2在频率滤波更为常用，函数先将图像f进行zero-padding到指定P,Q尺寸后再进行傅立叶变换。zero-padding可以加快fft计算并且能够避免循环卷积。关于循环卷积的更多内容，在文章中有描述. 对于一个实数图像f，执行fft2输出一定是复数(在">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/phase-vs-magnitude.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/wraparound-error-test.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/test-of-spatial-gaussian.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/test-of-frequency-filtering1.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/without-padding.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/test-of-frequency-filtering2.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/with-padding.png">
+<meta property="article:published_time" content="2020-09-16T02:04:48.000Z">
+<meta property="article:modified_time" content="2020-09-16T12:09:12.752Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="ImageProcessing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/phase-vs-magnitude.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Filtering-in-Frequency-Domain-Using-MATLAB</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/09/10/Image-Restoration/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&text=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&is_video=false&description=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Filtering-in-Frequency-Domain-Using-MATLAB&body=Check out this article: http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&name=Filtering-in-Frequency-Domain-Using-MATLAB&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&t=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波中基本函数"><span class="toc-number">1.</span> <span class="toc-text">频域滤波中基本函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波基础"><span class="toc-number">2.</span> <span class="toc-text">频域滤波基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#警惕循环卷积可能会导致图像出现wraparound-error"><span class="toc-number">2.1.</span> <span class="toc-text">警惕循环卷积，可能会导致图像出现wraparound error</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Filtering-in-Frequency-Domain-Using-MATLAB
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-16T02:04:48.000Z" itemprop="datePublished">2020-09-16</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/ImageProcessing/" rel="tag">ImageProcessing</a>
+    </div>
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="频域滤波中基本函数">频域滤波中基本函数</h1>
+<p>matlab中计算图像的傅立叶变换使用：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F = fft2(f);</span><br><span class="line">F = fft2(f,P,Q);</span><br></pre></td></tr></table></figure>
+<p>接受三个参数的<code>fft2</code>在频率滤波更为常用，函数先将图像f进行zero-padding到指定P,Q尺寸后再进行傅立叶变换。zero-padding可以加快fft计算并且能够避免循环卷积。关于循环卷积的更多内容，在<a href="">文章</a>中有描述.</p>
+<p>对于一个实数图像f，执行fft2输出一定是复数(在<a href="">文章</a>中有证明)。因此可知F在matlab中的属性为complex single。为了得到这个复数的强度和相位使用：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">S = <span class="built_in">abs</span>(F);</span><br><span class="line">phi = <span class="built_in">angle</span>(F);</span><br></pre></td></tr></table></figure>
+<p>回顾频域分析，傅立叶变换的幅度代表的是图像中的亮度，而相位代表的是图像中物体的空间位置。通常从视觉上看，幅度图包含的信息更容易理解，而相位图的信息不易理解但更为重要。由于相位图决定了物体的空间位置信息，因此在通常的频率滤波中我们期望<strong>不改变相位图信息</strong>，否则一旦相位图改变，可能图像滤波后会输出完全错误的信息。不改变相位图的滤波器被称为<strong>零相移滤波器</strong>。</p>
+<p>如果我们已知了复数F的强度S和相位phi，那么根据复数的表达，我们可以重新得到复数F:</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">F = S.*<span class="built_in">exp</span>(<span class="built_in">i</span> * phi);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例子1</p>
+</blockquote>
+<p><img src="phase-vs-magnitude.png"></p>
+<center>
+图1 相位和强度
+</center>
+<p>图1的上面两个图像是除中间白色矩形位置不同外完全一样的图像。利用matlab分别对两个图像进行傅立叶变换并输出强度和相位图依次得到下面四张图像。可以看到在强度图上，二者完全类似，但在相位图上二者表现出完全不一样的特点。这直接说明了相位图描述了原图像中物体的位移，强度描述了原图像中的亮度。</p>
+<hr />
+<p>经过函数<code>fft2</code>计算得到的频域图，在之前的文章已经知道是频率起点在左上角，向着图像中心位置递增的频率分布。这种频率分布不利于视觉上的分析，因此我们常常移动频域图像使得<strong>图像中心位置</strong>为频率起点，频率向四周扩散.这个移动过程使用：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Fc = fftshift(F);</span><br></pre></td></tr></table></figure>
+<p>上述函数<code>fftshift</code>是通过平移实现以中心位置为频率起点的，这个频移的原理在之前的<a href="">文章</a>有提到。现在我们重点关注<strong>什么是中心位置</strong>？对于连续的函数而言中心位置不难定义，但是对于离散的图像而言，<strong>中心</strong>的概念就很重要了，重要性主要体现在以下几个方面：</p>
+<ol type="1">
+<li><p>确定中心像素位置，类似<code>fftshift</code>的函数才有执行的依据</p></li>
+<li><p>之后创建的滤波器大多都是中心对称，那么中心在哪里非常重要</p></li>
+<li><p>图像的尺寸可能是矩形的，可能是方形的，可能尺寸是奇数像素的，也可能是偶数像素的，中心位置的明确很有意义</p></li>
+</ol>
+<p>我们按照不同的矩阵计数规则来分别解释。假如将尺寸为<span class="math inline">\(M \times N\)</span>的图像导入到从0开始计数，到M-1和N-1为止的环境中，中心元素定义为在<span class="math inline">\((M/2,N/2)\)</span>位置处的元素。比如尺寸为8x8，那么中心元素在(4,4)：中心元素为<strong>第五个</strong>元素。再比如奇数尺寸7x7，中心元素为(M/2,N/2)的floor : (3,3)。由于C语言整型除法就已经是floor后的整数了.对于奇数尺寸，这个中心元素为<strong>第四个</strong>元素。C中计算中心位置通用公式为:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> M,N;</span><br><span class="line"><span class="comment">///get M,N</span></span><br><span class="line"><span class="keyword">int</span> centM = M / <span class="number">2</span>;</span><br><span class="line"><span class="keyword">int</span> centN = N / <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+<p>如果是matlab环境，从1计数，到M和N为止，在偶数尺寸时，比如8x8，那么中心元素在(5,5)，中心元素为<strong>第五个</strong>元素；在奇数尺寸时，比如7x7，那么中心元素在(3,3)，中心元素为<strong>第四个</strong>元素。可以看到，中心元素的位置其实和C是一样的，只是角标的区别。matlab中计算中心位置通用公式为：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="built_in">floor</span>(M/<span class="number">2</span>) + <span class="number">1</span>,<span class="built_in">floor</span>(N/<span class="number">2</span>)+<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+<p>经过频率滤波后，需要将频域图像转换到空间域图像：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f = ifft2(F);</span><br></pre></td></tr></table></figure>
+<p>matlab的<code>fft2</code>和<code>ifft2</code>变换对存在一个默认的格式转换逻辑：如果原图像f是一个uint8格式的图像(matlab的<code>imread</code>后格式)，进过<code>fft2</code>后图像格式变成了范围为[0 255]的double格式，<strong>没有进行尺度缩放</strong>；然后<code>ifft2</code>后输出[0 255]的图像，但是是double格式。为了在执行滤波前后格式能够统一，通常需要在进入<code>fft2</code>前<strong>先将uint8转换成[0 1]的浮点数</strong>，进行滤波、<code>ifft2</code>后进行<strong>[0 1]浮点数向uint8转换</strong>。</p>
+<p>自建m函数<code>tofloat</code>实现了这个过程，执行流程如下：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">f = imread(<span class="string">'....'</span>); <span class="comment">%读入为uint8类型</span></span><br><span class="line">[f,revertclass] = tofloat(f); <span class="comment">%转换成float类型的f，并返回一个revertclass函数</span></span><br><span class="line">F = fft2(f);</span><br><span class="line"><span class="comment">%滤波操作</span></span><br><span class="line"><span class="comment">%H = getfilter();</span></span><br><span class="line">G = H.*F; <span class="comment">%滤波</span></span><br><span class="line">g = ifft2(G); <span class="comment">%从频域转换回空间域</span></span><br><span class="line">g = revertclass(g); <span class="comment">%从float转换为uint8</span></span><br><span class="line">imshow(g);</span><br></pre></td></tr></table></figure>
+<h1 id="频域滤波基础">频域滤波基础</h1>
+<p>回顾滤波操作就是就是下面两个傅立叶变换对：</p>
+<p><span class="math display">\[f(x,y)\star h(x,y) \Leftrightarrow H(u,v)F(u,v) \tag{1} \\
+f(x,y)h(x,y) \Leftrightarrow H(u,v) \star F(u,v) \\
+\]</span></p>
+<p>与频域滤波关系最密切的就是上述第一个公式，它描述了空间域的卷积过程（空间滤波过程）其实就是频域上两个傅立叶变换相乘的过程。我们称F(u,v)为图像的傅立叶变换，H(u,v)成为滤波器传递函数。滤波器传递函数根据我们的需求进行创建.根据第一个公式的描述，频域滤波和空间卷机滤波是等价的，但为了使二者完全等价（等效），其实还有一些其他的规范需要频域滤波时注意。</p>
+<h2 id="警惕循环卷积可能会导致图像出现wraparound-error">警惕循环卷积，可能会导致图像出现wraparound error</h2>
+<p>循环卷积的出现是因为，F和H都是周期性的,我们把F和H在频域上相乘，然后逆变换回空间域：</p>
+<p><span class="math display">\[g(x,y) = Real\left\{ \mathfrak{F}^{-1} \left[ H(u,v)F(u,v) \right]  \right\} \tag{2}\]</span></p>
+<p>根据卷积定理频域相乘等价于空间域卷积。这种周期性函数的卷积可能会导致错误的结果，因为滑动窗在另一个图像上移动时，会无意识的把它周期重复的部分给一同卷积进来.保证空间滤波和频域滤波一致性的唯一方法就是使用恰当的zero-padding。</p>
+<p>需要注意，我们padding的对象是图像f和h，而不是频域图像F,因为我们是想让公式1的卷积过程不受循环卷积干扰。这里有一个小细节，通常而言我们所进行的频域滤波，只需要padding图像f，对应的频域滤波器H我们只需要在频域上构建即可，不需要从空间域上去构建h（空间域上构建也不是不行，但更复杂了）。由于是在频域上直接构建滤波器H，其尺寸直接等于padding后的图像f的尺寸，这就会导致一个问题：我们只能说padding后的f一定能够避免循环卷积，但是却不能对滤波器做一样的保证。因此，还是会出现一定程度的wraparound error,在进行这种形式的滤波器设计时需要明白这个细节.通常,常用的几种频域滤波器产生的wraparound error微乎其微。</p>
+<blockquote>
+<p>例子2</p>
+</blockquote>
+<p>下面模拟循环卷积导致的wraparound error问题，创建一个图样：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ff = <span class="built_in">ones</span>(<span class="number">500</span>,<span class="number">500</span>);</span><br><span class="line">ff(<span class="number">1</span>:<span class="number">250</span>,:) = <span class="number">0</span>;</span><br><span class="line">imshow(ff);</span><br></pre></td></tr></table></figure>
+<p>输出图样如下图所示：</p>
+<p><img src="wraparound-error-test.png" width=350></p>
+<center>
+图2 图样
+</center>
+<p>现在对图2进行高通滤波.我们提前已经知道高斯滤波能够滤除图像的高频细节，从而导致图像模糊。</p>
+<p>先来计算公式1的左边部分，即空间滤波核卷积进行滤波操作。创建一个高通滤波核，并用这个核与图像进行卷积：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">h = fspecial(<span class="string">'gaussian'</span>,<span class="number">15</span>,<span class="number">7</span>);</span><br><span class="line"><span class="comment">%matlab内建的滤波核生成器</span></span><br><span class="line">gs = imfilter(f,h)</span><br><span class="line"><span class="comment">%matlab内建的空间滤波函数</span></span><br><span class="line"><span class="built_in">figure</span>(<span class="string">'name'</span>,<span class="string">'spatial filtering'</span>),imshow(gs);</span><br></pre></td></tr></table></figure>
+<p>上述代码输出的图像如图所示：</p>
+<p><img src="test-of-spatial-gaussian.png" width=450></p>
+<center>
+图3 高斯核空间滤波
+</center>
+<p>重点关注图3在<strong>四周出现了黑色的模糊化</strong>。这是能够解释的:结合<a href="/2020/07/04/Experiment-circular-convolution-convolution#padding">文章的图2来看</a>来看，当高斯核在图2的边界进行卷积时，有一部分卷积核是在图外的，因此需要临时性的padding这些图外的区域为0或者其他值。由于0代表的是黑色像素，因此会拉低整体像素亮度。这个padding过程由空间滤波函数<code>imfilter</code>保证。</p>
+<p>空间滤波就是这样简单，下面我们使用等价的频域滤波来验证公式1的正确性。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[M,N] = <span class="built_in">size</span>(f);</span><br><span class="line">[f,revertclass] = tofloat(f); <span class="comment">%将uint8图像转变为float并返回revertclass逆转函数</span></span><br><span class="line">F = fft2(f);</span><br><span class="line">sig = <span class="number">10</span>; <span class="comment">%高斯滤波器的方差</span></span><br><span class="line">H = lpfilter(<span class="string">'gaussian'</span>,M,N,sig);<span class="comment">%创建频域上的高斯滤波器</span></span><br><span class="line">G = H.*F; <span class="comment">%频域滤波过程</span></span><br><span class="line">g = ifft2(G);<span class="comment">%这一步将会导致出现循环卷积的wraparound error</span></span><br><span class="line">g = revertclass(g);<span class="comment">%逆转float格式回uint8格式</span></span><br><span class="line"><span class="built_in">figure</span>(<span class="string">'name'</span>,<span class="string">'frequency filtering without padding'</span>),imshow(g);</span><br></pre></td></tr></table></figure>
+<p>上述代码只需注意<code>F=fft2(f)</code>执行了没有zero-padding的傅立叶变换操作。输出的滤波结果图如下：</p>
+<p><img src="test-of-frequency-filtering1.png" width=450></p>
+<center>
+图4 高斯滤波器频域滤波1
+</center>
+<p>同样，我们重点观察图4<strong>四周</strong>。可以看到图4在上下边缘出现了类似图3的黑色模糊化，但是其<strong>左右边缘没有出现黑色模糊化</strong>。除边缘外，图4内部部分与图3类似都出现了模糊化。</p>
+<p>假如在实际的图像处理工作中没有对边缘有如此准确的模糊化要求，那么其实图4也能算得上低通滤波结果。但如果准确的定义低通滤波需要在包括边界的所有范围内进行，那么图4显然是不完全的低通滤波结果。产生这种问题的原因是循环卷积导致wraparound error。而循环卷积发生在<code>g=ifft2(G)</code>执行时，也就是从频域向空间域转化时服从卷积定理，等价的卷积过程出现了问题。</p>
+<p>由于图2的傅立叶变换结果F是周期性的，其逆变换结果f也是周期性的。因此，可以绘出下面的图像:</p>
+<p><img src="without-padding.png"></p>
+<center>
+图5 没有padding的卷积过程
+</center>
+<p>图5是理论上的图3的周期性重复图样，我们关注其中绿色虚线框住的区域，这个区域可以被看作是上述代码的<code>f</code>图像进行卷积的那一块。红色框线代表的是高斯滤波器H在空间域时的图样h，我们知道高斯核在傅立叶变换前后都是高斯函数图样，因此这个红色框线其实就是一个与<code>f</code>等尺寸的高斯核。频域滤波后向空间域的转换过程服从卷积定理，也就等价图5中红色框线在绿色区域内进行卷积。显然，绿色区域内上边界部分由于红框同时框住了重复的黑色区域实现了模糊化，下边界框住了重复的白色区域也实现了模糊化。但是在绿色区域的左右边界，红色窗口的滑动就出现了问题:由于红色区域框住了绿色区域内白色部分的同时也框住了重复的左右两侧白色区域，这导致了在进行高斯滤波时几乎不会出现模糊化。</p>
+<p>上面的论述成立一个很关键的提前:红色框线是一个高斯核，也就是只在中心区域有值，周围区域几乎无值。</p>
+<p>图5及其下面的论述解释了图4的产生。那么如何正确的产生与图3一摸一样的结果呢？只需要zero-padding即可：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Fp = fft2(f,<span class="number">2</span>*M,<span class="number">2</span>*N); <span class="comment">%一种最简单的zero-padding方法：扩大一倍的尺寸</span></span><br><span class="line">Hp = lpfilter(<span class="string">'gaussian'</span>,<span class="number">2</span>*M,<span class="number">2</span>*N,<span class="number">2</span>*sig); <span class="comment">%注意，由于尺寸放大一倍因此方差也要扩大一倍</span></span><br><span class="line">Gp = Hp.*Fp;</span><br><span class="line">gp = ifft2(Gp);</span><br><span class="line">gpc = gp(<span class="number">1</span>:<span class="built_in">size</span>(f,<span class="number">1</span>),<span class="number">1</span>:<span class="built_in">size</span>(f,<span class="number">2</span>)); <span class="comment">%由于尺寸翻倍，因此只需要其中的四分之一即可</span></span><br><span class="line">gpc = revertclass(gpc);</span><br><span class="line"><span class="built_in">figure</span>(<span class="string">'name'</span>,<span class="string">'frequency filtering with padding'</span>),imshow(gpc);</span><br></pre></td></tr></table></figure>
+<p>输出的滤波结果如图：</p>
+<p><img src="test-of-frequency-filtering2.png" width=450></p>
+<center>
+图6 高斯滤波器滤波2
+</center>
+<p>从图6可以看到，图6和图3基本一致，特别是两边的部分出现了黑色模糊化。padding的f为什么能够解决循环卷积导致的wraparound error问题呢？一下面的图7展开解释。</p>
+<p><img src="with-padding.png"></p>
+<center>
+图7 padding后的卷积过程
+</center>
+<p>图7同样是理论上存在的重复图样，但是和图5有所区别：由于zero-padding了一倍的尺寸，绿色框住的区域为原图f的padding后的版本。同理，与之匹配的高斯滤波器也变成了一倍大小的红框。但是我们观察可以发现红框在绿框左上角范围中滑动时不会受类似图5一样重复图样的影响，所滑动的有效范围外都是0.这保证了绿框左上角部分的正确卷积。</p>
+<p>但是需要指出的是，绿框不仅包含左上角部分，其余三块zero-padding也需要进行卷积，卷积过程会引入其他重复图案中白色的部分。但这不影响最后的输出，因为我们只要保证左上角是正确的即可，最后输出时需要截断：<code>gpc = gp(1:size(f,1),1:size(f,2))</code></p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波中基本函数"><span class="toc-number">1.</span> <span class="toc-text">频域滤波中基本函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波基础"><span class="toc-number">2.</span> <span class="toc-text">频域滤波基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#警惕循环卷积可能会导致图像出现wraparound-error"><span class="toc-number">2.1.</span> <span class="toc-text">警惕循环卷积，可能会导致图像出现wraparound error</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&text=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&is_video=false&description=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Filtering-in-Frequency-Domain-Using-MATLAB&body=Check out this article: http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&title=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&name=Filtering-in-Frequency-Domain-Using-MATLAB&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/&t=Filtering-in-Frequency-Domain-Using-MATLAB" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>

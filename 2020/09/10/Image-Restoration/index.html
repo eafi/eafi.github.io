@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文用来总结和实现digital image processing中关于图像恢复和重建的部分。 一种退化模型 书中将图像退化的过程分成了两步，一步是退化(Degradation)，一步是加性噪声(additive noise)。那么整个模型就是一张原图\(f(x,y)\)受到了退化\(\mathcal{H}\)和加性噪声\(\eta(x,y)\)最后得到退化图\(g(x,y)\)，我们希望通过恢复">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Image-Restoration">
+<meta property="og:url" content="http://yoursite.com/2020/09/10/Image-Restoration/index.html">
+<meta property="og:site_name" content="SuperEafi">
+<meta property="og:description" content="本文用来总结和实现digital image processing中关于图像恢复和重建的部分。 一种退化模型 书中将图像退化的过程分成了两步，一步是退化(Degradation)，一步是加性噪声(additive noise)。那么整个模型就是一张原图\(f(x,y)\)受到了退化\(\mathcal{H}\)和加性噪声\(\eta(x,y)\)最后得到退化图\(g(x,y)\)，我们希望通过恢复">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/model.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/PDF-of-Gaussian.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/PDF-of-Rayleigh.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/PDF-of-Erlang.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/PDF-of-Exponential.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/PDF-of-Uniform.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/PDF-of-lognormal.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/erlangtest.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/composition-of-sinusoid.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/imnoise3-test.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/10/Image-Restoration/adpmedian.png">
+<meta property="article:published_time" content="2020-09-10T07:49:15.000Z">
+<meta property="article:modified_time" content="2020-09-15T12:23:31.842Z">
+<meta property="article:author" content="Eafi">
+<meta property="article:tag" content="ImageProcessing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/10/Image-Restoration/model.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Image-Restoration</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/09/16/Filtering-in-Frequency-Domain/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/09/08/wavelet-and-other-image-transforms2/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/10/Image-Restoration/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/10/Image-Restoration/&text=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/10/Image-Restoration/&is_video=false&description=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Image-Restoration&body=Check out this article: http://yoursite.com/2020/09/10/Image-Restoration/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/10/Image-Restoration/&name=Image-Restoration&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/10/Image-Restoration/&t=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一种退化模型"><span class="toc-number">1.</span> <span class="toc-text">一种退化模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#噪声模型"><span class="toc-number">2.</span> <span class="toc-text">噪声模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#一些常见的噪声种类"><span class="toc-number">2.1.</span> <span class="toc-text">一些常见的噪声种类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#散粒噪声shot-noise"><span class="toc-number">2.1.1.</span> <span class="toc-text">散粒噪声(shot noise)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#读出噪声read-noise"><span class="toc-number">2.1.2.</span> <span class="toc-text">读出噪声(Read noise)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#暗电流dark-current"><span class="toc-number">2.1.3.</span> <span class="toc-text">暗电流(Dark current)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一些重要的噪声概率建模"><span class="toc-number">2.2.</span> <span class="toc-text">一些重要的噪声概率建模</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#gaussian-noise"><span class="toc-number">2.2.1.</span> <span class="toc-text">Gaussian Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rayleigh-noise"><span class="toc-number">2.2.2.</span> <span class="toc-text">Rayleigh Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#erlang-noise"><span class="toc-number">2.2.3.</span> <span class="toc-text">Erlang Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exponential-noise"><span class="toc-number">2.2.4.</span> <span class="toc-text">Exponential Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#uniform-noise"><span class="toc-number">2.2.5.</span> <span class="toc-text">Uniform Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#salt-and-pepper-noise"><span class="toc-number">2.2.6.</span> <span class="toc-text">Salt-and-Pepper Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lognormal"><span class="toc-number">2.2.7.</span> <span class="toc-text">Lognormal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">2.2.8.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#噪声的matlab实现"><span class="toc-number">2.3.</span> <span class="toc-text">噪声的Matlab实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#加入高斯噪声"><span class="toc-number">2.3.1.</span> <span class="toc-text">加入高斯噪声</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#加入椒盐噪声"><span class="toc-number">2.3.2.</span> <span class="toc-text">加入椒盐噪声</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#产生指定分布的噪声"><span class="toc-number">2.4.</span> <span class="toc-text">产生指定分布的噪声</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#存在封闭式"><span class="toc-number">2.4.1.</span> <span class="toc-text">存在封闭式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#rayleigh-noise-1"><span class="toc-number">2.4.1.1.</span> <span class="toc-text">1.Rayleigh Noise</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exponential-noise-1"><span class="toc-number">2.4.1.2.</span> <span class="toc-text">2.Exponential Noise</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不存在封闭式"><span class="toc-number">2.4.2.</span> <span class="toc-text">不存在封闭式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#lognormal-noise"><span class="toc-number">2.4.2.1.</span> <span class="toc-text">3.lognormal noise</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#erlang-noise-1"><span class="toc-number">2.4.2.2.</span> <span class="toc-text">4.Erlang Noise</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#salt-pepper"><span class="toc-number">2.4.2.3.</span> <span class="toc-text">5.Salt &amp; Pepper</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结-1"><span class="toc-number">2.4.3.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#周期噪声"><span class="toc-number">2.5.</span> <span class="toc-text">周期噪声</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab仿真周期噪声"><span class="toc-number">2.5.1.</span> <span class="toc-text">matlab仿真周期噪声</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#噪声参数的估计"><span class="toc-number">2.6.</span> <span class="toc-text">噪声参数的估计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab参数估计仿真"><span class="toc-number">2.6.1.</span> <span class="toc-text">matlab参数估计仿真</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#restoration-in-the-presence-of-noise-only---spatial-filtering"><span class="toc-number">3.</span> <span class="toc-text">Restoration in the presence of noise only - spatial filtering</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#均值滤波"><span class="toc-number">3.1.</span> <span class="toc-text">均值滤波</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#arithmetic-mean-filter"><span class="toc-number">3.1.1.</span> <span class="toc-text">1.Arithmetic Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现"><span class="toc-number">3.1.2.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#geometric-mean-filter"><span class="toc-number">3.1.3.</span> <span class="toc-text">2.Geometric Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-1"><span class="toc-number">3.1.4.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#harmonic-mean-filter"><span class="toc-number">3.1.5.</span> <span class="toc-text">3.Harmonic Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-2"><span class="toc-number">3.1.6.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#contraharmonic-mean-filter"><span class="toc-number">3.1.7.</span> <span class="toc-text">4.Contraharmonic Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-3"><span class="toc-number">3.1.8.</span> <span class="toc-text">matlab实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#次序统计滤波"><span class="toc-number">3.2.</span> <span class="toc-text">次序统计滤波</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#median-filter"><span class="toc-number">3.2.1.</span> <span class="toc-text">1.Median Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-4"><span class="toc-number">3.2.2.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#maxmin-filter"><span class="toc-number">3.2.3.</span> <span class="toc-text">2.Max&amp;Min Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-5"><span class="toc-number">3.2.4.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#midpoint-filter"><span class="toc-number">3.2.5.</span> <span class="toc-text">3.Midpoint Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-6"><span class="toc-number">3.2.6.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alpha-trimmed-mean-filter"><span class="toc-number">3.2.7.</span> <span class="toc-text">4.Alpha-Trimmed Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-7"><span class="toc-number">3.2.8.</span> <span class="toc-text">matlab实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自适应局部降噪滤波"><span class="toc-number">3.3.</span> <span class="toc-text">自适应局部降噪滤波</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自适应中值滤波"><span class="toc-number">3.4.</span> <span class="toc-text">自适应中值滤波</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-8"><span class="toc-number">3.4.1.</span> <span class="toc-text">matlab实现</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Image-Restoration
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">SuperEafi</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-10T07:49:15.000Z" itemprop="datePublished">2020-09-10</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Textbook/">Textbook</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/ImageProcessing/" rel="tag">ImageProcessing</a>
+    </div>
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            processEscapes: true
+          }
+        });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+            tex2jax: {
+              skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+          });
+      </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+              var all = MathJax.Hub.getAllJax(), i;
+              for(i=0; i < all.length; i += 1) {
+                  all[i].SourceElement().parentNode.className += ' has-jax';
+              }
+          });
+      </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文用来总结和实现<em>digital image processing</em>中关于图像恢复和重建的部分。</p>
+<h1 id="一种退化模型">一种退化模型</h1>
+<p>书中将图像退化的过程分成了两步，一步是退化(Degradation)，一步是加性噪声(additive noise)。那么整个模型就是一张原图<span class="math inline">\(f(x,y)\)</span>受到了退化<span class="math inline">\(\mathcal{H}\)</span>和加性噪声<span class="math inline">\(\eta(x,y)\)</span>最后得到退化图<span class="math inline">\(g(x,y)\)</span>，我们希望通过恢复过程得到图<span class="math inline">\(\hat{f}(x,y)\)</span>，它是原图<span class="math inline">\(f(x,y)\)</span>的一个逼近。</p>
+<p>上述叙述过程可以用图1的流程图来描述.</p>
+<p><img src="model.png" width=400></p>
+<center>
+图1 退化和恢复模型
+</center>
+<h1 id="噪声模型">噪声模型</h1>
+<p>数字图像中噪声的出现主要有两个地方，一个是产生图像过程(acquisition)；另一个是传输图像过程(transmission)。比如对于一个CCD相机来说，所拍摄场景的亮度和传感器温度很大程度决定了相机的噪声。</p>
+<h2 id="一些常见的噪声种类">一些常见的噪声种类</h2>
+<h3 id="散粒噪声shot-noise">散粒噪声(shot noise)</h3>
+<p>散粒噪声是一种实验观测中的读出噪声，当观测中数量有限的携带能量的粒子（例如电路中的电子或光学仪器中的光子）数量少到能够引发数据读取中出现可观测到的统计涨落，这种读出的统计涨落被称作散粒噪声。</p>
+<p>散粒噪声的本质在于，通过测量到的电流强度或光强度能够给出收集到的电子或光子的平均数量，但无法得知任意时刻实际收集到的电子或光子数量。实际的数量可能会高于、低于或相当于平均的数量，其分布按平均值遵循泊松分布。由于泊松分布在大量粒子数时趋向于正态分布，在大量粒子存在时信号中的散粒噪声会呈现正态分布。散粒噪声的标准差此时等于平均粒子数的平方根，信噪比从而为</p>
+<p><span class="math display">\[SNR = \frac{N}{\sqrt{N}} = \sqrt{N}\]</span></p>
+<p>这里的N是采集到的平均粒子数，当N很大时信噪比也会很大。<strong>因此尤其当测量中采集的粒子数很少时对散粒噪声的分析就显得非常重要</strong>.</p>
+<h3 id="读出噪声read-noise">读出噪声(Read noise)</h3>
+<p>读出噪声，就是相机在读出信号时产生的噪声，是电子通过前置放大器和模-数转换器（ADC）转换为数字信号时引入的不确定性。这种噪声遵循高斯分布。</p>
+<h3 id="暗电流dark-current">暗电流(Dark current)</h3>
+<p>暗电流是由相机传感器产热时产生电子产生的。这些电子也会被采集，从而形成噪声。暗电流的特点是随着时间累积，因此在长曝光的应用场景中，暗电流越大，所累积的噪声影响越大。由于暗电流是热量产生的，因此制冷是降低暗电流的主要方法。</p>
+<h2 id="一些重要的噪声概率建模">一些重要的噪声概率建模</h2>
+<p>上一节介绍了一些常出现的噪声种类，这些种类出现在图像上的形式我们可以用数学建模来公式化表达。噪声就是一些随机数，这些随机数通过概率密度函数（PDF）或累计分布函数（CDF）来唯一的描述。下面介绍一些最常用的噪声概率模型，这些噪声模型广泛应用在各种图像降噪建模中。</p>
+<h3 id="gaussian-noise">Gaussian Noise</h3>
+<p>高斯噪声的概率密度函数如下：</p>
+<p><span class="math display">\[p(z) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(z-\bar{z})^2}{2\sigma^2}}\ \ -\infty &lt; z &lt; \infty \tag{1}\]</span></p>
+<p>公式1有以下几个参数需要说明：</p>
+<ol type="1">
+<li><p>z代表高斯随机变量的亮度</p></li>
+<li><p><span class="math inline">\(\bar{z}\)</span>代表的是z的均值</p></li>
+<li><p><span class="math inline">\(\sigma\)</span>代表标准差，<span class="math inline">\(\sigma^2\)</span>代表方差</p></li>
+</ol>
+<p>高斯概率密度函数图像如下所示：</p>
+<p><img src="PDF-of-Gaussian.png"></p>
+<center>
+图2 PDF of Gaussian Noise
+</center>
+<p>根据图像，可知对于一个值z，其落入<span class="math inline">\(\bar{z} \pm \sigma\)</span>的概率接近0.68，落入<span class="math inline">\(\bar{z} \pm 2 \sigma\)</span>的概率接近0.95.</p>
+<p>高斯噪声的累计概率分布如下：</p>
+<p><span class="math display">\[F(z) = \int^z_{-z} p(v)dv\]</span></p>
+<h3 id="rayleigh-noise">Rayleigh Noise</h3>
+<p>瑞丽噪声的概率密度函数为：</p>
+<p><span class="math display">\[p(z) = \left\{ \begin{array}{rc1} 
+&amp; \frac{2}{b} (z-a)e^{-(z-a)^2/b} &amp; z \ge a \\
+&amp; 0 &amp; z &lt; a
+\end{array}\right. \tag{2}
+\]</span></p>
+<p>其中：</p>
+<ol type="1">
+<li><p>z的均值为<span class="math inline">\(\bar{z} = a + \sqrt{\pi b /4}\)</span></p></li>
+<li><p>z的方差为<span class="math inline">\(\sigma^2 = \frac{b(4-\pi)}{4}\)</span></p></li>
+</ol>
+<p>瑞丽概率密度函数图像如下所示：</p>
+<p><img src="PDF-of-Rayleigh.png"></p>
+<center>
+图3 PDF of Rayleigh Noise
+</center>
+<p>瑞丽概率密度函数呈现出一种倾斜的状态，非常适合对倾斜的直方图进行建模。</p>
+<p>Rayleigh的累计概率分布如下：</p>
+<p><span class="math display">\[F(z) = \left\{ \begin{array}{rc1} 
+&amp; 1-e^{-(z-a)^2 /b} &amp; z \ge a \\
+&amp; 0 &amp; z &lt; a
+\end{array}\right. \tag{3}
+\]</span></p>
+<h3 id="erlang-noise">Erlang Noise</h3>
+<p>Erlang噪声概率密度函数为：</p>
+<p><span class="math display">\[p(z) = \left\{ \begin{array}{rc1} 
+&amp; \frac{a^b z^{b-1}}{(b-1)!} e^{-az}  &amp; z \ge 0 \\
+&amp; 0 &amp; z &lt; 0
+\end{array}\right. \tag{4}
+\]</span></p>
+<p>其中：</p>
+<ol type="1">
+<li><p>a&gt;b,且b是一个正整数</p></li>
+<li><p>z的均值为<span class="math inline">\(\bar{z} = \frac{b}{a}\)</span></p></li>
+<li><p>z的方差为<span class="math inline">\(\sigma^2 = \frac{b}{a^2}\)</span></p></li>
+</ol>
+<p>Erlang Noise的概率密度函数图像为：</p>
+<p><img src="PDF-of-Erlang.png"></p>
+<center>
+图4 PDF of Erlang Noise
+</center>
+<p>Erlang噪声的累计分布函数为：</p>
+<p><span class="math display">\[F(z) = \left[1 - e^{az} \sum_{n=0}^{b-1} \frac{(az)^n}{n!} \right] \tag{5}\]</span></p>
+<h3 id="exponential-noise">Exponential Noise</h3>
+<p>指数噪声其实是Erlang的一个特例，当Erlang的b=1时，公式被称为指数噪声概率密度函数：</p>
+<p><span class="math display">\[p(z) = \left\{ \begin{array}{rc1} 
+&amp; a e^{-az}  &amp; z \ge 0 \\
+&amp; 0 &amp; z &lt; 0
+\end{array}\right. \tag{6}
+\]</span></p>
+<p>其中：</p>
+<ol type="1">
+<li><p>z的均值为<span class="math inline">\(\bar{z} = \frac{1}{a}\)</span></p></li>
+<li><p>z的方差为<span class="math inline">\(\sigma^2 = \frac{1}{a^2}\)</span></p></li>
+</ol>
+<p>从Erlang Noise的图4可以看出，如果我们让b=1，那么那个图像的峰值位置将会被移动到z=0处：</p>
+<p><img src="PDF-of-Exponential.png"></p>
+<center>
+图5 PDF of Exponential
+</center>
+<p>Exponential噪声的累计分布函数为：</p>
+<p><span class="math display">\[F(z) = \left\{ \begin{array}{rc1} 
+&amp; 1 - e^{-az}  &amp; z \ge 0 \\
+&amp; 0 &amp; z &lt; 0
+\end{array}\right. \tag{7}
+\]</span></p>
+<h3 id="uniform-noise">Uniform Noise</h3>
+<p>均匀噪声的概率密度函数为：</p>
+<p><span class="math display">\[p(z) = \left\{\begin{array}{rc1}
+&amp;\frac{1}{b-a} &amp; a \le z le b \\
+&amp;0 &amp; \mbox{otherwise}
+\end{array}\right. \tag{8}\]</span></p>
+<p>其中：</p>
+<ol type="1">
+<li><p>z的均值为<span class="math inline">\(\bar{z} = \frac{a+b}{2}\)</span></p></li>
+<li><p>z的方差为<span class="math inline">\(\sigma^2 = \frac{(b-1)^2}{12}\)</span></p></li>
+</ol>
+<p>均匀噪声的累计分布函数为：</p>
+<p><span class="math display">\[F(z) = \left\{\begin{array}{rc1}
+&amp;0 &amp; z &lt; a \\
+&amp;\frac{z-a}{b-a} &amp; a \le z \le b \\
+&amp;1 &amp; z &gt;b
+\end{array}\right. \tag{9}\]</span></p>
+<p><img src="PDF-of-Uniform.png"></p>
+<center>
+图6 PDF of Uniform
+</center>
+<p>均匀噪声一般不用做图像污染的噪声，但这不影响均匀噪声非常重要。这是因为均匀噪声能够产生其他噪声的分布：</p>
+<p>假设<span class="math inline">\(\omega\)</span>是一个均匀分布在区间(0,1)的随机变量，那么为了获得一个指定的累计分布函数F的随机变量z，可以通过计算方程：</p>
+<p><span class="math display">\[z = F^{-1} (\omega) \tag{10}\]</span></p>
+<p>这个公式简单且重要，因为我们可以用过一个服从均匀分布的随机变量<span class="math inline">\(\omega\)</span>，产生我们期望的一个服从特定CDF的随机变量z。但能够运用这个公式有一个先觉条件：<strong>公式6的右半部分需要是一个封闭式(closed-form expression)</strong>，即函数表达式是有限标准操作的组合（标准操作一般不包括极限、微分和积分）。因此，如果一个随机变量z的累计分布函数不是一个封闭式，那么就没办法用这个公式。</p>
+<h3 id="salt-and-pepper-noise">Salt-and-Pepper Noise</h3>
+<p>椒盐噪声是上述所有噪声概率密度函数中最特殊的一种，其特殊在椒盐噪声的分布图样不依赖于它的均值和方差，而是由单独的salt概率和pepper概率组成的：</p>
+<p><span class="math display">\[p(z) = \left\{ \begin{array}{rc1} 
+&amp;P_s &amp; \mbox{for}\ z=2^k -1 \\
+&amp;P_p &amp; \mbox{for}\ z=0 \\
+&amp;1-(P_s+P_p) &amp; \mbox{for}\ z=V
+\end{array}\right.
+\tag{11}
+\]</span></p>
+<p>其中，k是色深位数。</p>
+<p>我们假设有一张椒盐噪声的噪声图像<span class="math inline">\(\eta(x,y)\)</span>，这个图像与原图<span class="math inline">\(f(x,y)\)</span>作用时，有三种情况，第一种如果被污染位置为salt，那么这个位置的像素亮度被设置为最大<span class="math inline">\(2^k-1\)</span>；第二种如果被污染位置为pepper，那么这个位置被设置为亮度最小0;第三种就是保留原来的像素亮度。</p>
+<p>关于公式7有以下几点需要说明：</p>
+<ol type="1">
+<li><p>公式7中的<span class="math inline">\(P_s,P_p\)</span>是可以任意指定的，比如<span class="math inline">\(P_s = 0.02,P_p=0.01\)</span> ,说明图像出现salt的概率为0.02，出现pepper的概率为0.01，其余为正常像素值。</p></li>
+<li><p>椒盐噪声的均值和方差是随着不用的<span class="math inline">\(P_s,O_p\)</span>计算出来的：</p></li>
+</ol>
+<p><span class="math display">\[\bar{z} = (0)P_p + K(1-P_s-P_p)+(2^k -1 )P_s\]</span></p>
+<p><span class="math display">\[\sigma^2 \ (0-\bar{z})^2 P_p + (K-\bar{z})^2(1-P_s-P_p)+(2^k-1)^2 P_s\]</span></p>
+<p>椒盐噪声的累计分布函数为：</p>
+<p><span class="math display">\[F(z) = \left\{ \begin{array}{rc1} 
+&amp; 0 &amp; \mbox{for}\ z&lt;0 \\
+&amp; P_p &amp; \mbox{for}\ 0 \le z &lt;k \\
+&amp; 1-P_s &amp; \mbox{for}\ k \le z &lt;2^n-1 \\
+&amp; 1 &amp; \mbox{for}\ 2^n-1 \le z
+\end{array}\right. \tag{12}
+\]</span></p>
+<h3 id="lognormal">Lognormal</h3>
+<p>lognormal的特点是假如随机变量X服从lognormal分布，那么随机变量<span class="math inline">\(Y = ln(X)\)</span>服从<strong>正态分布</strong>.</p>
+<p>lognormal的概率密度函数为：</p>
+<p><span class="math display">\[p(z) = \frac{1}{\sqrt{2 \pi} b z} e^{-\frac{(lnz - a)^2}{2b^2}} \ z&gt;0 \]</span></p>
+<p>lognormal的概率密度函数图像为：</p>
+<p><img src="PDF-of-lognormal.png" width=400></p>
+<center>
+图7 PDF of lognormal
+</center>
+<p>lognormal的累计分布函数为：</p>
+<p><span class="math display">\[F(z) = \int_0^z p(v)dv\]</span></p>
+<h3 id="小结">小结</h3>
+<ol type="1">
+<li><p>高斯噪声通常出现在电路噪声、由低亮度或高温导致的传感器噪声</p></li>
+<li><p>瑞丽适合描述深度成像(range iamging)中的噪声现象</p></li>
+<li><p>椒盐噪声出现在错误的快门</p></li>
+<li><p>Erlang噪声在激光成像时很有用</p></li>
+<li><p>大多复杂累计分布的噪声都可以使用均匀分布结合公式10生成</p></li>
+</ol>
+<h2 id="噪声的matlab实现">噪声的Matlab实现</h2>
+<p>Matlab中提供了函数<code>imnoise</code>用以将传入的图像f按照特定的噪声进行污染,有些噪声在Matlab中内置，可以直接使用参数定义，有些特定表达的噪声可能在Matlab中不存在，需要自定义。<code>imnoise</code>传入参数规则：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g = imnoise(f,<span class="built_in">type</span>,parameters)</span><br></pre></td></tr></table></figure>
+<p>下面是一些能够直接使用Matlab内建的噪声类型的使用方法</p>
+<h3 id="加入高斯噪声">加入高斯噪声</h3>
+<p>回顾前面，高斯噪声出现在高温或者低亮度的环境。Matlab中的imnoise的高斯噪声有如下几个：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">g = imnoise(f,<span class="string">'gaussian'</span>,m,var) </span><br><span class="line"><span class="comment">%分别传入特定均值、方差的高斯噪声于f</span></span><br><span class="line"></span><br><span class="line">g = imnoise(f,<span class="string">'localvar'</span>,V) </span><br><span class="line"><span class="comment">%传入0均值的，均有局部方差的高斯噪声。这个V是一个与f同尺寸的方差图</span></span><br><span class="line"></span><br><span class="line">g = imnoise(f,<span class="string">'localvar'</span>,image_intensity,var) </span><br><span class="line"><span class="comment">%传入0均值，方差与图像亮度呈现一定映射规律的高斯噪声</span></span><br></pre></td></tr></table></figure>
+<p>上述主要注意的是:</p>
+<ol type="1">
+<li><p>局部方差高斯噪声的概念，能够客制化图像中高斯噪声按照不同方差高斯分布产生。</p></li>
+<li><p>对于RGB图像，在进行指定方差进行污染时，需要小心传入的方差图像的通道数也要为三通道</p></li>
+</ol>
+<h3 id="加入椒盐噪声">加入椒盐噪声</h3>
+<p>椒盐噪声通常出现在错误的快门开关时，Matlab中可用：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g = imnoise(f,<span class="string">'salt &amp; pepper'</span>,d) <span class="comment">%d指定了被椒盐噪声污染的比率</span></span><br></pre></td></tr></table></figure>
+<p>上述要注意的是，Matlab的椒盐噪声并未单独的指定salt的比率和pepper的比率。如果需要分别指定salt/pepper出现的概率，需要客制化一个函数。</p>
+<h2 id="产生指定分布的噪声">产生指定分布的噪声</h2>
+<p>有些时候我们期望噪声具备一定的分布规则（知道它的概率密度函数或累积分布函数），但这种噪声可能Matlab并不内建，因此我们需要具备产生指定分布噪声的能力。在上述讲噪声概率建模中提到了均匀分布，均匀分布自身很少以噪声形式出现，大多情况均匀噪声是被用来产生其他分布形式的噪声。在前面讲述公式6提到，只有公式6右半部分,即从CDF反解出来的结果,是<strong>封闭形式</strong>才能够利用公式6。因此一些不存在封闭形式的可能需要其他方法。本节将抛开matlab自带的<code>imnoise</code>函数，根据噪声建模公式或者噪声自身特点来产生指定分布的噪声图像。因此，本节注重公式推导和代码实现。</p>
+<h3 id="存在封闭式">存在封闭式</h3>
+<h4 id="rayleigh-noise-1">1.Rayleigh Noise</h4>
+<p>以Rayleigh噪声为例子，描述如何使用公式6进行Rayleigh噪声生成：</p>
+<p>已知Rayleigh分布的累积分布函数形式为：</p>
+<p><span class="math display">\[F(z) = \left\{ \begin{array}{rc1} 
+&amp; 1-e^{-(z-a)^2 /b} &amp; z \ge a \\
+&amp; 0 &amp; z &lt; a
+\end{array}\right. \tag{3}
+\]</span></p>
+<p>其中b&gt;0，结合公式6，为了解出随机变量z，写：</p>
+<p><span class="math display">\[1 - e^{-(z-a)^2 / b}  = \omega\]</span></p>
+<p>然后得到的z的表达：</p>
+<p><span class="math display">\[z = a + \sqrt{-b ln(1-\omega)}\]</span></p>
+<p>从Rayleigh的图3可以看出，随机变量z在服从Rayleigh时z的取值大于等于a，这一点也可以从上面这个公式得到，这是因为平方根显然是大于零的。有了这个表达，当我们拥有一个服从均匀分布的随机变量<span class="math inline">\(\omega\)</span>时，就能够产生参数为a和b的服从Rayleigh分布的随机变量z.因此，称这个表达为随机变量生成器(random number generator equation):</p>
+<p><span class="math display">\[z = a + \sqrt{-b ln(1-U(0,1))}\]</span></p>
+<p>下面使用matlab对这个公式进行表达并产生Rayleigh噪声：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RayleighNoise = a + <span class="built_in">sqrt</span>(-b*<span class="built_in">log</span>(<span class="number">1</span>-<span class="built_in">rand</span>(M,N)));</span><br><span class="line"><span class="comment">%产生尺寸为M,N的RayleighNoise</span></span><br></pre></td></tr></table></figure>
+<h4 id="exponential-noise-1">2.Exponential Noise</h4>
+<p>类似的，指数分布(Exponential Noise)有生成器：</p>
+<p><span class="math display">\[z = - \frac{1}{a} ln \left[ 1 - U(0,1) \right]\]</span></p>
+<p>下面使用matlab对这个公式进行表达并产生Exponential噪声：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">R</span> = <span class="title">exponential</span><span class="params">(M,N,a)</span></span></span><br><span class="line">    <span class="keyword">if</span> a &lt;= <span class="number">0</span> </span><br><span class="line">        error(<span class="string">'Parameter a must be positive for exponential type.'</span>)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    k = - <span class="number">1</span>/a;</span><br><span class="line">    R = k*<span class="built_in">log</span>(<span class="number">1</span>-<span class="built_in">rand</span>(M,N));</span><br></pre></td></tr></table></figure>
+<h3 id="不存在封闭式">不存在封闭式</h3>
+<p>应用公式10其实就是反解噪声模型的累积分布函数，对于Rayleigh噪声分布而言，从上一小节可以推导得到一个封闭式的随机变量生成器。但看看噪声模型中的Lognroaml和Gaussian的累积分布函数，我们无法直接得到一个封闭形式的生成器。但可以利用一些其他方法来获得随机变量生成器。</p>
+<h4 id="lognormal-noise">3.lognormal noise</h4>
+<p>以lognormal为例，lognormal值随机变量ln(X)服从正态分布，因此写随机变量生成器：</p>
+<p><span class="math display">\[z = e^{bN(0,1) + a}\]</span></p>
+<p>得到服从lognormal的随机变量z。</p>
+<p>下面使用matlab对这个公式进行表达并产生lognormal noise：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">R = <span class="built_in">exp</span>(b * <span class="built_in">randn</span>(M,N)+a);</span><br><span class="line"><span class="comment">%注意是randn，即正态分布随机变量</span></span><br></pre></td></tr></table></figure>
+<h4 id="erlang-noise-1">4.Erlang Noise</h4>
+<p>以Erlang为例，Erlang的生成器为：</p>
+<p><span class="math display">\[z = E_1 + E_2 + ... + E_b\]</span></p>
+<p>其中，<span class="math inline">\(E_i\)</span>是参数为a的服从指数分布的随机变量。</p>
+<p>下面使用matlab对这个公式进行表达并产生Erlang噪声：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">funciton R  = erlang(M,N,a,b)</span><br><span class="line">    <span class="keyword">if</span>(b -= <span class="built_in">round</span>(b) || b &lt;=<span class="number">0</span>) <span class="comment">%round为圆整，圆整后若有余量说明非整数</span></span><br><span class="line">        error(<span class="string">'Param b must be a positive integer for Erlang.'</span>)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    k = <span class="number">-1</span>/a;</span><br><span class="line">    R = <span class="built_in">zeros</span>(M,N);</span><br><span class="line">    <span class="keyword">for</span> <span class="built_in">j</span> = <span class="number">1</span>:b</span><br><span class="line">        R = R + k * <span class="built_in">log</span>(<span class="number">1</span>-<span class="built_in">rand</span>(M,N)); <span class="comment">%服从参数为a的指数分布部分</span></span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h4 id="salt-pepper">5.Salt &amp; Pepper</h4>
+<p>椒盐噪声的产生比较特殊，由两个概率控制：<span class="math inline">\(P_s\)</span>出现salt的概率；<span class="math inline">\(P_p\)</span>出现pepper的概率，<span class="math inline">\(1-P_s-P_p\)</span>像素不变的概率。基本上使用的就是均匀分布附加一些额外的逻辑。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">R</span> = <span class="title">saltpepper</span><span class="params">(M,N,a,b)</span></span></span><br><span class="line">    <span class="keyword">if</span>(a+b) &gt; <span class="number">1</span></span><br><span class="line">        error(<span class="string">'The sum Pa+Pb must not exceed 1.'</span>) </span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    R(<span class="number">1</span>:M,<span class="number">1</span>:N) = <span class="number">0.5</span>;<span class="comment">%矩阵全初始化为0.5</span></span><br><span class="line">    X = <span class="built_in">rand</span>(M,N);  <span class="comment">%产生一个大小为M，N的均匀分布矩阵，这个矩阵每一个元素都在0～1之间</span></span><br><span class="line">    R(X &lt;= a) = <span class="number">0</span>; <span class="comment">%pepper noise</span></span><br><span class="line">    u = a+b;</span><br><span class="line">    R(X &gt; a &amp; X &lt;= u) = <span class="number">1</span>; <span class="comment">%salt noise</span></span><br></pre></td></tr></table></figure>
+<h3 id="小结-1">小结</h3>
+<p>本节展示了一系列噪声的产生方法,这些方法主要是运用了噪声模型的累积分布函数或是一些其它技巧产生的。</p>
+<ol type="1">
+<li>对于产生的噪声<span class="math inline">\(z=F^{-1}(w)\)</span>，我们最关注的是随机变量z的取值。比如使用上述matlab代码可以产生各种各样的服从特定分布的随机变量z，为了验证随机变量确实符合期望的分布，可以产生一个一维的噪声数组，然后使用直方图绘制这个数组：</li>
+</ol>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%验证Erlang噪声输出出来的随机变量确实符合Erlang图样</span></span><br><span class="line">R = erlang(<span class="number">500</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">histogram(R);</span><br></pre></td></tr></table></figure>
+<p>输出直方图如下：</p>
+<p><img src="erlangtest.png" width=400></p>
+<center>
+图8 Erlang输出测试
+</center>
+<ol start="2" type="1">
+<li>针对不同的噪声图在加入原始图像时还要小心溢出问题，椒盐噪声污染时需要特别小心不是求和运算。</li>
+</ol>
+<h2 id="周期噪声">周期噪声</h2>
+<p>在噪声模型中介绍了很多的噪声，这些噪声都是空间无关的噪声，即他们在图像表现上像素之间没有任何的位置关系。但是还有一种噪声是空间相关的，就是周期噪声。周期噪声一般出现在电力的干扰。结合傅立叶变换可知，对于这种周期性的噪声，不难理解最好的消除周期噪声的办法就是频率滤波。即我们将受到空间相关的周期噪声图样转换为频率图样后进行选择性滤波，然后转换回空间域。</p>
+<p>在书中使用的周期性噪声的2D模型如下：</p>
+<p><span class="math display">\[r(x,y) = A\sin\left[2\pi u_0 (x+B_x)/M + 2\pi v_0 (y+B_y)/N \right] \tag{13}\]</span></p>
+<p>其中，<span class="math inline">\(x=0,1,2,...,M-1,y=0,1,2,...,N-1\)</span>,A为幅度，<span class="math inline">\(u_0,v_0\)</span>确定了沿着x轴和y轴上正弦的频率，<span class="math inline">\(B_x,B_y\)</span>描述了与原点的相位差。公式13为纯正弦周期的噪声在空间域上的表达。需要注意的是，公式13只描述了一个正弦噪声，但实际的图像噪声中可能包含多个不同方向、频率、强度的正弦组合。叠加后的噪声图将会变得复杂，无法从空间域进行观察，比如下图所示，是若干形式如13的正弦的一系列叠加：</p>
+<p><img src="composition-of-sinusoid.png"></p>
+<center>
+图9 多个周期噪声组合产生的复杂周期噪声
+</center>
+<p>公式13的傅立叶变换为：</p>
+<p><span class="math display">\[R(u,v) = j \frac{AMN}{2} \left[ e^{-j 2\pi (u_0B_x /M + v_0 B_y/N)} \delta(u+u_0,v+v_0) - e^{j 2\pi (u_0B_x /M + v_0 B_y/N)} \delta(u-u_0,v-v_0) \right] \tag{14}\]</span></p>
+<p>关于公式14有如下几点说明：</p>
+<ol type="1">
+<li><p><span class="math inline">\(u=0,1,2,...,M-1\ \mbox{and}\ v=0,1,2,...,N-1\)</span></p></li>
+<li><p>公式中出现不意外的两个脉冲点，这两个脉冲点是共轭的，且在频率坐标系上的<span class="math inline">\((u+u_0,v+v_0),(u-u_0,v-v_0)\)</span></p></li>
+<li><p>公式中的脉冲函数使得除了脉冲点外，其他地方均为0</p></li>
+</ol>
+<h3 id="matlab仿真周期噪声">matlab仿真周期噪声</h3>
+<p>我们已经知道可以通过指定频域图像共轭脉冲点位置等价于在空间域图像产生一个正弦周期噪声图样，因此matlab仿真中编写产生周期噪声函数，这个函数接受数个脉冲点坐标（频域坐标）<strong>C</strong>，以及他们的幅值<strong>A</strong>、相位<strong>B</strong>，然后输出频域谱图<strong>S</strong>、空间域周期噪声图<strong>r</strong>、和傅立叶公式<strong>R</strong>。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[r,R,S]</span> = <span class="title">imnoise3</span><span class="params">(M,N,C,A,B)</span></span></span><br><span class="line"><span class="comment">% r : 输出的空间域噪声图</span></span><br><span class="line"><span class="comment">% R : 输出的傅立叶公式，由于是周期噪声，因此公式其实就是两个在特定位置的共轭脉冲</span></span><br><span class="line"><span class="comment">% S : 输出的频率谱图</span></span><br><span class="line"><span class="comment">% M，N : 指定尺寸</span></span><br><span class="line"><span class="comment">% C : 脉冲点坐标，这个坐标是频域上以[floor(M/2) +1 , floor(N/2)+1]为中心的坐标，保证中心坐标为整数</span></span><br><span class="line"><span class="comment">% A : 幅值,这是一个[1 X K]的矩阵，因为从公式13可知只控制一个幅值</span></span><br><span class="line"><span class="comment">% B : 相位,这是一个[K X 2]的矩阵，因为从公式13可知有Bx,By两个方向的相位需要指定</span></span><br><span class="line"></span><br><span class="line">K = <span class="built_in">size</span>(C,<span class="number">1</span>); <span class="comment">%获得周期噪声组合的个数，也就说函数接受多个公式13的组合</span></span><br><span class="line"><span class="keyword">if</span> nargin &lt; <span class="number">4</span></span><br><span class="line">    A = <span class="built_in">ones</span>(<span class="number">1</span>,K); <span class="comment">%若没有A参数，那么默认初始化为幅度1</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">if</span> nargin &lt; <span class="number">5</span></span><br><span class="line">    B = <span class="built_in">zeros</span>(K,<span class="number">2</span>);<span class="comment">%若没有B参数，那么默认初始化为相位0</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">%生成R：傅立叶公式组合</span></span><br><span class="line">R = <span class="built_in">zeros</span>(M,N);</span><br><span class="line"><span class="keyword">for</span> <span class="built_in">j</span> = <span class="number">1</span>:K</span><br><span class="line">    u1 = <span class="built_in">floor</span>(M/<span class="number">2</span>) + <span class="number">1</span> - C(<span class="built_in">j</span>,<span class="number">1</span>);</span><br><span class="line">    v1 = <span class="built_in">floor</span>(N/<span class="number">2</span>) + <span class="number">1</span> - C(<span class="built_in">j</span>,<span class="number">2</span>);</span><br><span class="line">    R(u1,v1) = <span class="built_in">i</span>*M*N*(A(<span class="built_in">j</span>)/<span class="number">2</span>) * <span class="built_in">exp</span>(-<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*(C(<span class="built_in">j</span>,<span class="number">1</span>) *B(<span class="built_in">j</span>,<span class="number">1</span>)/M+C(<span class="built_in">j</span>,<span class="number">2</span>)*B(<span class="built_in">j</span>,<span class="number">2</span>)/N));</span><br><span class="line"></span><br><span class="line">    u2 = <span class="built_in">floor</span>(M/<span class="number">2</span>) + <span class="number">1</span> + C(<span class="built_in">j</span>,<span class="number">1</span>);</span><br><span class="line">    v2 = <span class="built_in">floor</span>(N/<span class="number">2</span>) + <span class="number">1</span> + C(<span class="built_in">j</span>,<span class="number">2</span>);</span><br><span class="line">    R(u2,v2) = -<span class="built_in">i</span>*M*N*(A(<span class="built_in">j</span>)/<span class="number">2</span>) * <span class="built_in">exp</span>(<span class="built_in">i</span>*<span class="number">2</span>*<span class="built_in">pi</span>*(C(<span class="built_in">j</span>,<span class="number">1</span>) *B(<span class="built_in">j</span>,<span class="number">1</span>)/M+C(<span class="built_in">j</span>,<span class="number">2</span>)*B(<span class="built_in">j</span>,<span class="number">2</span>)/N));</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">S = <span class="built_in">abs</span>(R);</span><br><span class="line">r = <span class="built_in">real</span>(ifft2(ifftshift(R)));</span><br></pre></td></tr></table></figure>
+<p>关于上述代码还有几点需要补充：</p>
+<ol type="1">
+<li><p>R矩阵是一个二维傅立叶图像，它是一个复数图像（实数图像的傅立叶变换会是复数图像），由于我们已知周期噪声的傅立叶变换是两个共轭的在位置<span class="math inline">\((u+u_0,v+v_0),(u-u_0,v-v_0)\)</span>处的脉冲，因此只需要在复数图像上的这两个位置添加公式14的值即可。</p></li>
+<li><p><code>S=abs(R)</code>得到了R矩阵的magnitude部分，从而可以画出R的<strong>谱图</strong>而忽略phase相位部分</p></li>
+<li><p><code>r=real(ifft2(ifftshift(R)))</code>需要先把R矩阵恢复成低频在四角，高频在中心的频域图，然后再进行逆傅立叶变换最后取实数部分</p></li>
+</ol>
+<p>测试：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">C = [<span class="number">0</span> <span class="number">64</span>;<span class="number">0</span> <span class="number">128</span>;<span class="number">32</span> <span class="number">32</span>;<span class="number">64</span> <span class="number">0</span>;<span class="number">128</span> <span class="number">0</span>;<span class="number">-32</span> <span class="number">32</span>];</span><br><span class="line">[r,R,S] = imnoise3(<span class="number">512</span>,<span class="number">512</span>,C);</span><br><span class="line">imshow(S,[]);</span><br><span class="line"><span class="built_in">figure</span>,imshow(r,[]);</span><br></pre></td></tr></table></figure>
+<p><img src="imnoise3-test.png" width=450></p>
+<center>
+图10 imnoise3测试
+</center>
+<h2 id="噪声参数的估计">噪声参数的估计</h2>
+<ol type="1">
+<li><p>周期噪声的参数估计要么从空间图中找出周期性，那么使用傅立叶变换在频域图上找亮点，要么使用一些先验知识能够提前预估大致频率分布的位置。</p></li>
+<li><p>如果成像系统能够客制化拍摄，那么就应该拍摄纯色图像，比如一种均匀光照射的灰色板，这种照片有利于噪声参数估计。</p></li>
+<li><p>如果不能使用成像系统拍摄，只能使用现有的图像，那么可以提取已有照片中的<strong>小块常量背景</strong>作为噪声参数估计。</p></li>
+<li><p>对2，3这两种图像进行直方图绘制会出现噪声的分布图样，直方图所表现的形状能够描述这是一种什么分布类型的噪声</p></li>
+<li><p>对于一个满足2，3的图块S，假设<span class="math inline">\(p_S(z_i) \ i=0,1,2,...,L-1\)</span>代表像素灰度从0到L-1出现的概率(L在8-bit图像中为256)，<span class="math inline">\(z_i\)</span>代表出现的像素灰度值，那么图块S的均值为：</p></li>
+</ol>
+<p><span class="math display">\[\bar{z} = \sum_{i=0}^{L-1} z_ip_S(z_i)\]</span></p>
+<p>方差为：</p>
+<p><span class="math display">\[\sigma^2 = \sum_{i=0}^{L-1}(z_i-\bar{z})^2 p_S(z_i)\]</span></p>
+<p>有了均值和方差，就可以结合对直方图的概率密度函数的估计，选择合适的噪声模型进行估计。</p>
+<h3 id="matlab参数估计仿真">matlab参数估计仿真</h3>
+<p>我们已经知道如果图像背景本身就是常量的话，那么这个图像可以直接用来作为噪声参数估计；但如果背景复杂的话，需要提取ROI进行噪声估计。提取ROI的一个准则就是选择的背景尽可能是常量的。matlab内建<code>roipoly</code>能够实现交互性的绘制ROI：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">B = roipoly(f)</span><br><span class="line"><span class="comment">%将会弹出f图像，然后使用鼠标进行ROI选择</span></span><br></pre></td></tr></table></figure>
+<p>返回得到的B是一个尺寸与f一样的逻辑图像，即ROI区域为1，非ROI为0.然后可以对这个ROI进行直方图绘制观察噪声的分布特点：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p = imhist(f(B));</span><br><span class="line">bar(p);</span><br></pre></td></tr></table></figure>
+<h1 id="restoration-in-the-presence-of-noise-only---spatial-filtering">Restoration in the presence of noise only - spatial filtering</h1>
+<p>如果图像仅仅被加性噪声如染，那么：</p>
+<p><span class="math display">\[g(x,y) = f(x,y) + \eta(x,y)\]</span></p>
+<p>频域上：</p>
+<p><span class="math display">\[G(u,v) = F(u,v)+N(u,v)\]</span></p>
+<p>空间中的噪声<span class="math inline">\(\eta(x,y)\)</span>通常是未知的，因此一种降噪方法就是空间滤波，空间滤波的结果就是原图<span class="math inline">\(f(x,y)\)</span>的估计<span class="math inline">\(\hat{f}(x,y)\)</span>。 频率域上的噪声<span class="math inline">\(N(u,v)\)</span>可能由于表现出某种周期性而能够估计，采用一定的频率滤波方法能够很好的滤除，但周期性的噪声毕竟是特例。</p>
+<h2 id="均值滤波">均值滤波</h2>
+<h3 id="arithmetic-mean-filter">1.Arithmetic Mean Filter</h3>
+<p><span class="math display">\[\hat{f}(x,y) = \frac{1}{mn} \sum_{(r,c) \in S_{xy}} g(r,c)\]</span></p>
+<p>算术均值就是box filter，即在一个子窗口<span class="math inline">\(S_{xy}\)</span>里求均值后得到中心元素的估计值。算术均值滤波的特点是平滑周围区块像素，图像模糊。</p>
+<h3 id="matlab实现">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span> = <span class="title">amean</span><span class="params">(g,m,n)</span></span></span><br><span class="line"><span class="comment">%m,n指定算术均值的窗大小</span></span><br><span class="line">    w = fspecial(<span class="string">'average'</span>,[m n]);</span><br><span class="line">    <span class="comment">%fspecial可以根据需求产生各种尺寸和功能的滤波核</span></span><br><span class="line">    f = imfilter(g,w,<span class="string">'replicate'</span>);</span><br><span class="line">    <span class="comment">%使用特定核w进行滤波，在输出图像的边界采用的是重复边界值</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="geometric-mean-filter">2.Geometric Mean Filter</h3>
+<p><span class="math display">\[\hat{f}(x,y) = \left[ \underset{(r,c)\in S_{xy}}{\Pi} g(r,c) \right]^\frac{1}{mn}\]</span></p>
+<p>几何均值滤波在子窗口中相成然后取power，特点是能够达到类似算术均值的平滑效果，但又不会像算术均值那样损失太多的细节。</p>
+<p>在编程上为了使得上述公式更加简单，两边同时取对数：</p>
+<p><span class="math display">\[\begin{equation}\begin{aligned}
+ln \hat{f}(x,y) &amp;= \frac{1}{mn} ln \left[ \underset{(r,c)\in S_{xy}}{\Pi} g(r,c) \right] \\
+&amp;= \frac{1}{mn} \underset{(r,c) \in S_{xy}}{\sum} ln \left[ g(r,c) \right] \\
+\therefore 
+\hat{f}(x,y) &amp;= \exp{\left\{\underset{(r,c) \in S_{xy}}{\sum} ln \left[ g(r,c) \right]\right\}}^{1/m/n}
+\end{aligned}
+\end{equation} 
+\]</span></p>
+<h3 id="matlab实现-1">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span> = <span class="title">gmean</span><span class="params">(g,m,n)</span></span></span><br><span class="line"><span class="comment">%m,n指定算术均值的窗大小</span></span><br><span class="line">    [g,reverClass] = tofloat(g);</span><br><span class="line">    <span class="comment">%tofloat将uint8转换为float以进行浮点运算，最后可以使用reverClass回到原来的格式</span></span><br><span class="line">    f = <span class="built_in">exp</span>(imfilter(<span class="built_in">log</span>(g),<span class="built_in">ones</span>(m,n),<span class="string">'replicate'</span>)).^(<span class="number">1</span>/m/n);</span><br><span class="line">    <span class="comment">%利用tofloat返回值从float恢复到uint8</span></span><br><span class="line">    f = revertClass(f);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="harmonic-mean-filter">3.Harmonic Mean Filter</h3>
+<p><span class="math display">\[\hat{f}(x,y) = \frac{mn}{\underset{(r,c)\in S_{xu}}{\sum} \frac{1}{g(r,c)}}\]</span></p>
+<p>谐波均值滤波的特点是对salt&amp;pepper中的salt（高亮）具有很好的滤除效果，但对pepper效果不好，对高斯噪声效果很好。</p>
+<h3 id="matlab实现-2">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span> = <span class="title">harmean</span><span class="params">(g,m,n)</span></span></span><br><span class="line"><span class="comment">%m，n指定窗的大小</span></span><br><span class="line">    [g,revertClass] = tofloat(g);</span><br><span class="line">    f = m*n ./ imfilter(<span class="number">1.</span>/(g+<span class="built_in">eps</span>),<span class="built_in">ones</span>(m,n),<span class="string">'replicate'</span>);</span><br><span class="line">    <span class="comment">%eps是为了防止分母为0而matlab内建的值</span></span><br><span class="line">    f = revertClass(f);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="contraharmonic-mean-filter">4.Contraharmonic Mean Filter</h3>
+<p><span class="math display">\[\hat{f}(x,y)= \frac{\underset{(r,c)\in S_{xy}}{\sum} g(r,c)^{Q+1}}{\underset{(r,c)\in S_{xy}}{\sum} g(r,c)^Q}\]</span></p>
+<p>反谐波滤波对于salt$pepper有很好的滤除效果，但是需要计算两次：即当Q取正数时滤除pepper，当Q取负数时滤除salt。不难发现，如果Q=-1那么反谐波滤波退化为Harmonic Mean Filter，Q=0时退化成Arithmetic Mean Filter。</p>
+<h3 id="matlab实现-3">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span> = <span class="title">charmean</span><span class="params">(g,m,n,q)</span></span></span><br><span class="line">    [g,reverClass] = tofloat(g);</span><br><span class="line">    f = imfilter(g.^(q+<span class="number">1</span>),<span class="built_in">ones</span>(m,n),<span class="string">'replicate'</span>);</span><br><span class="line">    f = f./ (imfilter(g.^q,<span class="built_in">ones</span>(m,n),<span class="string">'replicate'</span>)+<span class="built_in">eps</span>);</span><br><span class="line">    f = revertClass(f);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>小结：</p>
+<ol type="1">
+<li><p>均值滤波主要是用的是求平均的方法替换掉小窗内中心元素的像素值，因此在一定程度上都会模糊化图像</p></li>
+<li><p>算术均值和几何均值滤波适合滤除像高斯噪声这样的空间随机噪声，而且几何均值滤波相较于算术均值滤波模糊的程度较小</p></li>
+<li><p>Contraharmonic均值滤波适合滤除salt&amp;pepper噪声，但是其缺陷是需要分别知道到底是salt噪声还是pepper噪声，它只能单独进行滤波。如果错误的进行Q值设定将会输出错误的滤波结果</p></li>
+</ol>
+<h2 id="次序统计滤波">次序统计滤波</h2>
+<p>次序统计滤波主要原理就是将子窗口中的像素进行排序，然后按照特定的滤波方法选择像素进行中心像素覆盖。具体的滤波方法有中值滤波、Max&amp;Min滤波、Midpoint滤波、Alpha-Trimmed Mean滤波。</p>
+<h3 id="median-filter">1.Median Filter</h3>
+<p>中值滤波的公式表达为：</p>
+<p><span class="math display">\[\hat{f}(x,y) = \underset{(r,c)\in S_{xy}}{median}\left\{ g(r,c) \right\}\]</span></p>
+<p>中值滤波就是一个子窗口<span class="math inline">\(S_{xy}\)</span>中心元素的像素值等于这个子窗口排序后的中间元素值.中值滤波对脉冲噪声有着出色的滤除效果，并且在滤除的同时又不会使图像像线性平滑那样模糊。</p>
+<p>中值滤波过程可以重复进行，比如重复进行三次，这样能够大幅的去除脉冲噪声。但中值滤波在重复进行时仍然会一定程度的模糊化图像。</p>
+<h3 id="matlab实现-4">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span> = <span class="title">mfilt</span><span class="params">(g,m,n)</span></span></span><br><span class="line">    f = medfilt2(g,[m n],<span class="string">'symmetric'</span>)</span><br><span class="line">    <span class="comment">%matlab内建的中值滤波函数</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="maxmin-filter">2.Max&amp;Min Filter</h3>
+<p>Max Filter即最大值滤波，表达如下:</p>
+<p><span class="math display">\[\hat{f}(x,y) = \underset{(r,c)\in S_{xy}}{max} \left\{ g(r,c) \right\}\]</span></p>
+<p>最大滤波可以腐蚀掉亮度低的区域。</p>
+<p>Min Filter表达如下:</p>
+<p><span class="math display">\[\hat{f}(x,y) = \underset{(r,c)\in S_{xy}}{min} \left\{ g(r,c) \right\}\]</span></p>
+<p>最小滤波可以腐蚀掉亮度高的区域</p>
+<h3 id="matlab实现-5">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%max : 使用膨胀</span></span><br><span class="line">f = imdilate(g,<span class="built_in">ones</span>(m,n));</span><br><span class="line"><span class="comment">%min : 使用腐蚀</span></span><br><span class="line">f = imerode(g,<span class="built_in">ones</span>(m,n));</span><br></pre></td></tr></table></figure>
+<h3 id="midpoint-filter">3.Midpoint Filter</h3>
+<p>MidPoint Filter是最大最小滤波的一个组合：</p>
+<p><span class="math display">\[\hat{f}(x,y) = \frac{1}{2} \left[ \underset{(r,c)\in S_{xy}}{min} \left\{ g(r,c) \right\}+ \underset{(r,c)\in S_{xy}}{max} \left\{ g(r,c) \right\} \right]\]</span></p>
+<p>Midpoint Filter对于高斯噪声或均匀噪声最有效果。</p>
+<h3 id="matlab实现-6">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">f1 = ordfilt2(g,<span class="number">1</span>,<span class="built_in">ones</span>(m,n),<span class="string">'symmetric'</span>); <span class="comment">%次序滤波最大</span></span><br><span class="line">f2 = ordfilt2(g,m*n,<span class="built_in">ones</span>(m,n),<span class="string">'symmetric'</span>); <span class="comment">%次序滤波最小</span></span><br><span class="line">f = imlincomb(<span class="number">0.5</span>,f1,<span class="number">0.5</span>,f2); <span class="comment">%线性组合</span></span><br></pre></td></tr></table></figure>
+<h3 id="alpha-trimmed-mean-filter">4.Alpha-Trimmed Mean Filter</h3>
+<p>对一个子窗口<span class="math inline">\(S_{xy}\)</span>中的像素进行排序，如果我们去除掉亮度最低的<span class="math inline">\(d/2\)</span>个像素，去除掉亮度最高的<span class="math inline">\(d/2\)</span>个像素，最后剩下<span class="math inline">\(m*n - d\)</span>个中间位置的有序像素<span class="math inline">\(g_R(r,c)\)</span>。对余下的<span class="math inline">\(g_R(r,c)\)</span>进行取均值运算：</p>
+<p><span class="math display">\[\hat{f}(x,y) = \frac{1}{mn-d} \sum_{(r,c)\in S_{xy}}g_R(r,c)\]</span></p>
+<p>关于上述公式有以下几点需要补充：</p>
+<ol type="1">
+<li><p>d的范围为0~mn-1，且在d=mn-1时只保留了中间像素，这个滤波器退化成了中值滤波；在d=0时退化成了算术均值滤波</p></li>
+<li><p>这个滤波器对于多种噪声组合滤波有效，比如salt&amp;pepper与高斯噪声的组合。这是显然的，因为我们知道算术均值滤波对于高斯噪声有较好的滤除效果，而均值滤波对于椒盐噪声有较好的滤除效果，因此这两个的结合有利于两种组合时的噪声滤除.</p></li>
+</ol>
+<h3 id="matlab实现-7">matlab实现</h3>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span> = <span class="title">alphatrim</span><span class="params">(g,m,n,d)</span></span></span><br><span class="line">    <span class="keyword">if</span>(d&lt;=<span class="number">0</span> || (d/<span class="number">2</span> -= <span class="built_in">round</span>(d/<span class="number">2</span>))</span><br><span class="line">        error(<span class="string">'d must be a positive,even integer.'</span>);</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    [g,revertClass] = tofloat(g);</span><br><span class="line">    f = imfilter(g,<span class="built_in">ones</span>(m,n),<span class="string">'symmetric'</span>);</span><br><span class="line">    <span class="keyword">for</span> k = <span class="number">1</span>:d/<span class="number">2</span></span><br><span class="line">        f = f - ordfilt2(g,k,<span class="built_in">ones</span>(m,n),<span class="string">'symmetric'</span>);</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">for</span> k = (m*n - (d/<span class="number">2</span>) + <span class="number">1</span>) : m*n</span><br><span class="line">        f = f - ordfilt2(g,k,<span class="built_in">ones</span>(m,n),<span class="string">'symmetric'</span>);</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    f = f / (m*n - d);</span><br><span class="line">    f = revertClass(f);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h2 id="自适应局部降噪滤波">自适应局部降噪滤波</h2>
+<p>最简单的一种自适应局部降噪滤波建立在均值和方差之上。我们知道均值代表的是区域内的平均亮度，方差代表的是区域内的对比度。那么给定一个在坐标位置(x,y)的子窗<span class="math inline">\(S_{xy}\)</span>，噪声的全局方差为<span class="math inline">\(\sigma_{\eta}^2\)</span>，子窗口<span class="math inline">\(S_{xy}\)</span>的局部亮度为<span class="math inline">\(\overline{z}_S_{xy}\)</span>，子窗口局部方差为<span class="math inline">\(\sigma^2_{S_{xy}}\)</span>。有了这四个量值就能够进行下面的滤波步骤：</p>
+<ol type="1">
+<li><p>如果<span class="math inline">\(\sigma_{\eta}^2\)</span>为零，那么滤波器直接返回噪声图(g)上的对应坐标(x,y)作为原图(f)的估计</p></li>
+<li><p>如果局部方差<span class="math inline">\(\sigma_{S_{xy}}^2\)</span>相对<span class="math inline">\(\sigma_{\eta}^2\)</span>很大，那么尽量返回一个接近噪声图(g)在位置(x,y)的值。这是因为如果局部方差大，说明局部对比度很高，说明这个局部可能与边缘相关。而自适应滤波应该尽可能的保留图像的边缘。</p></li>
+<li><p>如果<span class="math inline">\(\sigma_{\eta}^2\)</span>和<span class="math inline">\(\sigma_{S_{xy}}^2\)</span>相等，那么返回窗口<span class="math inline">\(S_{xy}\)</span>的算术均值。</p></li>
+</ol>
+<p>整个过程可由一个公式描述：</p>
+<p><span class="math display">\[\hat{f}(x,y) = g(x,y) - \frac{\sigma_{\eta}^2}{\sigma_{S_{xy}}^2} \left[g(x,y) - \overline{z}_{S_{xy}} \right]\]</span></p>
+<p>上述过程唯一需要提前先验已知的是参数全局噪声的方差，这可以通过一些方法估计计算得到。其他参数均可以在子窗口中计算获得。公式还有一点需要注意，如果<span class="math inline">\(\sigma_{S_{xy}}^2\)</span>大于等于<span class="math inline">\(\sigma_{\eta}^2\)</span>时没有问题；但一旦小于将会出现负<span class="math inline">\(\hat{f}(x,y)\)</span>。对于负数的态度有两个，一个是不允许负数，即两个方差的比值最大就是1.这个处理方法导致这个公式是个非线性公式。还有一个处理办法是允许负值，但是在最后输出图像<span class="math inline">\(\hat{f}\)</span>前需要重新scale一次，这个处理方法导致图像会损失一定程度的动态范围(亮的地方不够亮，暗的地方不够暗)。</p>
+<p>自适应局部降噪滤波具备一下特点：</p>
+<ol type="1">
+<li><p>需要对全剧噪声的方差有先验，而且输出的估计图像效果也与这个先验的准确度有关</p></li>
+<li><p>将边界视作局部高对比度区域，巧妙规避了模糊边界的问题</p></li>
+<li><p>计算复杂度更高</p></li>
+</ol>
+<h2 id="自适应中值滤波">自适应中值滤波</h2>
+<p>自适应中值滤波具有如下特点：</p>
+<ol type="1">
+<li><p>能够滤除脉冲噪声(比如salt&amp;pepper)</p></li>
+<li><p>能够平滑一些非脉冲噪声(相较传统中值滤波的一种提升)</p></li>
+<li><p>能够减少畸变(传统中值滤波总是会置换像素),即能够使得图像保持一定程度的锐利</p></li>
+<li><p>具备一个可变化尺寸的子窗口<span class="math inline">\(S_{xy}\)</span></p></li>
+<li><p>能够自适应更大比率的salt&amp;pepper噪声(传统中值滤波一般只适合0.2的<span class="math inline">\(P_s\ \mbox{and}\ P_p\)</span>)</p></li>
+</ol>
+<p>自适应中值滤波的执行需要如下参数：</p>
+<ul>
+<li><p><span class="math inline">\(z_{min}\)</span> : <span class="math inline">\(S_{xy}\)</span>中的最小亮度</p></li>
+<li><p><span class="math inline">\(z_{max}\)</span> : <span class="math inline">\(S_{xy}\)</span>中的最大亮度</p></li>
+<li><p><span class="math inline">\(z_{med}\)</span> : <span class="math inline">\(S_{xy}\)</span>中的中间亮度</p></li>
+<li><p><span class="math inline">\(z_{xy}\)</span> : <span class="math inline">\(S_{xy}\)</span>中的(x,y)位置的亮度</p></li>
+<li><p><span class="math inline">\(S_{max}\)</span> : <span class="math inline">\(S_{xy}\)</span>能够达到的最大窗口尺寸</p></li>
+</ul>
+<p>自适应中值滤波的算法步骤分成了两步，第一步LevelA和第二步LevelB。</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\mathbf{LEVEL A:} \\
+&amp;\mbox{IF}\ z_{min}&lt; z_{med} &lt;z_{max}\ ,\ \mbox{go to LEVEL B} \\
+&amp;\mbox{ELSE increase the size of}\ S_{xy} \\
+&amp;\mbox{IF}\ S_{xy} \le S_{max},\mbox{repeat LEVEL A} \\
+&amp;\mbox{ELSE output}\ z_{med} \\
+&amp;\mathbf{LEVEL B:} \\
+&amp;\mbox{ELSE output}\ z_{med} \\
+&amp;\mbox{IF}\ z_{min}&lt;z_{xy}&lt;z_{max},\mbox{output}\ z_{xy} \\
+&amp;\mbox{ELSE output}\ z_{med} \\
+\end{aligned}
+\]</span></p>
+<p>如果在LEVEL A的检查中<span class="math inline">\(z_{med}\)</span>不是脉冲噪声，那么进入B。在LEVEL B中如果(x,y)位置的像素也不是脉冲那么直接输出<span class="math inline">\(z_{xy}\)</span>，这很好的规避掉传统中值滤波总是会置换像素的问题，取而代之的是有选择的置换像素：只有在<span class="math inline">\(z_{xy}\)</span>是脉冲时才用非脉冲噪声<span class="math inline">\(z_{med}\)</span>取代。</p>
+<p>如果在LEVEL A的检车中<span class="math inline">\(z_{med}\)</span>是可能是脉冲噪声（之所以是可能，因为在当前<span class="math inline">\(S_{xy}\)</span>范围的最大和最小还不能代表全局），那么LEVEL A试图增加<span class="math inline">\(S_{xy}\)</span>尺寸，并重新检查<span class="math inline">\(z_{med}\)</span>是否可能是脉冲噪声。显然就算最后<span class="math inline">\(S_{xy}\)</span>达到了最大尺寸，且不能满足<span class="math inline">\(z_{min}&lt;z_{med}&lt;z_{max}\)</span>还是不足以说明<span class="math inline">\(z_{med}\)</span>就是脉冲噪声。在这个时候从LEVEL A输出的<span class="math inline">\(z_{med}\)</span>可以看作是不成熟的输出，而为了避免这种输出，要么噪声图像自身的脉冲噪声较少，那么我们可以通过增大<span class="math inline">\(S_{xy}\)</span>窗的大小，使得在更大范围内搜索<span class="math inline">\(z_{min},z_{max},z_{med}\)</span>然后使程序从LEVEL B输出。</p>
+<p>由于自适应中值滤波的核心思路还是中值滤波，因此在选择自适应的起始窗大小时可以使用传统中值滤波进行试验。</p>
+<h3 id="matlab实现-8">matlab实现</h3>
+<p>在<em>Digital Image Processing Using MATLAB</em>中，使用了大量的mask操作进行图像处理。下面的函数就是一个非常具体的例子。需要注意的是，这种mask处理简化了大量的像素指针循环的操作。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span> = <span class="title">adpmedian</span><span class="params">(g,Smax)</span></span></span><br><span class="line"><span class="keyword">if</span> (Smax &lt;=<span class="number">1</span>) || (Smax/<span class="number">2</span> == <span class="built_in">round</span>(Smax/<span class="number">2</span>)) || (Smax ~= <span class="built_in">round</span>(Smax))</span><br><span class="line">    error(<span class="string">'SMAX must be an odd integer &gt; 1.'</span>)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">f = g;</span><br><span class="line">f(:) = <span class="number">0</span>;</span><br><span class="line">alreadyProcessed = <span class="built_in">false</span>(<span class="built_in">size</span>(g)); </span><br><span class="line"><span class="comment">%%生成一个尺寸与g相同的逻辑假矩阵</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> k = <span class="number">3</span>:<span class="number">2</span>:Smax</span><br><span class="line"><span class="comment">%%核的尺寸从3开始知道Smax为止的奇数</span></span><br><span class="line">    zmin = ordfilt2(g,<span class="number">1</span>,<span class="built_in">ones</span>(k,k),<span class="string">'symmetric'</span>);</span><br><span class="line">    <span class="comment">%%次序滤波，得到的全是最大值</span></span><br><span class="line">    zmax = ordfilt2(g,k*k,<span class="built_in">ones</span>(k,k),<span class="string">'symmetric'</span>);</span><br><span class="line">    <span class="comment">%%次序滤波，得到的全是最小值</span></span><br><span class="line">    zmed = medfilt2(g,[k k],<span class="string">'symmetric'</span>);</span><br><span class="line">    <span class="comment">%%中值滤波，得到全是中值</span></span><br><span class="line">    processUsingLevelB = (zmed &gt; zmin) &amp; (zmax &gt; zmed) &amp;...</span><br><span class="line">        ~alreadyProcessed;</span><br><span class="line">    <span class="comment">%%能够进行LEVEL B的mask，比较过程通过比较**同一像素位置neighbor的最大与最小**</span></span><br><span class="line">    <span class="comment">%%同时要确保已经经过LEVEL B处理的像素不会被重复处理，因此需要取~alreadyProcessed</span></span><br><span class="line">    <span class="comment">%%最终的mask是一个1代表这个像素能够进行Level B处理（即要么输出zmed，要么输出zxy，取决于后面步骤）</span></span><br><span class="line">    <span class="comment">%%0代表这个像素在LEVEL A中不满足跳转条件，这个像素可能是个脉冲噪声；或这个像素之前已经被处理过</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">%%LEVEL B:</span></span><br><span class="line">    zB = (g &gt; zmin) &amp; (zmax &gt; g);</span><br><span class="line">    <span class="comment">%%判断(x,y)像素是否是最大或者最小像素，因此zBmask是一个1代表(x,y)像素满足LEVEL B第一个输出条件的...</span></span><br><span class="line">    <span class="comment">%%...输出原位置像素的位；0代表(x,y)像素是可能是脉冲噪声</span></span><br><span class="line">    outputZxy = processUsingLevelB &amp; zB;</span><br><span class="line">    <span class="comment">%%如果(x,y)位置像素已经被zB标注为非脉冲噪声，那么直接输出原亮度</span></span><br><span class="line">    outputZmed = processUsingLevelB &amp; ~zB;</span><br><span class="line">    <span class="comment">%%如果(x,y)位置像素已经被zB标注为脉冲噪声，那么直接输出处中值图zmed位置</span></span><br><span class="line">    f(outputZxy) = g(outputZxy);</span><br><span class="line">    f(outputZmed) = zmed(outputZmed);</span><br><span class="line">    </span><br><span class="line">    alreadyProcessed = alreadyProcessed | processUsingLevelB;</span><br><span class="line">    <span class="comment">%%已经处理了的坐标进行mask，保存还未处理完成的坐标</span></span><br><span class="line">    <span class="comment">%%还未处理完成的位置是因为不满足LEVEL A的跳转到LEVEL B的条件，因此需要进行Sxy的尺寸变大处理</span></span><br><span class="line">    <span class="keyword">if</span> all(alreadyProcessed(:))</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">%%由于在函数最开始f=g，因此就算进行了最终的Smax尺寸还有未执行的像素，也能够安全返回</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>下面进行测试，将倒入的图像进行salt&amp;pepper污染：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g = imnoise(f,<span class="string">'salt &amp; pepper'</span>,<span class="number">0.25</span>);imshow(g);</span><br></pre></td></tr></table></figure>
+<p>通常认为超过0.2的椒盐噪声使用中值滤波已经无法取得满意的滤除效果：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f1 = medfilt2(g,[<span class="number">7</span> <span class="number">7</span>],<span class="string">'symmetric'</span>);<span class="built_in">figure</span>,imshow(f1);</span><br></pre></td></tr></table></figure>
+<p>从图中可以看出核为7的中值滤波能够完整的滤除噪声，但是出现了模糊，因此设置7为Smax <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f2 = adpmedian(g,<span class="number">7</span>);<span class="built_in">figure</span>,imshow(f2);</span><br></pre></td></tr></table></figure></p>
+<p><img src="adpmedian.png"></p>
+<center>
+图11 自适应中值滤波测试
+</center>
+<p>从上图可以看到左图为Lena经过0.25的椒盐噪声污染后的图像，中间为使用matlab自带的medfilt2进行滤波的结果，这个结果显示出传统中值滤波虽然能够滤除椒盐噪声，但是图像产生了模糊。这种模糊的主要原因是中值滤波会不加选择的替换掉每一个中心元素。右图的自适应中值滤波得到了很好的解决，即能够滤除椒盐噪声，又能够保留细节。但是自适应算法的主要问题就是计算复杂度高。</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一种退化模型"><span class="toc-number">1.</span> <span class="toc-text">一种退化模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#噪声模型"><span class="toc-number">2.</span> <span class="toc-text">噪声模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#一些常见的噪声种类"><span class="toc-number">2.1.</span> <span class="toc-text">一些常见的噪声种类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#散粒噪声shot-noise"><span class="toc-number">2.1.1.</span> <span class="toc-text">散粒噪声(shot noise)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#读出噪声read-noise"><span class="toc-number">2.1.2.</span> <span class="toc-text">读出噪声(Read noise)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#暗电流dark-current"><span class="toc-number">2.1.3.</span> <span class="toc-text">暗电流(Dark current)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一些重要的噪声概率建模"><span class="toc-number">2.2.</span> <span class="toc-text">一些重要的噪声概率建模</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#gaussian-noise"><span class="toc-number">2.2.1.</span> <span class="toc-text">Gaussian Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rayleigh-noise"><span class="toc-number">2.2.2.</span> <span class="toc-text">Rayleigh Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#erlang-noise"><span class="toc-number">2.2.3.</span> <span class="toc-text">Erlang Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exponential-noise"><span class="toc-number">2.2.4.</span> <span class="toc-text">Exponential Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#uniform-noise"><span class="toc-number">2.2.5.</span> <span class="toc-text">Uniform Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#salt-and-pepper-noise"><span class="toc-number">2.2.6.</span> <span class="toc-text">Salt-and-Pepper Noise</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lognormal"><span class="toc-number">2.2.7.</span> <span class="toc-text">Lognormal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">2.2.8.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#噪声的matlab实现"><span class="toc-number">2.3.</span> <span class="toc-text">噪声的Matlab实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#加入高斯噪声"><span class="toc-number">2.3.1.</span> <span class="toc-text">加入高斯噪声</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#加入椒盐噪声"><span class="toc-number">2.3.2.</span> <span class="toc-text">加入椒盐噪声</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#产生指定分布的噪声"><span class="toc-number">2.4.</span> <span class="toc-text">产生指定分布的噪声</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#存在封闭式"><span class="toc-number">2.4.1.</span> <span class="toc-text">存在封闭式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#rayleigh-noise-1"><span class="toc-number">2.4.1.1.</span> <span class="toc-text">1.Rayleigh Noise</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exponential-noise-1"><span class="toc-number">2.4.1.2.</span> <span class="toc-text">2.Exponential Noise</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不存在封闭式"><span class="toc-number">2.4.2.</span> <span class="toc-text">不存在封闭式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#lognormal-noise"><span class="toc-number">2.4.2.1.</span> <span class="toc-text">3.lognormal noise</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#erlang-noise-1"><span class="toc-number">2.4.2.2.</span> <span class="toc-text">4.Erlang Noise</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#salt-pepper"><span class="toc-number">2.4.2.3.</span> <span class="toc-text">5.Salt &amp; Pepper</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结-1"><span class="toc-number">2.4.3.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#周期噪声"><span class="toc-number">2.5.</span> <span class="toc-text">周期噪声</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab仿真周期噪声"><span class="toc-number">2.5.1.</span> <span class="toc-text">matlab仿真周期噪声</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#噪声参数的估计"><span class="toc-number">2.6.</span> <span class="toc-text">噪声参数的估计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab参数估计仿真"><span class="toc-number">2.6.1.</span> <span class="toc-text">matlab参数估计仿真</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#restoration-in-the-presence-of-noise-only---spatial-filtering"><span class="toc-number">3.</span> <span class="toc-text">Restoration in the presence of noise only - spatial filtering</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#均值滤波"><span class="toc-number">3.1.</span> <span class="toc-text">均值滤波</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#arithmetic-mean-filter"><span class="toc-number">3.1.1.</span> <span class="toc-text">1.Arithmetic Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现"><span class="toc-number">3.1.2.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#geometric-mean-filter"><span class="toc-number">3.1.3.</span> <span class="toc-text">2.Geometric Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-1"><span class="toc-number">3.1.4.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#harmonic-mean-filter"><span class="toc-number">3.1.5.</span> <span class="toc-text">3.Harmonic Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-2"><span class="toc-number">3.1.6.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#contraharmonic-mean-filter"><span class="toc-number">3.1.7.</span> <span class="toc-text">4.Contraharmonic Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-3"><span class="toc-number">3.1.8.</span> <span class="toc-text">matlab实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#次序统计滤波"><span class="toc-number">3.2.</span> <span class="toc-text">次序统计滤波</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#median-filter"><span class="toc-number">3.2.1.</span> <span class="toc-text">1.Median Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-4"><span class="toc-number">3.2.2.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#maxmin-filter"><span class="toc-number">3.2.3.</span> <span class="toc-text">2.Max&amp;Min Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-5"><span class="toc-number">3.2.4.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#midpoint-filter"><span class="toc-number">3.2.5.</span> <span class="toc-text">3.Midpoint Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-6"><span class="toc-number">3.2.6.</span> <span class="toc-text">matlab实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alpha-trimmed-mean-filter"><span class="toc-number">3.2.7.</span> <span class="toc-text">4.Alpha-Trimmed Mean Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-7"><span class="toc-number">3.2.8.</span> <span class="toc-text">matlab实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自适应局部降噪滤波"><span class="toc-number">3.3.</span> <span class="toc-text">自适应局部降噪滤波</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自适应中值滤波"><span class="toc-number">3.4.</span> <span class="toc-text">自适应中值滤波</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matlab实现-8"><span class="toc-number">3.4.1.</span> <span class="toc-text">matlab实现</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/10/Image-Restoration/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/10/Image-Restoration/&text=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/10/Image-Restoration/&is_video=false&description=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Image-Restoration&body=Check out this article: http://yoursite.com/2020/09/10/Image-Restoration/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/10/Image-Restoration/&title=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/10/Image-Restoration/&name=Image-Restoration&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/10/Image-Restoration/&t=Image-Restoration" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Eafi
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">tags</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="https://github.com/eafi" target="_blank" rel="noopener">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'eafi';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</body>
+</html>
