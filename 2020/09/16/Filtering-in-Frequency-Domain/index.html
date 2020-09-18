@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="频域滤波中基本函数 matlab中计算图像的傅立叶变换使用： 12F &#x3D; fft2(f);F &#x3D; fft2(f,P,Q); 接受三个参数的fft2在频率滤波更为常用，函数先将图像f进行zero-padding到指定P,Q尺寸后再进行傅立叶变换。zero-padding可以加快fft计算并且能够避免循环卷积。关于循环卷积的更多内容，在文章中有描述. 对于一个实数图像f，执行fft2输出一定是复数(在">
+    <meta name="description" content="本文首先介绍了一些频域滤波中最常用的几个matlab函数，然后强调了一定要明白循环卷积是如何产生的以及如何避免的。在滤波器获取分别使用了两种方法进行获取操作，其中最重要的是从频域直接获取的方法。最后分别介绍了低通、高通、选择、notch滤波器及其配套的生成、滤波代码和例子。  滤波器中基本函数 频域滤波基础 循环卷积问题 频域滤波器的获取 低通频域滤波器 高通频域滤波器 选择滤波器   频域滤波中">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Filtering-in-Frequency-Domain-Using-MATLAB">
 <meta property="og:url" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/index.html">
 <meta property="og:site_name" content="SuperEafi">
-<meta property="og:description" content="频域滤波中基本函数 matlab中计算图像的傅立叶变换使用： 12F &#x3D; fft2(f);F &#x3D; fft2(f,P,Q); 接受三个参数的fft2在频率滤波更为常用，函数先将图像f进行zero-padding到指定P,Q尺寸后再进行傅立叶变换。zero-padding可以加快fft计算并且能够避免循环卷积。关于循环卷积的更多内容，在文章中有描述. 对于一个实数图像f，执行fft2输出一定是复数(在">
+<meta property="og:description" content="本文首先介绍了一些频域滤波中最常用的几个matlab函数，然后强调了一定要明白循环卷积是如何产生的以及如何避免的。在滤波器获取分别使用了两种方法进行获取操作，其中最重要的是从频域直接获取的方法。最后分别介绍了低通、高通、选择、notch滤波器及其配套的生成、滤波代码和例子。  滤波器中基本函数 频域滤波基础 循环卷积问题 频域滤波器的获取 低通频域滤波器 高通频域滤波器 选择滤波器   频域滤波中">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/phase-vs-magnitude.png">
 <meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/wraparound-error-test.png">
@@ -20,8 +20,13 @@
 <meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/without-padding.png">
 <meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/test-of-frequency-filtering2.png">
 <meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/with-padding.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/rearrange-filter.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/high-pass-gaussian-filter-test.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/notch-filter-test.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/notch-filter-test-2.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/16/Filtering-in-Frequency-Domain/notch-filter-test-3.png">
 <meta property="article:published_time" content="2020-09-16T02:04:48.000Z">
-<meta property="article:modified_time" content="2020-09-16T12:09:12.752Z">
+<meta property="article:modified_time" content="2020-09-18T09:14:54.083Z">
 <meta property="article:author" content="Eafi">
 <meta property="article:tag" content="ImageProcessing">
 <meta name="twitter:card" content="summary">
@@ -118,7 +123,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波中基本函数"><span class="toc-number">1.</span> <span class="toc-text">频域滤波中基本函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波基础"><span class="toc-number">2.</span> <span class="toc-text">频域滤波基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#警惕循环卷积可能会导致图像出现wraparound-error"><span class="toc-number">2.1.</span> <span class="toc-text">警惕循环卷积，可能会导致图像出现wraparound error</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波中基本函数"><span class="toc-number">1.</span> <span class="toc-text">频域滤波中基本函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波基础"><span class="toc-number">2.</span> <span class="toc-text">频域滤波基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#警惕循环卷积可能会导致图像出现wraparound-error"><span class="toc-number">2.1.</span> <span class="toc-text">警惕循环卷积，可能会导致图像出现wraparound error</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#滤波过程函数化"><span class="toc-number">2.2.</span> <span class="toc-text">滤波过程函数化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波器的获取"><span class="toc-number">3.</span> <span class="toc-text">频域滤波器的获取</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#从空间域滤波器获取"><span class="toc-number">3.1.</span> <span class="toc-text">从空间域滤波器获取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从频域直接获得滤波器"><span class="toc-number">3.2.</span> <span class="toc-text">从频域直接获得滤波器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#坐标的重映射"><span class="toc-number">3.2.1.</span> <span class="toc-text">1. 坐标的重映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#低通频域滤波器"><span class="toc-number">3.2.2.</span> <span class="toc-text">2.低通频域滤波器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高通频域滤波器"><span class="toc-number">3.2.3.</span> <span class="toc-text">3.高通频域滤波器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高频增强滤波"><span class="toc-number">3.2.4.</span> <span class="toc-text">4.高频增强滤波</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#带阻带通滤波器"><span class="toc-number">3.2.5.</span> <span class="toc-text">5.带阻&#x2F;带通滤波器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#notch-filter"><span class="toc-number">3.2.6.</span> <span class="toc-text">6. Notch filter</span></a></li></ol></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -201,7 +206,18 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h1 id="频域滤波中基本函数">频域滤波中基本函数</h1>
+    <p>本文首先介绍了一些频域滤波中最常用的几个matlab函数，然后强调了一定要明白循环卷积是如何产生的以及如何避免的。在滤波器获取分别使用了两种方法进行获取操作，其中最重要的是从频域直接获取的方法。最后分别介绍了低通、高通、选择、notch滤波器及其配套的生成、滤波代码和例子。</p>
+<ul>
+<li><a href="#频域滤波中基本函数">滤波器中基本函数</a></li>
+<li><a href="#频域滤波基础">频域滤波基础</a></li>
+<li><a href="#循环卷积问题">循环卷积问题</a></li>
+<li><a href="#频域滤波器的获取">频域滤波器的获取</a></li>
+<li><a href="#低通频域滤波器">低通频域滤波器</a></li>
+<li><a href="#高通频域滤波器">高通频域滤波器</a></li>
+<li><a href="#notch-filter">选择滤波器</a></li>
+</ul>
+<p><a name="频域滤波中基本函数" ></a></p>
+<h1 id="频域滤波中基本函数">频域滤波中基本函数</h1>
 <p>matlab中计算图像的傅立叶变换使用：</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F = fft2(f);</span><br><span class="line">F = fft2(f,P,Q);</span><br></pre></td></tr></table></figure>
 <p>接受三个参数的<code>fft2</code>在频率滤波更为常用，函数先将图像f进行zero-padding到指定P,Q尺寸后再进行傅立叶变换。zero-padding可以加快fft计算并且能够避免循环卷积。关于循环卷积的更多内容，在<a href="">文章</a>中有描述.</p>
@@ -211,14 +227,16 @@
 <p>如果我们已知了复数F的强度S和相位phi，那么根据复数的表达，我们可以重新得到复数F:</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">F = S.*<span class="built_in">exp</span>(<span class="built_in">i</span> * phi);</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>例子1</p>
+<p>例子1:强度图和相位图的含义</p>
 </blockquote>
 <p><img src="phase-vs-magnitude.png"></p>
 <center>
 图1 相位和强度
 </center>
 <p>图1的上面两个图像是除中间白色矩形位置不同外完全一样的图像。利用matlab分别对两个图像进行傅立叶变换并输出强度和相位图依次得到下面四张图像。可以看到在强度图上，二者完全类似，但在相位图上二者表现出完全不一样的特点。这直接说明了相位图描述了原图像中物体的位移，强度描述了原图像中的亮度。</p>
-<hr />
+<blockquote>
+<p>例子1</p>
+</blockquote>
 <p>经过函数<code>fft2</code>计算得到的频域图，在之前的文章已经知道是频率起点在左上角，向着图像中心位置递增的频率分布。这种频率分布不利于视觉上的分析，因此我们常常移动频域图像使得<strong>图像中心位置</strong>为频率起点，频率向四周扩散.这个移动过程使用：</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Fc = fftshift(F);</span><br></pre></td></tr></table></figure>
 <p>上述函数<code>fftshift</code>是通过平移实现以中心位置为频率起点的，这个频移的原理在之前的<a href="">文章</a>有提到。现在我们重点关注<strong>什么是中心位置</strong>？对于连续的函数而言中心位置不难定义，但是对于离散的图像而言，<strong>中心</strong>的概念就很重要了，重要性主要体现在以下几个方面：</p>
@@ -236,19 +254,21 @@
 <p>matlab的<code>fft2</code>和<code>ifft2</code>变换对存在一个默认的格式转换逻辑：如果原图像f是一个uint8格式的图像(matlab的<code>imread</code>后格式)，进过<code>fft2</code>后图像格式变成了范围为[0 255]的double格式，<strong>没有进行尺度缩放</strong>；然后<code>ifft2</code>后输出[0 255]的图像，但是是double格式。为了在执行滤波前后格式能够统一，通常需要在进入<code>fft2</code>前<strong>先将uint8转换成[0 1]的浮点数</strong>，进行滤波、<code>ifft2</code>后进行<strong>[0 1]浮点数向uint8转换</strong>。</p>
 <p>自建m函数<code>tofloat</code>实现了这个过程，执行流程如下：</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">f = imread(<span class="string">'....'</span>); <span class="comment">%读入为uint8类型</span></span><br><span class="line">[f,revertclass] = tofloat(f); <span class="comment">%转换成float类型的f，并返回一个revertclass函数</span></span><br><span class="line">F = fft2(f);</span><br><span class="line"><span class="comment">%滤波操作</span></span><br><span class="line"><span class="comment">%H = getfilter();</span></span><br><span class="line">G = H.*F; <span class="comment">%滤波</span></span><br><span class="line">g = ifft2(G); <span class="comment">%从频域转换回空间域</span></span><br><span class="line">g = revertclass(g); <span class="comment">%从float转换为uint8</span></span><br><span class="line">imshow(g);</span><br></pre></td></tr></table></figure>
+<p><a name="频域滤波基础" ></a></p>
 <h1 id="频域滤波基础">频域滤波基础</h1>
 <p>回顾滤波操作就是就是下面两个傅立叶变换对：</p>
 <p><span class="math display">\[f(x,y)\star h(x,y) \Leftrightarrow H(u,v)F(u,v) \tag{1} \\
 f(x,y)h(x,y) \Leftrightarrow H(u,v) \star F(u,v) \\
 \]</span></p>
 <p>与频域滤波关系最密切的就是上述第一个公式，它描述了空间域的卷积过程（空间滤波过程）其实就是频域上两个傅立叶变换相乘的过程。我们称F(u,v)为图像的傅立叶变换，H(u,v)成为滤波器传递函数。滤波器传递函数根据我们的需求进行创建.根据第一个公式的描述，频域滤波和空间卷机滤波是等价的，但为了使二者完全等价（等效），其实还有一些其他的规范需要频域滤波时注意。</p>
+<p><a name="循环卷积问题"></a></p>
 <h2 id="警惕循环卷积可能会导致图像出现wraparound-error">警惕循环卷积，可能会导致图像出现wraparound error</h2>
 <p>循环卷积的出现是因为，F和H都是周期性的,我们把F和H在频域上相乘，然后逆变换回空间域：</p>
 <p><span class="math display">\[g(x,y) = Real\left\{ \mathfrak{F}^{-1} \left[ H(u,v)F(u,v) \right]  \right\} \tag{2}\]</span></p>
 <p>根据卷积定理频域相乘等价于空间域卷积。这种周期性函数的卷积可能会导致错误的结果，因为滑动窗在另一个图像上移动时，会无意识的把它周期重复的部分给一同卷积进来.保证空间滤波和频域滤波一致性的唯一方法就是使用恰当的zero-padding。</p>
 <p>需要注意，我们padding的对象是图像f和h，而不是频域图像F,因为我们是想让公式1的卷积过程不受循环卷积干扰。这里有一个小细节，通常而言我们所进行的频域滤波，只需要padding图像f，对应的频域滤波器H我们只需要在频域上构建即可，不需要从空间域上去构建h（空间域上构建也不是不行，但更复杂了）。由于是在频域上直接构建滤波器H，其尺寸直接等于padding后的图像f的尺寸，这就会导致一个问题：我们只能说padding后的f一定能够避免循环卷积，但是却不能对滤波器做一样的保证。因此，还是会出现一定程度的wraparound error,在进行这种形式的滤波器设计时需要明白这个细节.通常,常用的几种频域滤波器产生的wraparound error微乎其微。</p>
 <blockquote>
-<p>例子2</p>
+<p>例子2:模拟循环卷积</p>
 </blockquote>
 <p>下面模拟循环卷积导致的wraparound error问题，创建一个图样：</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ff = <span class="built_in">ones</span>(<span class="number">500</span>,<span class="number">500</span>);</span><br><span class="line">ff(<span class="number">1</span>:<span class="number">250</span>,:) = <span class="number">0</span>;</span><br><span class="line">imshow(ff);</span><br></pre></td></tr></table></figure>
@@ -282,20 +302,215 @@ f(x,y)h(x,y) \Leftrightarrow H(u,v) \star F(u,v) \\
 </center>
 <p>图5是理论上的图3的周期性重复图样，我们关注其中绿色虚线框住的区域，这个区域可以被看作是上述代码的<code>f</code>图像进行卷积的那一块。红色框线代表的是高斯滤波器H在空间域时的图样h，我们知道高斯核在傅立叶变换前后都是高斯函数图样，因此这个红色框线其实就是一个与<code>f</code>等尺寸的高斯核。频域滤波后向空间域的转换过程服从卷积定理，也就等价图5中红色框线在绿色区域内进行卷积。显然，绿色区域内上边界部分由于红框同时框住了重复的黑色区域实现了模糊化，下边界框住了重复的白色区域也实现了模糊化。但是在绿色区域的左右边界，红色窗口的滑动就出现了问题:由于红色区域框住了绿色区域内白色部分的同时也框住了重复的左右两侧白色区域，这导致了在进行高斯滤波时几乎不会出现模糊化。</p>
 <p>上面的论述成立一个很关键的提前:红色框线是一个高斯核，也就是只在中心区域有值，周围区域几乎无值。</p>
-<p>图5及其下面的论述解释了图4的产生。那么如何正确的产生与图3一摸一样的结果呢？只需要zero-padding即可：</p>
+<p>图5及上面的论述解释了图4的产生。那么如何正确的产生与图3一模一样的结果呢？只需要zero-padding即可：</p>
 <figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Fp = fft2(f,<span class="number">2</span>*M,<span class="number">2</span>*N); <span class="comment">%一种最简单的zero-padding方法：扩大一倍的尺寸</span></span><br><span class="line">Hp = lpfilter(<span class="string">'gaussian'</span>,<span class="number">2</span>*M,<span class="number">2</span>*N,<span class="number">2</span>*sig); <span class="comment">%注意，由于尺寸放大一倍因此方差也要扩大一倍</span></span><br><span class="line">Gp = Hp.*Fp;</span><br><span class="line">gp = ifft2(Gp);</span><br><span class="line">gpc = gp(<span class="number">1</span>:<span class="built_in">size</span>(f,<span class="number">1</span>),<span class="number">1</span>:<span class="built_in">size</span>(f,<span class="number">2</span>)); <span class="comment">%由于尺寸翻倍，因此只需要其中的四分之一即可</span></span><br><span class="line">gpc = revertclass(gpc);</span><br><span class="line"><span class="built_in">figure</span>(<span class="string">'name'</span>,<span class="string">'frequency filtering with padding'</span>),imshow(gpc);</span><br></pre></td></tr></table></figure>
 <p>输出的滤波结果如图：</p>
 <p><img src="test-of-frequency-filtering2.png" width=450></p>
 <center>
 图6 高斯滤波器滤波2
 </center>
-<p>从图6可以看到，图6和图3基本一致，特别是两边的部分出现了黑色模糊化。padding的f为什么能够解决循环卷积导致的wraparound error问题呢？一下面的图7展开解释。</p>
+<p>从图6可以看到，图6和图3基本一致，特别是两边的部分出现了黑色模糊化。padding的f为什么能够解决循环卷积导致的wraparound error问题呢？</p>
 <p><img src="with-padding.png"></p>
 <center>
 图7 padding后的卷积过程
 </center>
-<p>图7同样是理论上存在的重复图样，但是和图5有所区别：由于zero-padding了一倍的尺寸，绿色框住的区域为原图f的padding后的版本。同理，与之匹配的高斯滤波器也变成了一倍大小的红框。但是我们观察可以发现红框在绿框左上角范围中滑动时不会受类似图5一样重复图样的影响，所滑动的有效范围外都是0.这保证了绿框左上角部分的正确卷积。</p>
+<p>图7同样是理论上存在的重复图样，但是和图5有所区别：由于zero-padding了一倍的尺寸，绿色框住的区域为原图f的padding后的版本。同理，与之匹配的高斯滤波器也变成了一倍大小的红框。观察可以发现红框在<strong>绿框左上角范围</strong>中滑动时不会受类似图5卷积到重复图样，所滑动在有效范围外都是0.这保证了绿框左上角部分的正确卷积。</p>
 <p>但是需要指出的是，绿框不仅包含左上角部分，其余三块zero-padding也需要进行卷积，卷积过程会引入其他重复图案中白色的部分。但这不影响最后的输出，因为我们只要保证左上角是正确的即可，最后输出时需要截断：<code>gpc = gp(1:size(f,1),1:size(f,2))</code></p>
+<blockquote>
+<p>例子2</p>
+</blockquote>
+<h2 id="滤波过程函数化">滤波过程函数化</h2>
+<p>结合例子2中的滤波过程，将整个代码封装成函数的形式：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">g</span> = <span class="title">dftfilt</span><span class="params">(f,H,classout)</span></span></span><br><span class="line"><span class="comment">% f : 输入图像，这个图像是没有经过padding的图像，...</span></span><br><span class="line"><span class="comment">%   ...这是因为传入的H是一个已经放大的滤波器图像，...</span></span><br><span class="line"><span class="comment">%   ...借助H的尺寸在dftfilt中实现f的padding</span></span><br><span class="line"><span class="comment">% H : 大尺寸的频域滤波器</span></span><br><span class="line"><span class="comment">% classout : 由于使用了revertclass，可以选择输出图像g到底是否需要回到uint8还是float</span></span><br><span class="line"></span><br><span class="line">[f,revertClass] = tofloat(f);</span><br><span class="line">F = fft2(f,<span class="built_in">size</span>(H,<span class="number">1</span>),<span class="built_in">size</span>(H,<span class="number">2</span>));<span class="comment">%利用大尺寸的H扩充f到相同的大尺寸</span></span><br><span class="line">g = ifft2(H.*F);</span><br><span class="line">g = g(<span class="number">1</span>:<span class="built_in">size</span>(f,<span class="number">1</span>),<span class="number">1</span>:<span class="built_in">size</span>(f,<span class="number">2</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> nargin == <span class="number">2</span> || strcmp(classout,<span class="string">'original'</span>)</span><br><span class="line">    g = revertClass(g);</span><br><span class="line"><span class="keyword">elseif</span> strcmp(classout,<span class="string">'fltpoint'</span>)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    error(<span class="string">'Underined class for the output image.'</span>);</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p><a name="频域滤波器的获取" ></a></p>
+<h1 id="频域滤波器的获取">频域滤波器的获取</h1>
+<h2 id="从空间域滤波器获取">从空间域滤波器获取</h2>
+<p>通常空间滤波计算效率都要高于频域滤波，尤其当滤波核很小时。当然，这也取决于小核的定义是多少和用什么样的算法。线性系统理论中有，将一个脉冲信号输入进一个线性系统中，其响应将完整的描述这个系统。 因此，利用这个特性，可以使用有限脉冲响应去描述这个线性系统。在matlab中函数</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">H = freqz2(h,R,C)</span><br><span class="line"><span class="comment">% R : rows, C: cols</span></span><br><span class="line"><span class="comment">% h : 2D空间滤波器</span></span><br><span class="line"><span class="comment">% H : 对应的2D频域滤波器</span></span><br></pre></td></tr></table></figure>
+<p>可以得到空间滤波器对应的频域滤波器.</p>
+<blockquote>
+<p>例子3:Sobel算子的频域图像</p>
+</blockquote>
+<p>我们已经知道sobel算子是一种一阶计算算子:</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">h = fspecial(<span class="string">'sobel'</span>)'</span><br><span class="line">h = </span><br><span class="line">    <span class="number">1</span> <span class="number">0</span> <span class="number">-1</span></span><br><span class="line">    <span class="number">2</span> <span class="number">0</span> <span class="number">-2</span></span><br><span class="line">    <span class="number">1</span> <span class="number">0</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
+<p>使用函数<code>freqz2(h)</code>便可以获得sobel的频域滤波器。</p>
+<blockquote>
+<p>例子3</p>
+</blockquote>
+<h2 id="从频域直接获得滤波器">从频域直接获得滤波器</h2>
+<h3 id="坐标的重映射">1. 坐标的重映射</h3>
+<p>由<code>fft2</code>计算得到的频域图F的坐标原点是在(1,1)位置，然后向F的中心增大，假设我们称这种坐标组织形式为正常坐标组织。在前面提到为了<strong>视觉便于观察</strong>，可以使用<code>fftshift</code>将这种坐标组织改变成F中心坐标为坐标原点，向四周增大，假设我们称这种坐标组织形式为观察坐标组织。在滤波过程中是否<code>fftshift</code>其实没有影响，无非就是方不方便视觉观察的区别。因此，从频域直接获取滤波器可以不用故意设计成中心对称的，这样可以简化步骤：</p>
+<p><img src="rearrange-filter.png"></p>
+<center>
+图8 两种坐标组织方式的流程区别
+</center>
+<p>图8显示了两种直接从频域设计滤波器的思路。左边那种最符合常规的思路，因为通常而言我们所设计的滤波器是是中心对称的，于是显而易见地可以从一开始就把滤波器设计成中心对称的，然后调用<code>ifftshift</code>恢复到正常坐标组织即可。右边的思路更加纯粹，右边思路从构建滤波器一开始就是不对称的，是一开始就迎合正常坐标组织的形式，从而完全不使用<code>ifftshift</code>这类转换函数。</p>
+<p>显然第二种产生滤波器的方法更好，因为<code>fftshift</code>和<code>ifftshfit</code>作为正常坐标向观察坐标的转换的函数，其目的自始至终都是服务人的肉眼观察，作为滤波而言这完全不需要。</p>
+<p>第二种流程虽然形式上简单了，但还是有一个问题：如何才能产生正常坐标组织形式的频域滤波器？我们所用到的滤波器函数表达都是清一色的中心对称且以H中心坐标开始，第二种流程虽然看上去简化了步骤，但却在<strong>函数表达</strong>向<strong>滤波矩阵赋值</strong>过程中增加了复杂度。解决办法是<strong>坐标重映射</strong>。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="params">[U,V]</span> = <span class="title">dftuv</span><span class="params">(M,N)</span></span></span><br><span class="line">u = single(<span class="number">0</span>:(M<span class="number">-1</span>));</span><br><span class="line">v = single(<span class="number">0</span>:(N<span class="number">-1</span>));</span><br><span class="line">idx = <span class="built_in">find</span>(u &gt; M/<span class="number">2</span>);</span><br><span class="line">u(idx) = u(idx) - M;</span><br><span class="line">idy = <span class="built_in">find</span>(v &gt; N/<span class="number">2</span>);</span><br><span class="line">v(idy) = v(idy) - N;</span><br><span class="line">[V,U] = <span class="built_in">meshgrid</span>(v,u);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>比如观察<code>[U,V] = dftuv(5,5)</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">U &#x3D;</span><br><span class="line">  5×5 single 矩阵</span><br><span class="line">     0     0     0     0     0</span><br><span class="line">     1     1     1     1     1</span><br><span class="line">     2     2     2     2     2</span><br><span class="line">    -2    -2    -2    -2    -2</span><br><span class="line">    -1    -1    -1    -1    -1</span><br><span class="line">V &#x3D;</span><br><span class="line">  5×5 single 矩阵</span><br><span class="line">     0     1     2    -2    -1</span><br><span class="line">     0     1     2    -2    -1</span><br><span class="line">     0     1     2    -2    -1</span><br><span class="line">     0     1     2    -2    -1</span><br><span class="line">     0     1     2    -2    -1</span><br></pre></td></tr></table></figure>
+<p>可以看到这就是<code>fft2</code>计算输出的坐标组织形式坐标系：以左上角(1,1)位置为起点，向中心元素增大，四个角落向中心元素增大。</p>
+<blockquote>
+<p>例子:通过[U,V]获得距离中心坐标的距离^2矩阵</p>
+</blockquote>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[U,V] = dftuv(<span class="number">8</span>,<span class="number">5</span>); <span class="comment">%产生U,V矩阵</span></span><br><span class="line">DSQ = U.^<span class="number">2</span> + V.^<span class="number">2</span> <span class="comment">%直接使用U,V进行距离计算</span></span><br></pre></td></tr></table></figure>
+<p>输出得到:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">DSQ &#x3D;</span><br><span class="line">  8×5 single 矩阵</span><br><span class="line">     0     1     4     4     1</span><br><span class="line">     1     2     5     5     2</span><br><span class="line">     4     5     8     8     5</span><br><span class="line">     9    10    13    13    10</span><br><span class="line">    16    17    20    20    17</span><br><span class="line">     9    10    13    13    10</span><br><span class="line">     4     5     8     8     5</span><br><span class="line">     1     2     5     5     2</span><br></pre></td></tr></table></figure>
+<p>DSQ矩阵就是正常坐标组织下距离中心坐标的距离^2矩阵。不容易观察？这就对了，因为<code>fft2</code>输出的坐标组织也是这样的，因此可以用<code>fftshift</code>进行坐标转换：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DSQshift = fftshift(DSQ);</span><br><span class="line">DSQshift =</span><br><span class="line">  <span class="number">8</span>×<span class="number">5</span> single 矩阵</span><br><span class="line">    <span class="number">20</span>    <span class="number">17</span>    <span class="number">16</span>    <span class="number">17</span>    <span class="number">20</span></span><br><span class="line">    <span class="number">13</span>    <span class="number">10</span>     <span class="number">9</span>    <span class="number">10</span>    <span class="number">13</span></span><br><span class="line">     <span class="number">8</span>     <span class="number">5</span>     <span class="number">4</span>     <span class="number">5</span>     <span class="number">8</span></span><br><span class="line">     <span class="number">5</span>     <span class="number">2</span>     <span class="number">1</span>     <span class="number">2</span>     <span class="number">5</span></span><br><span class="line">     <span class="number">4</span>     <span class="number">1</span>     <span class="number">0</span>     <span class="number">1</span>     <span class="number">4</span></span><br><span class="line">     <span class="number">5</span>     <span class="number">2</span>     <span class="number">1</span>     <span class="number">2</span>     <span class="number">5</span></span><br><span class="line">     <span class="number">8</span>     <span class="number">5</span>     <span class="number">4</span>     <span class="number">5</span>     <span class="number">8</span></span><br><span class="line">    <span class="number">13</span>    <span class="number">10</span>     <span class="number">9</span>    <span class="number">10</span>    <span class="number">13</span></span><br></pre></td></tr></table></figure>
+<p>DSQshift矩阵看上去就好多了。这也说明了使用<code>dftuv</code>函数生成的是一种映射矩阵，可以直接在[U,V]上套用滤波器函数直接得到<strong>正常坐标组织下的频域滤波器</strong>.</p>
+<p>TIPS:matlab内建函数<code>hypot(U,V)</code>可以更快的输出<span class="math inline">\(\sqrt{U^2+V^2}\)</span>.</p>
+<blockquote>
+<p>例子</p>
+</blockquote>
+<p><a name="低通频域滤波器" ></a></p>
+<h3 id="低通频域滤波器">2.低通频域滤波器</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Ideal</th>
+<th>Butterworth</th>
+<th>Gaussian</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(H(u,v)=\left\{ \begin{array}{rc1} 1 &amp; \mbox{if}\ D(u,v) \le D_0 \\ 0 &amp; \mbox{if}\ D(u,v)&gt;D_0 \end{array}\right.\)</span></td>
+<td><span class="math inline">\(H(u,v) = \frac{1}{1+\left[ D(u,v)/D_0 \right]^{2n}}\)</span></td>
+<td><span class="math inline">\(H(u,v)=e^{-D^2(u,v)/2D_0^2}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>上述低通滤波器需要关注以下几点：</p>
+<ol type="1">
+<li><p>D(u,v)指的是在<strong>[U,V]正常坐标组织下距离中心坐标的距离</strong>，即<code>D=hypot(U,V)</code>.</p></li>
+<li><p>对理想低通滤波器而言，<span class="math inline">\(D_0\)</span>指截止频率.理想滤波器在现实中是无法实现的，但是可以计算机模拟，通常低通滤波器会造成ringing。</p></li>
+<li><p>对Butterworth滤波器而言，<span class="math inline">\(D_0\)</span>指当<span class="math inline">\(H(u,v)\)</span>下降到最大值的50%时的截止频率。n控制了滤波器的形状，越大越接近理想滤波器；越小越接近高通滤波器</p></li>
+<li><p>对Gaussian滤波器而言，<span class="math inline">\(D_0\)</span>指当<span class="math inline">\(H(u,v)\)</span>下降到0.607时的频率.</p></li>
+</ol>
+<p>matlab实现这三种低通滤波器：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">H</span> = <span class="title">lpfilter</span><span class="params">(type,M,N,D0,n)</span></span></span><br><span class="line">[U,V] = dftuv(M,N);</span><br><span class="line">D = <span class="built_in">hypot</span>(U,V);</span><br><span class="line"><span class="keyword">switch</span> <span class="built_in">type</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">'ideal'</span></span><br><span class="line">     H = single(D &lt;= D0);</span><br><span class="line">    <span class="keyword">case</span> <span class="string">'btw'</span></span><br><span class="line">       <span class="keyword">if</span> nargin == <span class="number">4</span></span><br><span class="line">         n = <span class="number">1</span>;</span><br><span class="line">       <span class="keyword">end</span></span><br><span class="line">       H = <span class="number">1.</span>/(<span class="number">1</span>+(D./D0).^(<span class="number">2</span>*n));</span><br><span class="line">    <span class="keyword">case</span> <span class="string">'gaussian'</span></span><br><span class="line">        H = <span class="built_in">exp</span>(-(D.^<span class="number">2</span>)./(<span class="number">2</span>*(D0^<span class="number">2</span>)));</span><br><span class="line">    <span class="keyword">otherwise</span></span><br><span class="line">        error(<span class="string">'Unknown filter type.'</span>);</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p><a name="高通频域滤波器" ></a></p>
+<h3 id="高通频域滤波器">3.高通频域滤波器</h3>
+<p>高通频域滤波器可以借由低通频域滤波器产生：</p>
+<p><span class="math display">\[H_{HP}(u,v) = 1- H_{LP}(u,v)\]</span></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Ideal</th>
+<th>Butterworth</th>
+<th>Gaussian</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(H(u,v)=\left\{ \begin{array}{rc1} 0 &amp; \mbox{if}\ D(u,v) \le D_0 \\ 1 &amp; \mbox{if}\ D(u,v)&gt;D_0 \end{array}\right.\)</span></td>
+<td><span class="math inline">\(H(u,v) = \frac{1}{1+\left[ D_0/D(u,v) \right]^{2n}}\)</span></td>
+<td><span class="math inline">\(H(u,v)=1-e^{-D^2(u,v)/2D_0^2}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>matlab实现：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">H</span> = <span class="title">hpfilter</span><span class="params">(type,M,N,D0,n)</span></span></span><br><span class="line"><span class="keyword">if</span> nargin == <span class="number">4</span></span><br><span class="line">    n=<span class="number">1</span>;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">Hlp = lpfilter(<span class="built_in">type</span>,M,N,D0,n);</span><br><span class="line">H = <span class="number">1</span>- Hlp;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例子:高频滤波</p>
+</blockquote>
+<p>下面使用实际的例子来演示高通频域滤波的效果：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PQ = paddedsize(<span class="built_in">size</span>(f)); <span class="comment">%获取适合的尺寸，一般来说就是两倍尺寸</span></span><br><span class="line">D0 = <span class="number">0.05</span>*PQ(<span class="number">1</span>); </span><br><span class="line">H = hpfilter(<span class="string">'gaussian'</span>,PQ(<span class="number">1</span>),PQ(<span class="number">2</span>),D0);<span class="comment">%获取尺寸为PQ，D0为0.05倍宽度的高通高斯</span></span><br><span class="line">g = dftfilt(f,H); <span class="comment">%注意f是没有padding尺寸的图像，padding过程在这个函数中依据...</span></span><br><span class="line"><span class="comment">%...H的尺寸实现</span></span><br><span class="line"><span class="built_in">figure</span>,imshow(g);</span><br></pre></td></tr></table></figure>
+<p><img src="high-pass-gaussian-filter-test.png"></p>
+<center>
+图9 高斯高通滤波器测试
+</center>
+<p>可以看到高通滤波器由于滤除了DC频率导致整体亮度拉低，同时只保留了高频边缘部分信息。</p>
+<blockquote>
+<p>例子</p>
+</blockquote>
+<h3 id="高频增强滤波">4.高频增强滤波</h3>
+<p>前面的高频滤波一个问题是完全滤除了低频，只保留了高频。这样做的目的可能是我们需要看纯粹的高频轮廓信息。但假如我们想要将模糊的图片锐利化，即我们需要增强高频且不动低频，应该怎么实现呢？一种办法是使用空间滤波时提到的Laplacian核：</p>
+<p><span class="math display">\[g(x,y) = f(x,y) + c \]eft[ \nabla^2 f(x,y) \right]\]</span></p>
+<p>而在频率上可以使用<strong>高频增强滤波</strong>，我们知道高频滤波滤除了完全的dc频率，因此可以稍加修改高频滤波器：</p>
+<p><span class="math display">\[H_{HFE}(u,v) = a + bH_{HP}(u,v)\]</span></p>
+<p>偏移项a保证低频能够得到一定程度的保留，通常a的取值应该小，因为我们的重点是锐化细节。b是一个乘子，通常是一个大于1的数，因为我们需要放大高频。一种可能的调用方式如下：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PQ = paddedsize(<span class="built_in">size</span>(f)); </span><br><span class="line">D0 = <span class="number">0.05</span>*PQ(<span class="number">1</span>); </span><br><span class="line">H1 = hpfilter(<span class="string">'gaussian'</span>,PQ(<span class="number">1</span>),PQ(<span class="number">2</span>),D0);</span><br><span class="line">HFE = <span class="number">0.5</span> + <span class="number">2</span>*HBW;</span><br><span class="line">g = dftfilt(f,HFE,<span class="string">'fltpoint'</span>); <span class="comment">%注意fltpoint</span></span><br><span class="line">gfe = gscale(g);</span><br><span class="line">gfe = histeq(gfe,<span class="number">256</span>);</span><br><span class="line"><span class="built_in">figure</span>,imshow(gfe);</span><br></pre></td></tr></table></figure>
+<p>上述代码注意一下细节：</p>
+<ol type="1">
+<li><p><code>dftfilt</code>使用参数fltpoint指明输出的g应该是浮点数而不能经过revertclass恢复到uint8.这是重要的，因为高频滤波滤除了dc频率，得到的图像均值应该为0，而均值为0的图像唯一成立的可能是有正像素有负像素。revertclass会使得负像素截断到0从而丢失细节。为了保留细节应该直接输出float。</p></li>
+<li><p><code>gsclae</code>能够恢复到[0~1]范围</p></li>
+<li><p>经过高频增强滤波的图像通常表现出灰阶很窄，因此此时再配合一次直方图均匀化将获得较好的结果</p></li>
+</ol>
+<p><a name="notch-filter" ></a></p>
+<h3 id="带阻带通滤波器">5.带阻/带通滤波器</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Ideal</th>
+<th>Butterworth</th>
+<th>Gaussian</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(H(u,v)=\left\{ \begin{array}{rc1} 0 &amp; \mbox{for}\ D_0-\frac{W}{2} \le D(u,v) \le D_0+\frac{W}{2} \\ 1 &amp; \mbox{otherwise} \end{array}\right.\)</span></td>
+<td><span class="math inline">\(H(u,v) = \frac{1}{1+\left[ \frac{WD(u,v)}{D^2(u,v)-D_0^2} \right]^{2n}}\)</span></td>
+<td><span class="math inline">\(H(u,v)=1-e^{-\left[ \frac{D^2(u,v)-D_0^2}{WD(u,v)} \right]^2}\)</span></td>
+</tr>
+</tbody>
+</table>
+<h3 id="notch-filter">6. Notch filter</h3>
+<p>Notch filter是非常有用的选择性滤波器。Notch为“凹口”的意思，意味着Notch filter基本上能够做到“指哪打哪”的精确滤波。但这并不意味着在频域滤波器图像上随意的画。因为我们需要构建<strong>零相移滤波器</strong>，这意味着假如我们需要构建一个Notch filter精确的滤除以<span class="math inline">\((u_0,v_0)\)</span>位置为中心的频率成分，那么还需要镜像的在<span class="math inline">\((-u_0,-v_0)\)</span>位置也创建一个notch。</p>
+<p>Notchreject filter可以看作是一系列高通滤波器的乘积，这些高通滤波器首先其中心频率需要频移到滤波的位置，其次需要产生一个镜像位置的高通滤波器以满足零相移滤波器的要求：</p>
+<p><span class="math display">\[H_{NR}(u,v) = \Pi_{k=1}^{Q} H_k(u,v)H_{-k}(u,v)\]</span></p>
+<p>注意公式中的矩阵乘法为点乘.</p>
+<p>由于需要把高通滤波器平移，那么显然定义高通滤波器的<span class="math inline">\(D(u,v)\)</span>也需要平移到相应的位置：</p>
+<p><span class="math display">\[D_k(u,v) = \left[ (u-M/2 - u_k)^2 + (v - N/2 - v_k)^2 \right]^{1/2}\]</span></p>
+<p><span class="math display">\[D_{-k} (u,v) = \left[ (u-M/2 + u_k)^2 + (v - N/2 + v_k)^2 \right]^{1/2}\]</span></p>
+<p>有了Notchreject filter后对应的Notchpass filter：</p>
+<p><span class="math display">\[H_{NP}(u,v) = 1 - H_{NR}(u,v)\]</span></p>
+<p>实现Notch Filter的函数为:</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">H = cnotch(<span class="built_in">type</span>,notch,M,N,C,D0,n);</span><br><span class="line"><span class="comment">%% H = cnotch(type,notch,M,N,C,D0,n)</span></span><br><span class="line"><span class="comment">% type : Notch filter的每一个notch都可以指定由哪一种高通滤波器</span></span><br><span class="line"><span class="comment">%形态产生，接受的参数只能从ideal btw gaussian中选择，且一次只能</span></span><br><span class="line"><span class="comment">%指定一种type：即不接受一个向量type表达</span></span><br><span class="line"><span class="comment">% notch : Notch filter有pass reject两种情况</span></span><br><span class="line"><span class="comment">% M,N : 指定尺寸，但是可能最终输出的实际尺寸并不是M和N</span></span><br><span class="line"><span class="comment">% C : k-by-2 k对(ui,vi)坐标，每一对都是一个高通滤波器中心坐标位置</span></span><br><span class="line"><span class="comment">% D0 : 高通滤波器的截止频率，可以是一个标量，表达共用一个截止频率</span></span><br><span class="line"><span class="comment">% 也可以是长度为K的向量，指定每一个高通滤波器的截止频率</span></span><br><span class="line"><span class="comment">% H : 与其他filter产生的结果一样都是非中心对称的滤波器矩阵，这意味着</span></span><br><span class="line"><span class="comment">%要观察H的特点需要使用fftshift(H)</span></span><br><span class="line"><span class="comment">%%</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例子</p>
+</blockquote>
+<p>下面举一个使用Notch Filter滤波的实际例子：</p>
+<p><img src="notch-filter-test.png"></p>
+<center>
+图10 受到周期性噪声污染的图像
+</center>
+<p>图10为一个被周期性噪声污染的图像，右侧为对应的傅立叶变换图像。观察可以发现傅立叶图像中存在两个亮点，这是正弦形周期噪声的典型表现。下面使用matlab进行notch filter构造：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PQ = paddedsize(<span class="built_in">size</span>(I)); <span class="comment">%获取适合fft的尺寸</span></span><br><span class="line">F = fft2(I,PQ(<span class="number">1</span>),PQ(<span class="number">2</span>)); </span><br><span class="line">S = <span class="built_in">log</span>(<span class="number">1</span>+<span class="built_in">abs</span>(fftshift(F)));</span><br><span class="line">imtool(S,[]); <span class="comment">%使用工具imtool显示强度图，以方便确定亮点的坐标</span></span><br><span class="line"><span class="comment">%最后确定亮点坐标位置大概为(405,340)，据此可以构造在这个位置处的notch filter</span></span><br><span class="line"><span class="comment">%首先初步判断截断频率取20，采用高斯函数高通滤波器实现notch</span></span><br><span class="line">H = cnotch(<span class="string">'gaussian'</span>,<span class="string">'reject'</span>,PQ(<span class="number">1</span>),PQ(<span class="number">2</span>),[<span class="number">340</span> <span class="number">405</span>],<span class="number">20</span>);</span><br></pre></td></tr></table></figure>
+<p>上述代码需注意对于<code>cnotch</code>中的C，它的组合坐标是[行 列],与坐标(x,y)是反的.从<code>imtool</code>得到的坐标需要反转一下。</p>
+<p>为了直观的展示这个H覆盖在傅立叶图F上的样式，可以：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">P1 = fftshift(H).*S; <span class="comment">%将H与S相互叠加</span></span><br><span class="line">imshow(P1,[])</span><br></pre></td></tr></table></figure>
+<p>产生的图像如下:</p>
+<p><img src="notch-filter-test-2.png"></p>
+<center>
+图11 notch滤波器覆盖
+</center>
+<p>可以看到基本上黑色部分覆盖掉了亮点，下面进行滤波：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">f = dftfilt(I,H);</span><br><span class="line">imshow(f);</span><br></pre></td></tr></table></figure>
+<p>输出的滤波结果如下：</p>
+<p><img src="notch-filter-test-3.png"></p>
+<center>
+图12 notch filter滤波结果
+</center>
+<p>图12右侧为输出结果图，与左侧的原图比较可以发现周期噪声被很好的抑制。</p>
+<p>Notch Filter既有使用高通滤波器相乘产生凹口状外，还有矩形形状的Notch。这些Notch都必须遵守镜像对称原则。</p>
 
   </div>
 </article>
@@ -331,7 +546,7 @@ f(x,y)h(x,y) \Leftrightarrow H(u,v) \star F(u,v) \\
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波中基本函数"><span class="toc-number">1.</span> <span class="toc-text">频域滤波中基本函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波基础"><span class="toc-number">2.</span> <span class="toc-text">频域滤波基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#警惕循环卷积可能会导致图像出现wraparound-error"><span class="toc-number">2.1.</span> <span class="toc-text">警惕循环卷积，可能会导致图像出现wraparound error</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波中基本函数"><span class="toc-number">1.</span> <span class="toc-text">频域滤波中基本函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波基础"><span class="toc-number">2.</span> <span class="toc-text">频域滤波基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#警惕循环卷积可能会导致图像出现wraparound-error"><span class="toc-number">2.1.</span> <span class="toc-text">警惕循环卷积，可能会导致图像出现wraparound error</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#滤波过程函数化"><span class="toc-number">2.2.</span> <span class="toc-text">滤波过程函数化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#频域滤波器的获取"><span class="toc-number">3.</span> <span class="toc-text">频域滤波器的获取</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#从空间域滤波器获取"><span class="toc-number">3.1.</span> <span class="toc-text">从空间域滤波器获取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从频域直接获得滤波器"><span class="toc-number">3.2.</span> <span class="toc-text">从频域直接获得滤波器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#坐标的重映射"><span class="toc-number">3.2.1.</span> <span class="toc-text">1. 坐标的重映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#低通频域滤波器"><span class="toc-number">3.2.2.</span> <span class="toc-text">2.低通频域滤波器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高通频域滤波器"><span class="toc-number">3.2.3.</span> <span class="toc-text">3.高通频域滤波器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高频增强滤波"><span class="toc-number">3.2.4.</span> <span class="toc-text">4.高频增强滤波</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#带阻带通滤波器"><span class="toc-number">3.2.5.</span> <span class="toc-text">5.带阻&#x2F;带通滤波器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#notch-filter"><span class="toc-number">3.2.6.</span> <span class="toc-text">6. Notch filter</span></a></li></ol></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
